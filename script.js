@@ -1,0 +1,2 @@
+// JavaScipt Template
+var app = {};
