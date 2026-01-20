@@ -112,6 +112,15 @@ app.login = function() {
       // Simple SPA view switch
       loginView.style.display = "none";
       dashboardView.style.display = "block";
+
+// Update your app.login transition
+// Inside the 'try' block of app.login, call the render function:
+
+  document.getElementById('welcome-message').textContent = `Researcher Portal: ${response.user.email}`;
+  app.renderDashboard(); // Generate the projects
+  loginView.style.display = "none";
+  dashboardView.style.display = "block";
+
       
     } catch (error) {
       alert("Login failed: " + error);
@@ -144,6 +153,37 @@ app.simulateServer = function(email) {
     }, 1500); // 1.5 second delay
   });
 };
+
+// Dummy data for our POC
+app.projects = [
+  { id: 1, title: "Quantum Computing Logic", status: "Active", progress: "75%" },
+  { id: 2, title: "Neural Network Optimization", status: "Review", progress: "40%" },
+  { id: 3, title: "Biometric Security API", status: "Completed", progress: "100%" }
+];
+
+app.renderDashboard = function() {
+  const grid = document.getElementById('project-grid');
+  grid.innerHTML = ""; // Clear previous content
+
+  app.projects.forEach(project => {
+    const card = document.createElement('div');
+    card.className = "login-card"; // Re-using your card styles
+    card.style.margin = "0";
+    card.style.maxWidth = "none";
+    
+    card.innerHTML = `
+      <h3 style="margin-bottom: 10px; color: var(--primary);">${project.title}</h3>
+      <p style="font-size: 0.9rem; color: var(--gray);">Status: <strong>${project.status}</strong></p>
+      <div style="background: #eee; height: 8px; border-radius: 4px; margin-top: 15px;">
+        <div style="background: var(--primary); width: ${project.progress}; height: 100%; border-radius: 4px;"></div>
+      </div>
+      <p style="font-size: 0.8rem; margin-top: 5px; text-align: right;">${project.progress}</p>
+    `;
+    grid.appendChild(card);
+  });
+};
+
+
 
 app.run=function(){
   app.build();
