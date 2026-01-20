@@ -23,7 +23,7 @@ Minimal, modern, dependency-free responsive navbar + landing page.
 
 ## Project structure
 
-```sharpishly-rnd/
+```website/
 ├── index.html
 ├── styles.css
 ├── script.js
