@@ -34,47 +34,50 @@
 
   <div class="offcanvas-backdrop" id="backdrop"></div>
 
-  <main>
+<main>
+  <div class="container">
+    <h1>Sharpishly Research and Development&copy;</h1>
+    <p id="sub-header">Research and development accessible to everyone</p>
+  </div>
 
-    <div class="container">
-      <h1>Sharpishly Research and Development&copy;</h1>
-      <p>Research and development accessible to everyone</p>
-    </div>
-
-    <!-- login -->
+  <div id="login-view" class="section">
     <div class="login-container">
       <div class="login-card">
         <h2>Welcome Back</h2>
         <p class="login-subtitle">Please enter your details to sign in</p>
-        
         <form id="loginForm">
           <div class="form-group">
             <label for="email">Email Address</label>
             <input type="email" id="email" name="email" placeholder="name@company.com" required>
           </div>
-
           <div class="form-group">
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="••••••••" required>
           </div>
-
           <div class="form-options">
             <label class="remember-me">
               <input type="checkbox"> Remember me
             </label>
             <a href="#" class="forgot-password">Forgot password?</a>
           </div>
-
-          <button type="submit" class="btn-login">Sign In</button>
+          <button type="submit" class="btn-login" id="loginBtn">Sign In</button>
         </form>
-
         <p class="signup-link">Don't have an account? <a href="#">Request access</a></p>
       </div>
     </div>
-    <!-- login -->
-  
+  </div>
 
-  </main>
+  <div id="dashboard-view" class="section" style="display: none;">
+    <div class="container" style="margin-top: 2rem;">
+      <div class="login-card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+        <h2>Success!</h2>
+        <p id="welcome-message"></p>
+        <hr style="margin: 1.5rem 0; opacity: 0.2;">
+        <button class="btn-login" id="logoutBtn" style="background: var(--gray);">Sign Out</button>
+      </div>
+    </div>
+  </div>
+</main>
 
   <script src="script.js"></script>
 </body>

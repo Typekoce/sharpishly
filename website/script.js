@@ -87,9 +87,68 @@ app.mobile=function(){
   document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
 };
 
+app.login = function() {
+  const loginForm = document.getElementById('loginForm');
+  const loginView = document.getElementById('login-view');
+  const dashboardView = document.getElementById('dashboard-view');
+
+  loginForm?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // UI Feedback: Disable button to simulate loading
+    const btn = loginForm.querySelector('button');
+    const originalText = btn.textContent;
+    btn.textContent = "Authenticating...";
+    btn.disabled = true;
+
+    const email = document.getElementById('email').value;
+
+    try {
+      // Simulate an asynchronous API call
+      const response = await app.simulateServer(email);
+      
+      console.log("Server Response:", response);
+      
+      // Simple SPA view switch
+      loginView.style.display = "none";
+      dashboardView.style.display = "block";
+      
+    } catch (error) {
+      alert("Login failed: " + error);
+    } finally {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  });
+
+  // Simple Logout logic
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    loginView.style.display = "block";
+    dashboardView.style.display = "none";
+    loginForm.reset();
+  });
+};
+
+// The Dummy Asynchronous Call
+app.simulateServer = function(email) {
+  return new Promise((resolve, reject) => {
+    console.log("Contacting server...");
+    
+    setTimeout(() => {
+      // Simulate success for any email containing '@'
+      if (email.includes('@')) {
+        resolve({ status: 200, user: email, token: "fake-jwt-123" });
+      } else {
+        reject("Invalid email format");
+      }
+    }, 1500); // 1.5 second delay
+  });
+};
+
 app.run=function(){
   app.build();
   app.mobile();
+  app.login();
 };
 
 window.addEventListener("DOMContentLoaded",app.run);
