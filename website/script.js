@@ -60,6 +60,70 @@ app.createItems=function(c,items,mobile=false){
   });
 };
 
+app.projectFields = [
+  { id: "title", label: "Project Title", type: "text", placeholder: "e.g. Quantum Logic", required: true },
+  { id: "status", label: "Current Status", type: "text", placeholder: "e.g. Active", required: true },
+  { id: "progress", label: "Progress (%)", type: "number", placeholder: "0-100", required: true }
+];
+
+app.createProjectForm = function() {
+  const form = document.createElement('form');
+  form.id = "newProjectForm";
+
+  app.projectFields.forEach(field => {
+    const group = document.createElement('div');
+    group.className = "form-group";
+    group.style.marginBottom = "1rem";
+
+    const label = document.createElement('label');
+    label.setAttribute('for', field.id);
+    label.textContent = field.label;
+    label.style.display = "block";
+    label.style.marginBottom = "5px";
+
+    const input = document.createElement('input');
+    input.id = field.id;
+    input.type = field.type;
+    input.placeholder = field.placeholder;
+    input.required = field.required;
+    input.style.width = "100%";
+    input.style.padding = "0.75rem";
+    input.style.borderRadius = "0.375rem";
+    input.style.border = "1px solid #ced4da";
+
+    group.appendChild(label);
+    group.appendChild(input);
+    form.appendChild(group);
+  });
+
+  const submitBtn = document.createElement('button');
+  submitBtn.type = "submit";
+  submitBtn.className = "btn-login";
+  submitBtn.textContent = "Add Project";
+  submitBtn.style.marginTop = "10px";
+  
+  form.appendChild(submitBtn);
+
+  // Handle Form Submission
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Create new project object from input values
+    const newProject = {
+      id: Date.now(), // Unique ID
+      title: document.getElementById('title').value,
+      status: document.getElementById('status').value,
+      progress: document.getElementById('progress').value + "%"
+    };
+
+    app.projects.push(newProject); // Add to data array
+    app.renderDashboard();         // Refresh the UI
+    form.reset();                  // Clear the form
+  });
+
+  return form;
+};
+
 app.build=function(){
   let d=document.querySelector("#navbarNav .navbar-nav");
   if(d){
@@ -213,15 +277,43 @@ app.projects = [
 ];
 
 app.renderDashboard = function() {
+  const container = document.querySelector('#dashboard-view .container');
   const grid = document.getElementById('project-grid');
-  if (!grid) return;
   
-  grid.innerHTML = ""; // Clear the grid
+  if (!container || !grid) return;
+
+  // 1. Check if the Form already exists to avoid duplicates
+  let formWrapper = document.getElementById('form-wrapper');
+  
+  if (!formWrapper) {
+    // Create a wrapper for the form to match your UI style
+    formWrapper = document.createElement('div');
+    formWrapper.id = 'form-wrapper';
+    formWrapper.className = "login-card";
+    formWrapper.style.marginBottom = "2rem";
+    formWrapper.style.maxWidth = "100%";
+    formWrapper.style.textAlign = "left";
+
+    const formTitle = document.createElement('h3');
+    formTitle.textContent = "Register New Research Project";
+    formTitle.style.marginBottom = "1.5rem";
+    
+    // Use your programmatic form generator
+    const projectForm = app.createProjectForm();
+    
+    formWrapper.appendChild(formTitle);
+    formWrapper.appendChild(projectForm);
+    
+    // Insert the form at the top of the container, before the grid
+    container.insertBefore(formWrapper, grid);
+  }
+
+  // 2. Clear the Grid and Render Project Cards
+  grid.innerHTML = ""; 
 
   app.projects.forEach(project => {
-    // Call our new creation function
+    // Call the programmatic card creator
     const projectCard = app.createCard(project);
-    // Inject the actual DOM Node into the grid
     grid.appendChild(projectCard);
   });
 };
