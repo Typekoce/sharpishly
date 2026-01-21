@@ -3,7 +3,7 @@ const app={};
 app.menu=[
   {name:"Home",href:"#",active:true,pageId: "login-view"},
   {name:"Features",href:"#",pageId: "Features"},
-  {name:"Products",href:"#",dropdown:[
+  {name:"Products",href:"#",pageId: "Products",dropdown:[
     {name:"Lite",href:"#"},
     {name:"Pro",href:"#"},
     {name:"Enterprise",href:"#"}
