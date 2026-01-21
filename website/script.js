@@ -1,8 +1,8 @@
 const app={};
 
 app.menu=[
-  {name:"Home",href:"#",active:true},
-  {name:"Features",href:"#"},
+  {name:"Home",href:"#",active:true,pageId: "login-view"},
+  {name:"Features",href:"#",pageId: "Features"},
   {name:"Products",href:"#",dropdown:[
     {name:"Lite",href:"#"},
     {name:"Pro",href:"#"},
@@ -17,43 +17,100 @@ app.menu=[
   {name:"Contact",href:"#"}
 ];
 
-app.createItems=function(c,items,mobile=false){
-  items.forEach(i=>{
-    let li=document.createElement("li");
-    li.className="nav-item";
-    if(i.dropdown){
+app.showPage = function(pageId) {
+  // 1. Define all possible "page" containers
+  const pages = ['login-view', 'dashboard-view', 'Features'];
+  
+  // 2. Loop through and hide them all
+  pages.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  // 3. Show the requested page
+  const target = document.getElementById(pageId);
+  if (target) {
+    target.style.display = 'block';
+    console.log(`Page Switched to: ${pageId}`);
+  }
+};
+
+app.createItems = function(c, items, mobile = false) {
+  items.forEach(i => {
+    let li = document.createElement("li");
+    li.className = "nav-item";
+
+    if (i.dropdown) {
       li.classList.add("dropdown");
-      let a=document.createElement("a");
-      a.className="nav-link dropdown-toggle";
-      a.href=i.href||"#";
-      a.textContent=i.name;
-      if(i.active)a.classList.add("active");
+      let a = document.createElement("a");
+      a.className = "nav-link dropdown-toggle";
+      a.href = i.href || "#";
+      a.textContent = i.name;
+      if (i.active) a.classList.add("active");
+
+      // Click handler for top-level dropdown parent
+      a.onclick = function(e) {
+        e.preventDefault();
+        // If the dropdown name matches a page ID, show it
+        if (i.name === "Features") app.showPage("Features");
+      };
+
       li.appendChild(a);
-      let ul=document.createElement("ul");
-      ul.className="dropdown-menu";
-      if(mobile){
-        ul.style.position="static";
-        ul.style.border="none";
-        ul.style.boxShadow="none";
-        ul.style.margin="0";
-        ul.style.paddingLeft="1.2rem";
+      let ul = document.createElement("ul");
+      ul.className = "dropdown-menu";
+      
+      if (mobile) {
+        ul.style.position = "static";
+        ul.style.border = "none";
+        ul.style.boxShadow = "none";
+        ul.style.margin = "0";
+        ul.style.paddingLeft = "1.2rem";
       }
-      i.dropdown.forEach(s=>{
-        let sli=document.createElement("li");
-        let sa=document.createElement("a");
-        sa.className="dropdown-item";
-        sa.href=s.href||"#";
-        sa.textContent=s.name;
+
+      i.dropdown.forEach(s => {
+        let sli = document.createElement("li");
+        let sa = document.createElement("a");
+        sa.className = "dropdown-item";
+        sa.href = s.href || "#";
+        sa.textContent = s.name;
+
+        sa.onclick = function(e) {
+          e.preventDefault();
+          console.log("Navigating to sub-item:", s.name);
+          
+          // Close mobile menu if open
+          if(mobile) document.querySelector('.btn-close')?.click();
+        };
+
         sli.appendChild(sa);
         ul.appendChild(sli);
       });
       li.appendChild(ul);
-    }else{
-      let a=document.createElement("a");
-      a.className="nav-link";
-      a.href=i.href||"#";
-      a.textContent=i.name;
-      if(i.active)a.classList.add("active");
+    } else {
+      let a = document.createElement("a");
+      a.className = "nav-link";
+      a.href = i.href || "#";
+      a.textContent = i.name;
+      if (i.active) a.classList.add("active");
+
+      // Click handler for standard links
+      a.onclick = function(e) {
+        e.preventDefault();
+        
+        // Router Logic
+        if (i.name === "Features") {
+          app.showPage("Features");
+        } else if (i.name === "Home") {
+          // If already logged in, show dashboard; otherwise show login
+          const isLoggedIn = document.getElementById('dashboard-view').style.display === "block" || 
+                             document.getElementById('welcome-message').textContent !== "";
+          app.showPage(isLoggedIn ? 'dashboard-view' : 'login-view');
+        }
+
+        // Close mobile menu if open
+        if(mobile) document.querySelector('.btn-close')?.click();
+      };
+
       li.appendChild(a);
     }
     c.appendChild(li);
