@@ -113,8 +113,59 @@ app.login = function() {
       loginView.style.display = "none";
       dashboardView.style.display = "block";
 
-// Update your app.login transition
-// Inside the 'try' block of app.login, call the render function:
+app.createCard = function(project) {
+  // 1. Create the main card container
+  const card = document.createElement('div');
+  card.className = "login-card";
+  card.style.margin = "0";
+  card.style.maxWidth = "none";
+
+  // 2. Create the Title (H3)
+  const title = document.createElement('h3');
+  title.style.marginBottom = "10px";
+  title.style.color = "var(--primary)";
+  title.textContent = project.title;
+
+  // 3. Create the Status text (P)
+  const statusPara = document.createElement('p');
+  statusPara.style.fontSize = "0.9rem";
+  statusPara.style.color = "var(--gray)";
+  statusPara.textContent = "Status: ";
+  
+  const statusStrong = document.createElement('strong');
+  statusStrong.textContent = project.status;
+  statusPara.appendChild(statusStrong);
+
+  // 4. Create the Progress Bar Track (Container)
+  const progressTrack = document.createElement('div');
+  progressTrack.style.background = "#eee";
+  progressTrack.style.height = "8px";
+  progressTrack.style.borderRadius = "4px";
+  progressTrack.style.marginTop = "15px";
+
+  // 5. Create the Progress Fill (The blue part)
+  const progressFill = document.createElement('div');
+  progressFill.style.background = "var(--primary)";
+  progressFill.style.width = project.progress;
+  progressFill.style.height = "100%";
+  progressFill.style.borderRadius = "4px";
+  progressTrack.appendChild(progressFill);
+
+  // 6. Create the Percentage Label (P)
+  const percentLabel = document.createElement('p');
+  percentLabel.style.fontSize = "0.8rem";
+  percentLabel.style.marginTop = "5px";
+  percentLabel.style.textAlign = "right";
+  percentLabel.textContent = project.progress;
+
+  // 7. Assemble the card
+  card.appendChild(title);
+  card.appendChild(statusPara);
+  card.appendChild(progressTrack);
+  card.appendChild(percentLabel);
+
+  return card;
+};
 
   document.getElementById('welcome-message').textContent = `Researcher Portal: ${response.user.email}`;
   app.renderDashboard(); // Generate the projects
@@ -163,26 +214,17 @@ app.projects = [
 
 app.renderDashboard = function() {
   const grid = document.getElementById('project-grid');
-  grid.innerHTML = ""; // Clear previous content
+  if (!grid) return;
+  
+  grid.innerHTML = ""; // Clear the grid
 
   app.projects.forEach(project => {
-    const card = document.createElement('div');
-    card.className = "login-card"; // Re-using your card styles
-    card.style.margin = "0";
-    card.style.maxWidth = "none";
-    
-    card.innerHTML = `
-      <h3 style="margin-bottom: 10px; color: var(--primary);">${project.title}</h3>
-      <p style="font-size: 0.9rem; color: var(--gray);">Status: <strong>${project.status}</strong></p>
-      <div style="background: #eee; height: 8px; border-radius: 4px; margin-top: 15px;">
-        <div style="background: var(--primary); width: ${project.progress}; height: 100%; border-radius: 4px;"></div>
-      </div>
-      <p style="font-size: 0.8rem; margin-top: 5px; text-align: right;">${project.progress}</p>
-    `;
-    grid.appendChild(card);
+    // Call our new creation function
+    const projectCard = app.createCard(project);
+    // Inject the actual DOM Node into the grid
+    grid.appendChild(projectCard);
   });
 };
-
 
 
 app.run=function(){
