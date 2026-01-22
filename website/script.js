@@ -34,9 +34,7 @@ app.showPage = function(pageId) {
     // Logic: If they go to Quick Start, inject the form if it's empty
     if (pageId === 'quick-start') {
       const container = document.getElementById('quick-start-form-container');
-      if (container && !container.hasChildNodes()) {
         container.appendChild(app.createProjectForm());
-      }
     }
   }
 };
