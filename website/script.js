@@ -1,9 +1,10 @@
 const app = {
   // ────────────────────────────────────────────────
-  //  Data
+  // Data
   // ────────────────────────────────────────────────
   menu: [
-    { name: "Home",        pageId: "login-view",       active: true },
+    { name: "Home",        pageId: "login-view", active: true },
+    { name: "Dashboard",   pageId: "dashboard-view", hidden: true },
     { name: "Quick Start", pageId: "quick-start" },
     { name: "Features",    pageId: "Features" },
     { name: "Products",    pageId: "Products", dropdown: [
@@ -27,24 +28,39 @@ const app = {
   ],
 
   projectFormFields: [
-    { id: "title",    label: "Project Title",    type: "text",    placeholder: "e.g. Quantum Logic",     required: true },
-    { id: "status",   label: "Current Status",   type: "text",    placeholder: "e.g. Active",            required: true },
-    { id: "progress", label: "Progress (%)",     type: "number",  placeholder: "0–100",                  required: true }
+    { id: "title",    label: "Project Title",    type: "text",    placeholder: "e.g. Quantum Logic", required: true },
+    { id: "status",   label: "Current Status",   type: "text",    placeholder: "e.g. Active",        required: true },
+    { id: "progress", label: "Progress (%)",     type: "number",  placeholder: "0–100",              required: true }
   ],
 
   // ────────────────────────────────────────────────
-  //  Routing / Page visibility
+  // Auth state helpers
+  // ────────────────────────────────────────────────
+  isAuthenticated() {
+    return document.getElementById('welcome-message')?.textContent.trim() !== '' ||
+           document.getElementById('dashboard-view')?.style.display === 'block';
+  },
+
+  // ────────────────────────────────────────────────
+  // Page / View switching
   // ────────────────────────────────────────────────
   showPage(pageId) {
-    const pageIds = ['login-view', 'dashboard-view', 'quick-start', 'Features', 'Products'];
+    const pages = ['login-view', 'dashboard-view', 'quick-start', 'Features', 'Products'];
 
-    pageIds.forEach(id => {
+    pages.forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.style.display = id === pageId ? 'block' : 'none';
+      if (el) el.style.display = (id === pageId) ? 'block' : 'none';
     });
 
-    // One-time form injection on Quick Start
     if (pageId === 'quick-start') {
+      // Show Dashboard menu item once user has seen Quick Start
+      const dashboardItem = this.menu.find(item => item.name === 'Dashboard');
+      if (dashboardItem?.hidden) {
+        dashboardItem.hidden = false;
+        this.refreshNavigation();
+      }
+
+      // Lazy-create form only once
       const container = document.getElementById('quick-start-form-container');
       if (container && !container.hasChildNodes()) {
         container.appendChild(this.createProjectForm());
@@ -53,54 +69,68 @@ const app = {
   },
 
   // ────────────────────────────────────────────────
-  //  Navigation rendering
+  // Navigation
   // ────────────────────────────────────────────────
-  createNavItems(container, items, isMobile = false) {
+  refreshNavigation() {
+    const desktop = document.querySelector('#navbarNav .navbar-nav');
+    const mobile  = document.querySelector('#mobileMenu .navbar-nav');
+
+    if (desktop) {
+      desktop.innerHTML = '';
+      this.buildNavItems(desktop, this.menu, false);
+    }
+    if (mobile) {
+      mobile.innerHTML = '';
+      this.buildNavItems(mobile, this.menu, true);
+    }
+  },
+
+  buildNavItems(container, items, isMobile = false) {
     items.forEach(item => {
+      if (item.hidden) return;
+
       const li = document.createElement('li');
       li.className = 'nav-item';
       if (item.dropdown) li.classList.add('dropdown');
 
-      const a = document.createElement('a');
-      a.className = item.dropdown ? 'nav-link dropdown-toggle' : 'nav-link';
-      a.href = item.href || '#';
-      a.textContent = item.name;
-      if (item.active) a.classList.add('active');
+      const link = document.createElement('a');
+      link.className = item.dropdown ? 'nav-link dropdown-toggle' : 'nav-link';
+      link.href = item.href || '#';
+      link.textContent = item.name;
+      if (item.active) link.classList.add('active');
 
-      a.addEventListener('click', e => {
+      link.addEventListener('click', e => {
         e.preventDefault();
         this.handleNavClick(item, isMobile);
       });
 
-      li.appendChild(a);
+      li.appendChild(link);
 
       if (item.dropdown) {
         const ul = document.createElement('ul');
         ul.className = 'dropdown-menu';
         if (isMobile) {
-          Object.assign(ul.style, {
-            position: 'static',
-            border: 'none',
-            boxShadow: 'none',
-            margin: '0',
-            paddingLeft: '1.2rem'
-          });
+          ul.style.position = 'static';
+          ul.style.border   = 'none';
+          ul.style.boxShadow = 'none';
+          ul.style.margin    = '0';
+          ul.style.paddingLeft = '1.2rem';
         }
 
         item.dropdown.forEach(sub => {
           const sli = document.createElement('li');
-          const sa = document.createElement('a');
-          sa.className = 'dropdown-item';
-          sa.href = sub.href || '#';
-          sa.textContent = sub.name;
+          const a = document.createElement('a');
+          a.className = 'dropdown-item';
+          a.href = sub.href || '#';
+          a.textContent = sub.name;
 
-          sa.addEventListener('click', e => {
+          a.addEventListener('click', e => {
             e.preventDefault();
-            console.log('Sub-item clicked:', sub.name);
+            console.log(`Sub-item: ${sub.name}`);
             if (isMobile) document.querySelector('.btn-close')?.click();
           });
 
-          sli.appendChild(sa);
+          sli.appendChild(a);
           ul.appendChild(sli);
         });
 
@@ -112,69 +142,61 @@ const app = {
   },
 
   handleNavClick(item, isMobile) {
-    const pageMap = {
-      "Home":        () => this.showHome(),
+    const actions = {
+      "Home":        () => this.showPage(this.isAuthenticated() ? 'dashboard-view' : 'login-view'),
+      "Dashboard":   () => this.showPage('dashboard-view'),
       "Quick Start": () => this.showPage('quick-start'),
       "Features":    () => this.showPage('Features'),
-      // add more named routes here when needed
+      // "Products":    () => this.showPage('Products'),   // uncomment when needed
     };
 
-    const handler = pageMap[item.name];
-    if (handler) handler();
+    const action = actions[item.name];
+    if (action) action();
 
     if (isMobile) document.querySelector('.btn-close')?.click();
   },
 
-  showHome() {
-    const dashboardVisible = document.getElementById('dashboard-view').style.display === 'block';
-    const hasWelcomeText = document.getElementById('welcome-message').textContent.trim() !== '';
-    this.showPage(dashboardVisible || hasWelcomeText ? 'dashboard-view' : 'login-view');
-  },
-
   // ────────────────────────────────────────────────
-  //  Project Form & Card creation
+  // Project Form & Cards
   // ────────────────────────────────────────────────
   createProjectForm() {
     const form = document.createElement('form');
     form.id = 'newProjectForm';
 
-    this.projectFormFields.forEach(field => {
-      const group = document.createElement('div');
-      group.className = 'form-group';
+    this.projectFormFields.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'form-group';
 
       const label = document.createElement('label');
-      label.htmlFor = field.id;
-      label.textContent = field.label;
+      label.htmlFor = f.id;
+      label.textContent = f.label;
 
       const input = document.createElement('input');
-      Object.assign(input, {
-        id: field.id,
-        type: field.type,
-        placeholder: field.placeholder,
-        required: field.required
-      });
+      input.id          = f.id;
+      input.type        = f.type;
+      input.placeholder = f.placeholder;
+      input.required    = f.required;
 
-      group.append(label, input);
-      form.appendChild(group);
+      div.append(label, input);
+      form.appendChild(div);
     });
 
-    const btn = document.createElement('button');
-    btn.type = 'submit';
-    btn.className = 'btn-login';
-    btn.textContent = 'Add Project';
-    form.appendChild(btn);
+    const submit = document.createElement('button');
+    submit.type = 'submit';
+    submit.className = 'btn-login';
+    submit.textContent = 'Add Project';
+    form.appendChild(submit);
 
     form.addEventListener('submit', e => {
       e.preventDefault();
-      const data = {
+      const values = {
         id: Date.now(),
         title:    form.title.value.trim(),
         status:   form.status.value.trim(),
-        progress: form.progress.value + '%'
+        progress: form.progress.value.trim() + '%'
       };
-
-      this.projects.push(data);
-      this.renderDashboard();
+      this.projects.push(values);
+      this.renderProjects();
       form.reset();
     });
 
@@ -183,7 +205,7 @@ const app = {
 
   createProjectCard(project) {
     const card = document.createElement('div');
-    card.className = 'project-card'; // ← rename class if needed
+    card.className = 'project-card';
 
     card.innerHTML = `
       <h3>${project.title}</h3>
@@ -197,117 +219,111 @@ const app = {
     return card;
   },
 
-  renderDashboard() {
+  renderProjects() {
     const grid = document.getElementById('project-grid');
     if (!grid) return;
 
-    // Make sure form exists (moved from render to one-time creation)
+    // One-time form wrapper creation
     if (!document.getElementById('form-wrapper')) {
       const wrapper = document.createElement('div');
       wrapper.id = 'form-wrapper';
       wrapper.className = 'login-card';
       wrapper.innerHTML = '<h3>Register New Research Project</h3>';
-
       wrapper.appendChild(this.createProjectForm());
-      document.querySelector('#dashboard-view .container')?.insertBefore(wrapper, grid);
+
+      const container = document.querySelector('#dashboard-view .container');
+      if (container) container.insertBefore(wrapper, grid);
     }
 
     grid.innerHTML = '';
-    this.projects.forEach(project => {
-      grid.appendChild(this.createProjectCard(project));
-    });
+    this.projects.forEach(p => grid.appendChild(this.createProjectCard(p)));
   },
 
   // ────────────────────────────────────────────────
-  //  Auth simulation
+  // Auth (fake)
   // ────────────────────────────────────────────────
-  async simulateLogin(email) {
+  simulateLogin(email) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        if (email.includes('@')) {
-          resolve({ email, token: 'fake-jwt-123' });
-        } else {
-          reject(new Error('Invalid email format'));
-        }
-      }, 1200);
+        if (email.includes('@')) resolve({ email });
+        else reject(new Error('Invalid email'));
+      }, 1000);
     });
   },
 
-  initLogin() {
+  initAuth() {
     const form = document.getElementById('loginForm');
     if (!form) return;
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      const btn = form.querySelector('button');
-      const originalText = btn.textContent;
+      const btn = form.querySelector('button[type="submit"]');
+      const text = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Authenticating…';
 
       try {
-        const { email } = await this.simulateLogin(form.email.value);
+        const { email } = await this.simulateLogin(form.email.value.trim());
         document.getElementById('welcome-message').textContent = `Researcher Portal: ${email}`;
-        this.renderDashboard();
+        this.renderProjects();
         this.showPage('dashboard-view');
+        this.refreshNavigation();           // Show Dashboard link
       } catch (err) {
         alert('Login failed: ' + err.message);
       } finally {
-        btn.textContent = originalText;
+        btn.textContent = text;
         btn.disabled = false;
       }
     });
 
     document.getElementById('logoutBtn')?.addEventListener('click', () => {
-      document.getElementById('loginForm').reset();
+      document.getElementById('loginForm')?.reset();
       this.showPage('login-view');
+      this.refreshNavigation();
     });
   },
 
   // ────────────────────────────────────────────────
-  //  Mobile menu + initialization
+  // Mobile menu
   // ────────────────────────────────────────────────
   initMobileMenu() {
-    const toggler = document.querySelector('.navbar-toggler');
-    const menu    = document.getElementById('mobileMenu');
-    const backdrop = document.getElementById('backdrop');
-    const closeBtn = document.querySelector('.btn-close');
+    const els = {
+      toggler:  document.querySelector('.navbar-toggler'),
+      menu:     document.getElementById('mobileMenu'),
+      backdrop: document.getElementById('backdrop'),
+      close:    document.querySelector('.btn-close')
+    };
 
-    if (!toggler || !menu || !backdrop) return;
+    if (!els.toggler || !els.menu || !els.backdrop) return;
 
-    const open  = () => { menu.classList.add('show'); backdrop.classList.add('show'); };
-    const close = () => { menu.classList.remove('show'); backdrop.classList.remove('show'); };
+    const open = () => {
+      els.menu.classList.add('show');
+      els.backdrop.classList.add('show');
+    };
 
-    toggler.addEventListener('click', open);
-    closeBtn.addEventListener('click', close);
-    backdrop.addEventListener('click', close);
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') close();
-    });
+    const close = () => {
+      els.menu.classList.remove('show');
+      els.backdrop.classList.remove('show');
+    };
+
+    els.toggler.addEventListener('click', open);
+    els.close.addEventListener('click', close);
+    els.backdrop.addEventListener('click', close);
+    document.addEventListener('keydown', e => e.key === 'Escape' && close());
   },
 
+  // ────────────────────────────────────────────────
+  // Bootstrap / Start
+  // ────────────────────────────────────────────────
   init() {
-    // Build both desktop & mobile menus
-    const desktopNav = document.querySelector('#navbarNav .navbar-nav');
-    const mobileNav  = document.querySelector('#mobileMenu .navbar-nav');
-
-    if (desktopNav) {
-      desktopNav.innerHTML = '';
-      this.createNavItems(desktopNav, this.menu, false);
-    }
-    if (mobileNav) {
-      mobileNav.innerHTML = '';
-      this.createNavItems(mobileNav, this.menu, true);
-    }
-
+    this.refreshNavigation();
     this.initMobileMenu();
-    this.initLogin();
-
-    // Initial page
+    this.initAuth();
     this.showPage('login-view');
   }
 };
 
 // ────────────────────────────────────────────────
-//  Start
+// Entry point
 // ────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => app.init());
