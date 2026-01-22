@@ -2,6 +2,7 @@ const app={};
 
 app.menu=[
   {name:"Home",href:"#",active:true,pageId: "login-view"},
+  {name:"Quick Start",href:"#",pageId: "quick-start"},
   {name:"Features",href:"#",pageId: "Features"},
   {name:"Products",href:"#",pageId: "Products",dropdown:[
     {name:"Lite",href:"#"},
@@ -18,20 +19,25 @@ app.menu=[
 ];
 
 app.showPage = function(pageId) {
-  // 1. Define all possible "page" containers
-  const pages = ['login-view', 'dashboard-view', 'Features'];
+  // Add 'quick-start' to this list
+  const pages = ['login-view', 'dashboard-view', 'Features', 'Products', 'quick-start'];
   
-  // 2. Loop through and hide them all
   pages.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
 
-  // 3. Show the requested page
   const target = document.getElementById(pageId);
   if (target) {
     target.style.display = 'block';
-    console.log(`Page Switched to: ${pageId}`);
+    
+    // Logic: If they go to Quick Start, inject the form if it's empty
+    if (pageId === 'quick-start') {
+      const container = document.getElementById('quick-start-form-container');
+      if (container && !container.hasChildNodes()) {
+        container.appendChild(app.createProjectForm());
+      }
+    }
   }
 };
 
@@ -97,15 +103,19 @@ app.createItems = function(c, items, mobile = false) {
       a.onclick = function(e) {
         e.preventDefault();
         
-        // Router Logic
+        // --- UPDATED ROUTER LOGIC ---
         if (i.name === "Features") {
           app.showPage("Features");
-        } else if (i.name === "Home") {
-          // If already logged in, show dashboard; otherwise show login
+        } 
+        else if (i.name === "Quick Start") {
+          app.showPage("quick-start"); // Direct jump to registration
+        }
+        else if (i.name === "Home") {
           const isLoggedIn = document.getElementById('dashboard-view').style.display === "block" || 
                              document.getElementById('welcome-message').textContent !== "";
           app.showPage(isLoggedIn ? 'dashboard-view' : 'login-view');
         }
+        // ----------------------------
 
         // Close mobile menu if open
         if(mobile) document.querySelector('.btn-close')?.click();
