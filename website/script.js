@@ -22,9 +22,10 @@ const app = {
   ],
 
   projects: [
-    { id: 1, title: "Quantum Computing Logic",     status: "Active",    progress: "75%" },
+    { id: 1, title: "Native Mobile Application Lifecycle",     status: "Active",    progress: "75%" },
     { id: 2, title: "Neural Network Optimization", status: "Review",   progress: "40%" },
-    { id: 3, title: "Biometric Security API",      status: "Completed", progress: "100%" }
+    { id: 3, title: "Biometric Security API",      status: "Completed", progress: "100%" },
+    { id: 4, title: "Quantum Computing Logic",     status: "Active",    progress: "75%" },
   ],
 
   projectFormFields: [
@@ -45,7 +46,8 @@ const app = {
   // Page / View switching
   // ────────────────────────────────────────────────
   showPage(pageId) {
-    const pages = ['login-view', 'dashboard-view', 'quick-start', 'Features', 'Products'];
+    // List includes the new workspace-view
+    const pages = ['login-view', 'dashboard-view', 'quick-start', 'Features', 'Products', 'workspace-view'];
 
     pages.forEach(id => {
       const el = document.getElementById(id);
@@ -53,16 +55,14 @@ const app = {
     });
 
     if (pageId === 'quick-start') {
-      // Show Dashboard menu item once user has seen Quick Start
       const dashboardItem = this.menu.find(item => item.name === 'Dashboard');
       if (dashboardItem?.hidden) {
         dashboardItem.hidden = false;
         this.refreshNavigation();
       }
 
-      // Lazy-create form only once
       const container = document.getElementById('quick-start-form-container');
-      if (container && !container.hasChildNodes()) {
+      if (container && container.children.length === 0) {
         container.appendChild(this.createProjectForm());
       }
     }
@@ -110,11 +110,10 @@ const app = {
         const ul = document.createElement('ul');
         ul.className = 'dropdown-menu';
         if (isMobile) {
-          ul.style.position = 'static';
-          ul.style.border   = 'none';
-          ul.style.boxShadow = 'none';
-          ul.style.margin    = '0';
-          ul.style.paddingLeft = '1.2rem';
+          Object.assign(ul.style, {
+            position: 'static', border: 'none', boxShadow: 'none',
+            margin: '0', paddingLeft: '1.2rem'
+          });
         }
 
         item.dropdown.forEach(sub => {
@@ -126,7 +125,6 @@ const app = {
 
           a.addEventListener('click', e => {
             e.preventDefault();
-            console.log(`Sub-item: ${sub.name}`);
             if (isMobile) document.querySelector('.btn-close')?.click();
           });
 
@@ -147,7 +145,6 @@ const app = {
       "Dashboard":   () => this.showPage('dashboard-view'),
       "Quick Start": () => this.showPage('quick-start'),
       "Features":    () => this.showPage('Features'),
-      // "Products":    () => this.showPage('Products'),   // uncomment when needed
     };
 
     const action = actions[item.name];
@@ -157,8 +154,94 @@ const app = {
   },
 
   // ────────────────────────────────────────────────
-  // Project Form & Cards
+  // Project Workspace (Stakeholder Journey)
   // ────────────────────────────────────────────────
+
+  /**
+   * Transitions the user into a specific project workspace.
+   * Tailored for stakeholders like the Central Heating Company.
+   */
+  showWorkspace(project) {
+    this.showPage('workspace-view');
+    const container = document.getElementById('workspace-content');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    // Header section for the workspace
+    const header = document.createElement('div');
+    header.style.marginBottom = '2rem';
+    header.innerHTML = `
+      <h2>${project.title}</h2>
+      <p class="login-subtitle">Native Mobile Application Lifecycle</p>
+    `;
+
+    // Technical specs for developers and clients
+    const techBrief = this.createTechBrief(project);
+    
+    // 24/7 Support channel component
+    const supportPanel = this.createSupportPanel();
+
+    container.append(header, techBrief, supportPanel);
+  },
+
+  /**
+   * Creates the technical specifications view for the project.
+   */
+  createTechBrief(project) {
+    const section = document.createElement('div');
+    section.className = 'login-card';
+    section.style.maxWidth = '100%';
+    section.style.marginBottom = '2rem';
+
+    section.innerHTML = `
+      <h3>Technical Specifications</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 1rem;">
+        <div>
+          <label><strong>Native iOS:</strong></label>
+          <p>Swift / SwiftUI</p>
+        </div>
+        <div>
+          <label><strong>Native Android:</strong></label>
+          <p>Kotlin / Jetpack Compose</p>
+        </div>
+        <div>
+          <label><strong>Current Progress:</strong></label>
+          <p>${project.progress}</p>
+        </div>
+      </div>
+    `;
+    return section;
+  },
+
+  /**
+   * Creates the stakeholder support panel for 24/7 lifecycle support.
+   */
+  createSupportPanel() {
+    const panel = document.createElement('div');
+    panel.className = 'login-card';
+    panel.style.maxWidth = '100%';
+    panel.style.borderLeft = '5px solid var(--primary)';
+
+    panel.innerHTML = `
+      <h3>24/7 Developer Support</h3>
+      <p>Continuous support for the lifecycle of your heating app.</p>
+      <button class="btn-login" style="margin-top: 1rem; background: var(--dark);">
+        Open Support Ticket
+      </button>
+    `;
+
+    panel.querySelector('button').onclick = () => alert('Support Ticket Initiated for Central Heating App');
+    return panel;
+  },
+
+  // ────────────────────────────────────────────────
+  // Project Form & Cards (Programmatic DOM)
+  // ────────────────────────────────────────────────
+
+  /**
+   * Dynamically creates the project registration form.
+   */
   createProjectForm() {
     const form = document.createElement('form');
     form.id = 'newProjectForm';
@@ -166,17 +249,11 @@ const app = {
     this.projectFormFields.forEach(f => {
       const div = document.createElement('div');
       div.className = 'form-group';
-
       const label = document.createElement('label');
       label.htmlFor = f.id;
       label.textContent = f.label;
-
       const input = document.createElement('input');
-      input.id          = f.id;
-      input.type        = f.type;
-      input.placeholder = f.placeholder;
-      input.required    = f.required;
-
+      Object.assign(input, { id: f.id, name: f.id, type: f.type, placeholder: f.placeholder, required: f.required });
       div.append(label, input);
       form.appendChild(div);
     });
@@ -191,39 +268,69 @@ const app = {
       e.preventDefault();
       const values = {
         id: Date.now(),
-        title:    form.title.value.trim(),
-        status:   form.status.value.trim(),
+        title: form.title.value.trim(),
+        status: form.status.value.trim(),
         progress: form.progress.value.trim() + '%'
       };
       this.projects.push(values);
       this.renderProjects();
       form.reset();
+      this.showPage('dashboard-view');
     });
 
     return form;
   },
 
+  /**
+   * Creates a visual progress bar component.
+   */
+  createProgressBar(progress) {
+    const track = document.createElement('div');
+    track.className = 'progress-track';
+    const fill = document.createElement('div');
+    fill.className = 'progress-fill';
+    fill.style.width = progress;
+    track.appendChild(fill);
+    return track;
+  },
+
+  /**
+   * Creates a project card with a click event to enter the workspace.
+   */
   createProjectCard(project) {
     const card = document.createElement('div');
     card.className = 'project-card';
+    card.style.cursor = 'pointer';
 
-    card.innerHTML = `
-      <h3>${project.title}</h3>
-      <p class="status">Status: <strong>${project.status}</strong></p>
-      <div class="progress-track">
-        <div class="progress-fill" style="width: ${project.progress}"></div>
-      </div>
-      <p class="progress-label">${project.progress}</p>
-    `;
+    // Journey Continuation: Clicking a card enters the Workspace
+    card.onclick = () => this.showWorkspace(project);
 
+    const h3 = document.createElement('h3');
+    h3.textContent = project.title;
+
+    const statusP = document.createElement('p');
+    statusP.className = 'status';
+    statusP.textContent = 'Status: ';
+    const strong = document.createElement('strong');
+    strong.textContent = project.status;
+    statusP.appendChild(strong);
+
+    const progressTrack = this.createProgressBar(project.progress);
+    const label = document.createElement('p');
+    label.className = 'progress-label';
+    label.textContent = project.progress;
+
+    card.append(h3, statusP, progressTrack, label);
     return card;
   },
 
+  /**
+   * Renders the project grid in reverse chronological order.
+   */
   renderProjects() {
     const grid = document.getElementById('project-grid');
     if (!grid) return;
 
-    // One-time form wrapper creation
     if (!document.getElementById('form-wrapper')) {
       const wrapper = document.createElement('div');
       wrapper.id = 'form-wrapper';
@@ -236,21 +343,26 @@ const app = {
     }
 
     grid.innerHTML = '';
-    this.projects.forEach(p => grid.appendChild(this.createProjectCard(p)));
+    // Reverse order: most recent first
+    this.projects.slice().reverse().forEach(p => grid.appendChild(this.createProjectCard(p)));
   },
 
   // ────────────────────────────────────────────────
-  // Auth (fake)
+  // Auth & Initialization
   // ────────────────────────────────────────────────
+
+  /**
+   * Simulates a login delay for the POC.
+   */
   simulateLogin(email) {
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email.includes('@')) resolve({ email });
-        else reject(new Error('Invalid email'));
-      }, 1000);
+      setTimeout(() => email.includes('@') ? resolve({ email }) : reject(new Error('Invalid email')), 1000);
     });
   },
 
+  /**
+   * Initializes authentication listeners and logic.
+   */
   initAuth() {
     const form = document.getElementById('loginForm');
     if (!form) return;
@@ -267,7 +379,7 @@ const app = {
         document.getElementById('welcome-message').textContent = `Researcher Portal: ${email}`;
         this.renderProjects();
         this.showPage('dashboard-view');
-        this.refreshNavigation();           // Show Dashboard link
+        this.refreshNavigation();
       } catch (err) {
         alert('Login failed: ' + err.message);
       } finally {
@@ -283,9 +395,9 @@ const app = {
     });
   },
 
-  // ────────────────────────────────────────────────
-  // Mobile menu
-  // ────────────────────────────────────────────────
+  /**
+   * Initializes mobile menu interactions.
+   */
   initMobileMenu() {
     const els = {
       toggler:  document.querySelector('.navbar-toggler'),
@@ -296,15 +408,8 @@ const app = {
 
     if (!els.toggler || !els.menu || !els.backdrop) return;
 
-    const open = () => {
-      els.menu.classList.add('show');
-      els.backdrop.classList.add('show');
-    };
-
-    const close = () => {
-      els.menu.classList.remove('show');
-      els.backdrop.classList.remove('show');
-    };
+    const open = () => { els.menu.classList.add('show'); els.backdrop.classList.add('show'); };
+    const close = () => { els.menu.classList.remove('show'); els.backdrop.classList.remove('show'); };
 
     els.toggler.addEventListener('click', open);
     els.close.addEventListener('click', close);
@@ -312,9 +417,9 @@ const app = {
     document.addEventListener('keydown', e => e.key === 'Escape' && close());
   },
 
-  // ────────────────────────────────────────────────
-  // Bootstrap / Start
-  // ────────────────────────────────────────────────
+  /**
+   * Boots the application and builds the initial UI state.
+   */
   init() {
     this.refreshNavigation();
     this.initMobileMenu();
@@ -323,7 +428,4 @@ const app = {
   }
 };
 
-// ────────────────────────────────────────────────
-// Entry point
-// ────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => app.init());
