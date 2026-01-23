@@ -203,18 +203,49 @@ const app = {
     return form;
   },
 
+// Helper to create the progress bar sub-component
+  createProgressBar(progress) {
+    const track = document.createElement('div');
+    track.className = 'progress-track';
+
+    const fill = document.createElement('div');
+    fill.className = 'progress-fill';
+    fill.style.width = progress;
+
+    track.appendChild(fill);
+    return track;
+  },
+
   createProjectCard(project) {
     const card = document.createElement('div');
     card.className = 'project-card';
 
-    card.innerHTML = `
-      <h3>${project.title}</h3>
-      <p class="status">Status: <strong>${project.status}</strong></p>
-      <div class="progress-track">
-        <div class="progress-fill" style="width: ${project.progress}"></div>
-      </div>
-      <p class="progress-label">${project.progress}</p>
-    `;
+    card.onclick = function(){
+      alert(this);
+    };
+
+    // 1. Title
+    const h3 = document.createElement('h3');
+    h3.textContent = project.title;
+
+    // 2. Status Paragraph
+    const statusP = document.createElement('p');
+    statusP.className = 'status';
+    statusP.textContent = 'Status: ';
+    
+    const strong = document.createElement('strong');
+    strong.textContent = project.status;
+    statusP.appendChild(strong);
+
+    // 3. Progress Elements
+    const progressTrack = this.createProgressBar(project.progress);
+    
+    const label = document.createElement('p');
+    label.className = 'progress-label';
+    label.textContent = project.progress;
+
+    // Assemble the card
+    card.append(h3, statusP, progressTrack, label);
 
     return card;
   },
