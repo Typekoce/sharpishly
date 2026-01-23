@@ -53,16 +53,14 @@ const app = {
     });
 
     if (pageId === 'quick-start') {
-      // Show Dashboard menu item once user has seen Quick Start
       const dashboardItem = this.menu.find(item => item.name === 'Dashboard');
       if (dashboardItem?.hidden) {
         dashboardItem.hidden = false;
         this.refreshNavigation();
       }
 
-      // Lazy-create form only once
       const container = document.getElementById('quick-start-form-container');
-      if (container && !container.hasChildNodes()) {
+      if (container && container.children.length === 0) {
         container.appendChild(this.createProjectForm());
       }
     }
@@ -126,7 +124,6 @@ const app = {
 
           a.addEventListener('click', e => {
             e.preventDefault();
-            console.log(`Sub-item: ${sub.name}`);
             if (isMobile) document.querySelector('.btn-close')?.click();
           });
 
@@ -147,7 +144,6 @@ const app = {
       "Dashboard":   () => this.showPage('dashboard-view'),
       "Quick Start": () => this.showPage('quick-start'),
       "Features":    () => this.showPage('Features'),
-      // "Products":    () => this.showPage('Products'),   // uncomment when needed
     };
 
     const action = actions[item.name];
@@ -157,7 +153,7 @@ const app = {
   },
 
   // ────────────────────────────────────────────────
-  // Project Form & Cards
+  // Project Form & Cards (Programmatic DOM)
   // ────────────────────────────────────────────────
   createProjectForm() {
     const form = document.createElement('form');
@@ -173,6 +169,7 @@ const app = {
 
       const input = document.createElement('input');
       input.id          = f.id;
+      input.name        = f.id;
       input.type        = f.type;
       input.placeholder = f.placeholder;
       input.required    = f.required;
@@ -195,15 +192,18 @@ const app = {
         status:   form.status.value.trim(),
         progress: form.progress.value.trim() + '%'
       };
+      
       this.projects.push(values);
       this.renderProjects();
       form.reset();
+      
+      // Auto-display Dashboard
+      this.showPage('dashboard-view');
     });
 
     return form;
   },
 
-// Helper to create the progress bar sub-component
   createProgressBar(progress) {
     const track = document.createElement('div');
     track.className = 'progress-track';
@@ -219,10 +219,6 @@ const app = {
   createProjectCard(project) {
     const card = document.createElement('div');
     card.className = 'project-card';
-
-    card.onclick = function(){
-      alert(this);
-    };
 
     // 1. Title
     const h3 = document.createElement('h3');
@@ -244,9 +240,7 @@ const app = {
     label.className = 'progress-label';
     label.textContent = project.progress;
 
-    // Assemble the card
     card.append(h3, statusP, progressTrack, label);
-
     return card;
   },
 
@@ -254,7 +248,6 @@ const app = {
     const grid = document.getElementById('project-grid');
     if (!grid) return;
 
-    // One-time form wrapper creation
     if (!document.getElementById('form-wrapper')) {
       const wrapper = document.createElement('div');
       wrapper.id = 'form-wrapper';
@@ -267,11 +260,14 @@ const app = {
     }
 
     grid.innerHTML = '';
-    this.projects.forEach(p => grid.appendChild(this.createProjectCard(p)));
+    
+    // Reverse order: Most recent project displayed first
+    const displayList = this.projects.slice().reverse();
+    displayList.forEach(p => grid.appendChild(this.createProjectCard(p)));
   },
 
   // ────────────────────────────────────────────────
-  // Auth (fake)
+  // Auth & Initialization
   // ────────────────────────────────────────────────
   simulateLogin(email) {
     return new Promise((resolve, reject) => {
@@ -298,7 +294,7 @@ const app = {
         document.getElementById('welcome-message').textContent = `Researcher Portal: ${email}`;
         this.renderProjects();
         this.showPage('dashboard-view');
-        this.refreshNavigation();           // Show Dashboard link
+        this.refreshNavigation();
       } catch (err) {
         alert('Login failed: ' + err.message);
       } finally {
@@ -314,9 +310,6 @@ const app = {
     });
   },
 
-  // ────────────────────────────────────────────────
-  // Mobile menu
-  // ────────────────────────────────────────────────
   initMobileMenu() {
     const els = {
       toggler:  document.querySelector('.navbar-toggler'),
@@ -327,15 +320,8 @@ const app = {
 
     if (!els.toggler || !els.menu || !els.backdrop) return;
 
-    const open = () => {
-      els.menu.classList.add('show');
-      els.backdrop.classList.add('show');
-    };
-
-    const close = () => {
-      els.menu.classList.remove('show');
-      els.backdrop.classList.remove('show');
-    };
+    const open = () => { els.menu.classList.add('show'); els.backdrop.classList.add('show'); };
+    const close = () => { els.menu.classList.remove('show'); els.backdrop.classList.remove('show'); };
 
     els.toggler.addEventListener('click', open);
     els.close.addEventListener('click', close);
@@ -343,9 +329,6 @@ const app = {
     document.addEventListener('keydown', e => e.key === 'Escape' && close());
   },
 
-  // ────────────────────────────────────────────────
-  // Bootstrap / Start
-  // ────────────────────────────────────────────────
   init() {
     this.refreshNavigation();
     this.initMobileMenu();
@@ -354,7 +337,4 @@ const app = {
   }
 };
 
-// ────────────────────────────────────────────────
-// Entry point
-// ────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => app.init());
