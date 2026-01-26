@@ -152,8 +152,7 @@ const app = {
 
     if (isMobile) document.querySelector('.btn-close')?.click();
   },
-
-  // ────────────────────────────────────────────────
+// ────────────────────────────────────────────────
   // Project Workspace (Stakeholder Journey)
   // ────────────────────────────────────────────────
 
@@ -170,19 +169,105 @@ const app = {
 
     // Header section for the workspace
     const header = document.createElement('div');
+    header.style.textAlign = 'left';
     header.style.marginBottom = '2rem';
     header.innerHTML = `
-      <h2>${project.title}</h2>
-      <p class="login-subtitle">Native Mobile Application Lifecycle</p>
+      <h2 style="font-size: 2rem; color: var(--dark);">${project.title}</h2>
+      <p class="login-subtitle">R&D Lifecycle: Native Mobile Application Suite</p>
     `;
 
-    // Technical specs for developers and clients
-    const techBrief = this.createTechBrief(project);
-    
-    // 24/7 Support channel component
-    const supportPanel = this.createSupportPanel();
+    // Layout: 2-column grid for Workspace components
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
+    grid.style.gap = '20px';
 
-    container.append(header, techBrief, supportPanel);
+    // Column 1: Technical specs and Roadmap
+    const leftCol = document.createElement('div');
+    leftCol.append(this.createTechBrief(project), this.createMilestoneTracker());
+
+    // Column 2: AI Insights, Tech Logs, and Support
+    const rightCol = document.createElement('div');
+    rightCol.append(this.createAIAssistant(), this.createTechLog(), this.createSupportPanel());
+
+    grid.append(leftCol, rightCol);
+    container.append(header, grid);
+  },
+
+  /**
+   * Creates a visual roadmap of project milestones for clients/PMs.
+   */
+  createMilestoneTracker() {
+    const card = document.createElement('div');
+    card.className = 'login-card';
+    card.style.maxWidth = '100%';
+    card.style.marginBottom = '20px';
+    
+    card.innerHTML = `
+      <h3 style="margin-bottom:15px;">R&D Roadmap</h3>
+      <div style="border-left: 2px solid var(--border); padding-left: 20px; margin-left: 10px;">
+        <div style="margin-bottom: 20px; position: relative;">
+          <span style="position: absolute; left: -26px; background: white; color: green;">✔</span>
+          <strong>Phase 1: Architecture</strong>
+          <p style="font-size: 0.85rem; color: var(--gray);">UI/UX Design & Cloud Mapping (Completed)</p>
+        </div>
+        <div style="margin-bottom: 20px; position: relative;">
+          <span style="position: absolute; left: -26px; background: white; color: var(--primary);">●</span>
+          <strong>Phase 2: Native Build</strong>
+          <p style="font-size: 0.85rem; color: var(--gray);">iOS Swift & Android Kotlin development (In Progress)</p>
+        </div>
+        <div style="position: relative;">
+          <span style="position: absolute; left: -26px; background: white; color: #ccc;">○</span>
+          <strong>Phase 3: Deployment</strong>
+          <p style="font-size: 0.85rem; color: var(--gray);">App Store Submission & 24/7 Support Onboarding</p>
+        </div>
+      </div>
+    `;
+    return card;
+  },
+
+  /**
+   * Simulates AI-driven insights for the R&D project.
+   */
+  createAIAssistant() {
+    const div = document.createElement('div');
+    div.className = 'login-card';
+    div.style.maxWidth = '100%';
+    div.style.marginBottom = '20px';
+    div.style.border = '1px dashed var(--primary)';
+    
+    div.innerHTML = `
+      <h3 style="color: var(--primary); display: flex; align-items: center; gap: 8px;">
+        <span>✨</span> AI R&D Insight
+      </h3>
+      <p style="font-style: italic; font-size: 0.9rem; margin-top: 10px;">
+        "I recommend implementing Biometric Logic for the Central Heating app. This will allow users to securely lock thermostat controls via FaceID/Fingerprint."
+      </p>
+    `;
+    return div;
+  },
+
+  /**
+   * Creates a scrolling technical log to show cloud/system activity.
+   */
+  createTechLog() {
+    const logContainer = document.createElement('div');
+    logContainer.className = 'login-card';
+    logContainer.style.maxWidth = '100%';
+    logContainer.style.marginBottom = '20px';
+    logContainer.style.backgroundColor = '#1e1e1e';
+    logContainer.style.color = '#4ade80'; // Neon Green
+    
+    logContainer.innerHTML = `
+      <h3 style="color: white; font-size: 0.9rem; margin-bottom: 10px; font-family: monospace;">> SYSTEM_LOG</h3>
+      <div style="font-family: 'Courier New', monospace; font-size: 0.75rem; height: 100px; overflow-y: auto; line-height: 1.4;">
+        <div>[${new Date().toLocaleTimeString()}] Initializing AWS environment...</div>
+        <div>[${new Date().toLocaleTimeString()}] Swift compiler optimized for iOS 17...</div>
+        <div>[${new Date().toLocaleTimeString()}] Android Kotlin Gradle build successful.</div>
+        <div>[${new Date().toLocaleTimeString()}] Analyzing sensor data latency...</div>
+      </div>
+    `;
+    return logContainer;
   },
 
   /**
@@ -192,22 +277,18 @@ const app = {
     const section = document.createElement('div');
     section.className = 'login-card';
     section.style.maxWidth = '100%';
-    section.style.marginBottom = '2rem';
+    section.style.marginBottom = '20px';
 
     section.innerHTML = `
       <h3>Technical Specifications</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 1rem;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 1rem;">
         <div>
-          <label><strong>Native iOS:</strong></label>
-          <p>Swift / SwiftUI</p>
+          <label style="font-size: 0.8rem; color: var(--gray);">Primary Stack</label>
+          <p><strong>Native Mobile</strong></p>
         </div>
         <div>
-          <label><strong>Native Android:</strong></label>
-          <p>Kotlin / Jetpack Compose</p>
-        </div>
-        <div>
-          <label><strong>Current Progress:</strong></label>
-          <p>${project.progress}</p>
+          <label style="font-size: 0.8rem; color: var(--gray);">Progress</label>
+          <p><strong>${project.progress}</strong></p>
         </div>
       </div>
     `;
@@ -225,16 +306,15 @@ const app = {
 
     panel.innerHTML = `
       <h3>24/7 Developer Support</h3>
-      <p>Continuous support for the lifecycle of your heating app.</p>
-      <button class="btn-login" style="margin-top: 1rem; background: var(--dark);">
+      <p style="font-size: 0.9rem; margin: 10px 0;">Continuous lifecycle monitoring for the Central Heating Co. mobile suite.</p>
+      <button class="btn-login" style="margin-top: 0.5rem; background: var(--dark);">
         Open Support Ticket
       </button>
     `;
 
-    panel.querySelector('button').onclick = () => alert('Support Ticket Initiated for Central Heating App');
+    panel.querySelector('button').onclick = () => alert('Support Ticket Initiated. A native developer will be with you shortly.');
     return panel;
   },
-
   // ────────────────────────────────────────────────
   // Project Form & Cards (Programmatic DOM)
   // ────────────────────────────────────────────────
