@@ -4,6 +4,13 @@
 
 const app = {
   // ────────────────────────────────────────────────
+  // USER
+  // ────────────────────────────────────────────────
+  user:{
+    name:'',
+    email:'lee@majors.com',
+  },
+  // ────────────────────────────────────────────────
   // DATA: Navigation, Projects, and Forms
   // ────────────────────────────────────────────────
   menu: [
@@ -13,42 +20,43 @@ const app = {
     { name: "Quick Start", pageId: "quick-start" },
     { name: "Features",    pageId: "Features" },
     { name: "Products",    pageId: "Products", dropdown: [
-      { name: "Lite",       href: "#" },
-      { name: "Pro",        href: "#" },
-      { name: "Enterprise", href: "#" }
+      { name: "Lite", href: "#" }, { name: "Pro", href: "#" }, { name: "Enterprise", href: "#" }
     ]},
     { name: "Portal",      dropdown: [
-      { name: "Customers", href: "#" },
-      { name: "Clients",   href: "#" },
-      { name: "Staff",     href: "#" }
+      { name: "Customers", href: "#" }, { name: "Clients", href: "#" }, { name: "Staff", href: "#" }
     ]},
     { name: "Pricing",     href: "#" },
     { name: "Contact",     href: "#" }
   ],
 
   projects: [
-    { id: 1, title: "Native Mobile Application Lifecycle",     status: "Active",    progress: "75%" },
-    { id: 2, title: "Neural Network Optimization", status: "Review",   progress: "40%" },
-    { id: 3, title: "Biometric Security API",      status: "Completed", progress: "100%" },
-    { id: 4, title: "Quantum Computing Logic",     status: "Active",    progress: "75%" },
+    { id: 1, title: "Native Mobile Application Lifecycle", status: "Active",    progress: "75%" },
+    { id: 2, title: "Neural Network Optimization",         status: "Review",    progress: "40%" },
+    { id: 3, title: "Biometric Security API",              status: "Completed", progress: "100%" },
+    { id: 4, title: "Quantum Computing Logic",             status: "Active",    progress: "75%" },
   ],
 
   projectFormFields: [
-    { id: "title",    label: "Project Title",    type: "text",    placeholder: "e.g. Quantum Logic", required: true },
-    { id: "status",   label: "Current Status",   type: "text",    placeholder: "e.g. Active",        required: true },
-    { id: "progress", label: "Progress (%)",     type: "number",  placeholder: "0–100",              required: true }
+    { id: "title",  label: "Project Title",  type: "text",  placeholder: "e.g. Quantum Logic", required: true },
+    { id: "status", label: "Current Status", type: "text",  placeholder: "e.g. Active",        required: true },
+    { id: "email",  label: "Email",          type: "email", placeholder: "name@company.com",   required: true }
   ],
 
   // ────────────────────────────────────────────────
   // AUTH STATE HELPERS
   // ────────────────────────────────────────────────
   isAuthenticated() {
-    return document.getElementById('welcome-message')?.textContent.trim() !== '' ||
-           document.getElementById('dashboard-view')?.style.display === 'block';
+    const msg = document.getElementById('welcome-message')?.textContent.trim();
+    return msg !== '' && msg !== null && msg.includes(':');
+  },
+
+  getActiveEmail() {
+    const msg = document.getElementById('welcome-message')?.textContent;
+    return msg ? msg.split(': ')[1]?.trim() : null;
   },
 
   // ────────────────────────────────────────────────
-  // PAGE NAVIGATION: Controls visibility of all sections
+  // PAGE NAVIGATION
   // ────────────────────────────────────────────────
   showPage(pageId) {
     const pages = ['home', 'login-view', 'dashboard-view', 'quick-start', 'Features', 'Products', 'workspace-view'];
@@ -58,12 +66,12 @@ const app = {
       if (el) el.style.display = (id === pageId) ? 'block' : 'none';
     });
 
+    // Rule 1.1: Update Home Page greeting if email is present
+    if (pageId === 'home') {
+      this.updateHomeUI();
+    }
+
     if (pageId === 'quick-start') {
-      const dashboardItem = this.menu.find(item => item.name === 'Dashboard');
-      if (dashboardItem?.hidden) {
-        dashboardItem.hidden = false;
-        this.refreshNavigation();
-      }
       const container = document.getElementById('quick-start-form-container');
       if (container && container.children.length === 0) {
         container.appendChild(this.createProjectForm());
@@ -71,11 +79,38 @@ const app = {
     }
   },
 
+  updateHomeUI() {
+    const email = this.getActiveEmail();
+    const homeH1 = document.querySelector('#home h1');
+    const homeSub = document.querySelector('#home p.lead') || document.getElementById('sub-header');
+    
+    if (email && homeH1) {
+      homeH1.textContent = "Welcome Back, Researcher";
+      if (homeSub) homeSub.innerHTML = `Session active for: <strong>${email}</strong>`;
+    } else if (homeH1) {
+      homeH1.textContent = "Sharpishly R&D©";
+      if (homeSub) homeSub.textContent = "R&D accessible to everyone";
+    }
+  },
+
   refreshNavigation() {
     const desktop = document.querySelector('#navbarNav .navbar-nav');
     const mobile  = document.querySelector('#mobileMenu .navbar-nav');
-    if (desktop) { desktop.innerHTML = ''; this.buildNavItems(desktop, this.menu, false); }
-    if (mobile) { mobile.innerHTML = ''; this.buildNavItems(mobile, this.menu, true); }
+    const hasEmail = this.isAuthenticated();
+
+    let menuToRender;
+    if (hasEmail) {
+      // RULE: Only Home and Dashboard if email is present
+      menuToRender = this.menu.filter(item => item.name === "Home" || item.name === "Dashboard");
+      const dash = menuToRender.find(i => i.name === "Dashboard");
+      if (dash) dash.hidden = false;
+    } else {
+      // RULE: Normal menu minus Dashboard if guest
+      menuToRender = this.menu.filter(item => item.name !== "Dashboard");
+    }
+
+    if (desktop) { desktop.innerHTML = ''; this.buildNavItems(desktop, menuToRender, false); }
+    if (mobile) { mobile.innerHTML = ''; this.buildNavItems(mobile, menuToRender, true); }
   },
 
   buildNavItems(container, items, isMobile = false) {
@@ -89,7 +124,6 @@ const app = {
       link.className = item.dropdown ? 'nav-link dropdown-toggle' : 'nav-link';
       link.href = item.href || '#';
       link.textContent = item.name;
-      if (item.active) link.classList.add('active');
 
       link.addEventListener('click', e => {
         e.preventDefault();
@@ -101,18 +135,13 @@ const app = {
       if (item.dropdown) {
         const ul = document.createElement('ul');
         ul.className = 'dropdown-menu';
-        if (isMobile) {
-          Object.assign(ul.style, { position: 'static', border: 'none', boxShadow: 'none', margin: '0', paddingLeft: '1.2rem' });
-        }
+        if (isMobile) Object.assign(ul.style, { position: 'static', border: 'none', boxShadow: 'none', paddingLeft: '1.2rem' });
+        
         item.dropdown.forEach(sub => {
           const sli = document.createElement('li');
           const a = document.createElement('a');
           a.className = 'dropdown-item';
           a.textContent = sub.name;
-          a.addEventListener('click', e => { 
-            e.preventDefault(); 
-            if (isMobile) document.querySelector('.btn-close')?.click(); 
-          });
           sli.appendChild(a);
           ul.appendChild(sli);
         });
@@ -136,30 +165,26 @@ const app = {
   },
 
   // ────────────────────────────────────────────────
-  // WORKSPACE COMPONENTS: Stakeholder Dashboard
+  // WORKSPACE & PROJECT COMPONENTS
   // ────────────────────────────────────────────────
   showWorkspace(project) {
     this.showPage('workspace-view');
     const container = document.getElementById('workspace-content');
     if (!container) return;
     container.innerHTML = '';
-
+    // ... (rest of workspace logic remains unchanged)
     const header = document.createElement('div');
     header.style.textAlign = 'left';
     header.style.marginBottom = '2rem';
     header.innerHTML = `<h2 style="font-size: 2rem;">${project.title}</h2><p class="login-subtitle">R&D Lifecycle: Native Mobile Application Suite</p>`;
-
     const grid = document.createElement('div');
     grid.style.display = 'grid';
     grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
     grid.style.gap = '20px';
-
     const leftCol = document.createElement('div');
     leftCol.append(this.createTechBrief(project), this.createMilestoneTracker());
-
     const rightCol = document.createElement('div');
     rightCol.append(this.createAIAssistant(), this.createTechLog(), this.createSupportPanel());
-
     grid.append(leftCol, rightCol);
     container.append(header, grid);
   },
@@ -167,14 +192,11 @@ const app = {
   createMilestoneTracker() {
     const card = document.createElement('div');
     card.className = 'login-card';
-    card.style.maxWidth = '100%';
-    card.style.marginBottom = '20px';
-    card.innerHTML = `
-      <h3 style="margin-bottom:15px;">R&D Roadmap</h3>
+    card.innerHTML = `<h3 style="margin-bottom:15px;">R&D Roadmap</h3>
       <div style="border-left: 2px solid var(--border); padding-left: 20px; margin-left: 10px;">
-        <div style="margin-bottom: 20px; position: relative;"><span style="position: absolute; left: -26px; background: white; color: green;">✔</span><strong>Phase 1: Architecture</strong><p style="font-size: 0.85rem; color: var(--gray);">UI/UX Design & Cloud Mapping (Completed)</p></div>
-        <div style="margin-bottom: 20px; position: relative;"><span style="position: absolute; left: -26px; background: white; color: var(--primary);">●</span><strong>Phase 2: Native Build</strong><p style="font-size: 0.85rem; color: var(--gray);">iOS Swift & Android Kotlin development (In Progress)</p></div>
-        <div style="position: relative;"><span style="position: absolute; left: -26px; background: white; color: #ccc;">○</span><strong>Phase 3: Deployment</strong><p style="font-size: 0.85rem; color: var(--gray);">App Store Submission & 24/7 Support Onboarding</p></div>
+        <div style="margin-bottom: 20px; position: relative;"><span style="color: green;">✔</span> <strong>Phase 1: Architecture</strong></div>
+        <div style="margin-bottom: 20px; position: relative;"><span style="color: var(--primary);">●</span> <strong>Phase 2: Native Build</strong></div>
+        <div style="position: relative;"><span style="color: #ccc;">○</span> <strong>Phase 3: Deployment</strong></div>
       </div>`;
     return card;
   },
@@ -182,10 +204,8 @@ const app = {
   createAIAssistant() {
     const div = document.createElement('div');
     div.className = 'login-card';
-    div.style.maxWidth = '100%';
-    div.style.marginBottom = '20px';
     div.style.border = '1px dashed var(--primary)';
-    div.innerHTML = `<h3 style="color: var(--primary);">✨ AI R&D Insight</h3><p style="font-style: italic; font-size: 0.9rem; margin-top: 10px;">"I recommend implementing Biometric Logic for the Central Heating app for secure thermostat locking."</p>`;
+    div.innerHTML = `<h3 style="color: var(--primary);">✨ AI R&D Insight</h3><p style="font-style: italic; font-size: 0.9rem; margin-top: 10px;">"Optimizing biometric logic for the current build."</p>`;
     return div;
   },
 
@@ -194,11 +214,9 @@ const app = {
     log.className = 'login-card';
     log.style.backgroundColor = '#1e1e1e';
     log.style.color = '#4ade80';
-    log.innerHTML = `<h3 style="color: white; font-size: 0.9rem; margin-bottom: 10px; font-family: monospace;">> SYSTEM_LOG</h3>
+    log.innerHTML = `<h3 style="color: white; font-family: monospace;">> SYSTEM_LOG</h3>
       <div style="font-family: monospace; font-size: 0.75rem; height: 100px; overflow-y: auto;">
-        <div>[${new Date().toLocaleTimeString()}] AWS Instance active...</div>
-        <div>[${new Date().toLocaleTimeString()}] Swift compiler optimized...</div>
-        <div>[${new Date().toLocaleTimeString()}] Gradle build successful.</div>
+        <div>[${new Date().toLocaleTimeString()}] UI Navigation updated...</div>
       </div>`;
     return log;
   },
@@ -206,11 +224,7 @@ const app = {
   createTechBrief(project) {
     const section = document.createElement('div');
     section.className = 'login-card';
-    section.style.maxWidth = '100%';
-    section.style.marginBottom = '20px';
-    section.innerHTML = `<h3>Technical Specifications</h3><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 1rem;">
-      <div><label style="font-size: 0.8rem; color: var(--gray);">Primary Stack</label><p><strong>Native Mobile</strong></p></div>
-      <div><label style="font-size: 0.8rem; color: var(--gray);">Progress</label><p><strong>${project.progress}</strong></p></div></div>`;
+    section.innerHTML = `<h3>Technical Specifications</h3><p><strong>Stack:</strong> Native Mobile</p><p><strong>Progress:</strong> ${project.progress}</p>`;
     return section;
   },
 
@@ -218,8 +232,7 @@ const app = {
     const panel = document.createElement('div');
     panel.className = 'login-card';
     panel.style.borderLeft = '5px solid var(--primary)';
-    panel.innerHTML = `<h3>24/7 Developer Support</h3><p style="font-size: 0.9rem;">Continuous lifecycle monitoring active.</p><button class="btn-login" style="margin-top: 0.5rem; background: var(--dark);">Open Ticket</button>`;
-    panel.querySelector('button').onclick = () => alert('Support Ticket Initiated.');
+    panel.innerHTML = `<h3>Support</h3><button class="btn-login" style="background: var(--dark);">Open Ticket</button>`;
     return panel;
   },
 
@@ -237,10 +250,26 @@ const app = {
     const submit = document.createElement('button');
     submit.type = 'submit'; submit.className = 'btn-login'; submit.textContent = 'Add Project';
     form.appendChild(submit);
+
     form.addEventListener('submit', e => {
       e.preventDefault();
-      this.projects.push({ id: Date.now(), title: form.title.value.trim(), status: form.status.value.trim(), progress: form.progress.value.trim() + '%' });
+      const emailValue = form.email.value.trim();
+      
+      document.getElementById('welcome-message').textContent = `Researcher Portal: ${emailValue}`;
+
+      this.user.email = emailValue;
+
+      prettyBug(this.user);
+      
+      this.projects.push({ 
+        id: Date.now(), 
+        title: form.title.value.trim(), 
+        status: form.status.value.trim(), 
+        progress: '10%' // Default progress value
+      });
+
       this.renderProjects();
+      this.refreshNavigation();
       this.showPage('dashboard-view');
     });
     return form;
@@ -276,16 +305,19 @@ const app = {
   // ────────────────────────────────────────────────
   initAuth() {
     const form = document.getElementById('loginForm');
-    if (!form) return;
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      document.getElementById('welcome-message').textContent = `Researcher Portal: ${form.email.value.trim()}`;
-      this.renderProjects();
-      this.showPage('dashboard-view');
-      this.refreshNavigation();
-    });
+    if (form) {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        document.getElementById('welcome-message').textContent = `Researcher Portal: ${form.email.value.trim()}`;
+        this.renderProjects();
+        this.refreshNavigation();
+        this.showPage('dashboard-view');
+      });
+    }
+
     document.getElementById('logoutBtn')?.addEventListener('click', () => {
-      this.showPage('login-view');
+      document.getElementById('welcome-message').textContent = '';
+      this.showPage('home');
       this.refreshNavigation();
     });
   },
@@ -295,18 +327,16 @@ const app = {
     const menu = document.getElementById('mobileMenu');
     const backdrop = document.getElementById('backdrop');
     const close = document.querySelector('.btn-close');
-    const open = () => { menu.classList.add('show'); backdrop.classList.add('show'); };
     const hide = () => { menu.classList.remove('show'); backdrop.classList.remove('show'); };
-    toggler?.addEventListener('click', open);
-    close?.addEventListener('click', hide);
-    backdrop?.addEventListener('click', hide);
+    toggler?.addEventListener('click', () => { menu.classList.add('show'); backdrop.classList.add('show'); });
+    [close, backdrop].forEach(el => el?.addEventListener('click', hide));
   },
-
   init() {
     this.refreshNavigation();
     this.initMobileMenu();
     this.initAuth();
-    this.showPage('home'); // Boots to Home content
+    this.showPage('home');
+    //prettyBug(this);
   }
 };
 
