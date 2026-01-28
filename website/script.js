@@ -8,7 +8,7 @@ const app = {
   // ────────────────────────────────────────────────
   user:{
     name:'',
-    email:'lee@majors.com',
+    email:'',
   },
   // ────────────────────────────────────────────────
   // DATA: Navigation, Projects, and Forms
@@ -77,6 +77,7 @@ const app = {
         container.appendChild(this.createProjectForm());
       }
     }
+    
   },
 
   updateHomeUI() {
@@ -111,6 +112,10 @@ const app = {
 
     if (desktop) { desktop.innerHTML = ''; this.buildNavItems(desktop, menuToRender, false); }
     if (mobile) { mobile.innerHTML = ''; this.buildNavItems(mobile, menuToRender, true); }
+
+    // if (this.user && this.user.email && this.user.email.trim().length > 0) {
+    //   prettyBug({'refreshNavigation':this.user});
+    // }
   },
 
   buildNavItems(container, items, isMobile = false) {
@@ -259,7 +264,7 @@ const app = {
 
       this.user.email = emailValue;
 
-      prettyBug(this.user);
+      //prettyBug(this.user);
       
       this.projects.push({ 
         id: Date.now(), 
