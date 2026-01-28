@@ -1,94 +1,126 @@
+/***********************************************
+ * Sharpishly R&D – Application Logic
+ ***********************************************/
+
 const app = {
   // ────────────────────────────────────────────────
-  // Data
+  // USER
+  // ────────────────────────────────────────────────
+  user:{
+    name:'',
+    email:'',
+  },
+  // ────────────────────────────────────────────────
+  // DATA: Navigation, Projects, and Forms
   // ────────────────────────────────────────────────
   menu: [
-    { name: "Home",        pageId: "login-view", active: true },
+    { name: "Home",        pageId: "home", active: true },
+    { name: "Login",       pageId: "login-view" },
     { name: "Dashboard",   pageId: "dashboard-view", hidden: true },
     { name: "Quick Start", pageId: "quick-start" },
     { name: "Features",    pageId: "Features" },
     { name: "Products",    pageId: "Products", dropdown: [
-      { name: "Lite",       href: "#" },
-      { name: "Pro",        href: "#" },
-      { name: "Enterprise", href: "#" }
+      { name: "Lite", href: "#" }, { name: "Pro", href: "#" }, { name: "Enterprise", href: "#" }
     ]},
     { name: "Portal",      dropdown: [
-      { name: "Customers", href: "#" },
-      { name: "Clients",   href: "#" },
-      { name: "Staff",     href: "#" }
+      { name: "Customers", href: "#" }, { name: "Clients", href: "#" }, { name: "Staff", href: "#" }
     ]},
     { name: "Pricing",     href: "#" },
     { name: "Contact",     href: "#" }
   ],
 
   projects: [
-    { id: 1, title: "Native Mobile Application Lifecycle",     status: "Active",    progress: "75%" },
-    { id: 2, title: "Neural Network Optimization", status: "Review",   progress: "40%" },
-    { id: 3, title: "Biometric Security API",      status: "Completed", progress: "100%" },
-    { id: 4, title: "Quantum Computing Logic",     status: "Active",    progress: "75%" },
+    { id: 1, title: "Native Mobile Application Lifecycle", status: "Active",    progress: "75%" },
+    { id: 2, title: "Neural Network Optimization",         status: "Review",    progress: "40%" },
+    { id: 3, title: "Biometric Security API",              status: "Completed", progress: "100%" },
+    { id: 4, title: "Quantum Computing Logic",             status: "Active",    progress: "75%" },
   ],
 
   projectFormFields: [
-    { id: "title",    label: "Project Title",    type: "text",    placeholder: "e.g. Quantum Logic", required: true },
-    { id: "status",   label: "Current Status",   type: "text",    placeholder: "e.g. Active",        required: true },
-    { id: "progress", label: "Progress (%)",     type: "number",  placeholder: "0–100",              required: true }
+    { id: "title",  label: "Project Title",  type: "text",  placeholder: "e.g. Quantum Logic", required: true },
+    { id: "status", label: "Current Status", type: "text",  placeholder: "e.g. Active",        required: true },
+    { id: "email",  label: "Email",          type: "email", placeholder: "name@company.com",   required: true }
   ],
 
   // ────────────────────────────────────────────────
-  // Auth state helpers
+  // AUTH STATE HELPERS
   // ────────────────────────────────────────────────
   isAuthenticated() {
-    return document.getElementById('welcome-message')?.textContent.trim() !== '' ||
-           document.getElementById('dashboard-view')?.style.display === 'block';
+    const msg = document.getElementById('welcome-message')?.textContent.trim();
+    return msg !== '' && msg !== null && msg.includes(':');
+  },
+
+  getActiveEmail() {
+    const msg = document.getElementById('welcome-message')?.textContent;
+    return msg ? msg.split(': ')[1]?.trim() : null;
   },
 
   // ────────────────────────────────────────────────
-  // Page / View switching
+  // PAGE NAVIGATION
   // ────────────────────────────────────────────────
   showPage(pageId) {
-    // List includes the new workspace-view
-    const pages = ['login-view', 'dashboard-view', 'quick-start', 'Features', 'Products', 'workspace-view'];
+    const pages = ['home', 'login-view', 'dashboard-view', 'quick-start', 'Features', 'Products', 'workspace-view'];
 
     pages.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = (id === pageId) ? 'block' : 'none';
     });
 
-    if (pageId === 'quick-start') {
-      const dashboardItem = this.menu.find(item => item.name === 'Dashboard');
-      if (dashboardItem?.hidden) {
-        dashboardItem.hidden = false;
-        this.refreshNavigation();
-      }
+    // Rule 1.1: Update Home Page greeting if email is present
+    if (pageId === 'home') {
+      this.updateHomeUI();
+    }
 
+    if (pageId === 'quick-start') {
       const container = document.getElementById('quick-start-form-container');
       if (container && container.children.length === 0) {
         container.appendChild(this.createProjectForm());
       }
     }
+    
   },
 
-  // ────────────────────────────────────────────────
-  // Navigation
-  // ────────────────────────────────────────────────
+  updateHomeUI() {
+    const email = this.getActiveEmail();
+    const homeH1 = document.querySelector('#home h1');
+    const homeSub = document.querySelector('#home p.lead') || document.getElementById('sub-header');
+    
+    if (email && homeH1) {
+      homeH1.textContent = "Welcome Back, Researcher";
+      if (homeSub) homeSub.innerHTML = `Session active for: <strong>${email}</strong>`;
+    } else if (homeH1) {
+      homeH1.textContent = "Sharpishly R&D©";
+      if (homeSub) homeSub.textContent = "R&D accessible to everyone";
+    }
+  },
+
   refreshNavigation() {
     const desktop = document.querySelector('#navbarNav .navbar-nav');
     const mobile  = document.querySelector('#mobileMenu .navbar-nav');
+    const hasEmail = this.isAuthenticated();
 
-    if (desktop) {
-      desktop.innerHTML = '';
-      this.buildNavItems(desktop, this.menu, false);
+    let menuToRender;
+    if (hasEmail) {
+      // RULE: Only Home and Dashboard if email is present
+      menuToRender = this.menu.filter(item => item.name === "Home" || item.name === "Dashboard");
+      const dash = menuToRender.find(i => i.name === "Dashboard");
+      if (dash) dash.hidden = false;
+    } else {
+      // RULE: Normal menu minus Dashboard if guest
+      menuToRender = this.menu.filter(item => item.name !== "Dashboard");
     }
-    if (mobile) {
-      mobile.innerHTML = '';
-      this.buildNavItems(mobile, this.menu, true);
-    }
+
+    if (desktop) { desktop.innerHTML = ''; this.buildNavItems(desktop, menuToRender, false); }
+    if (mobile) { mobile.innerHTML = ''; this.buildNavItems(mobile, menuToRender, true); }
+
+    // if (this.user && this.user.email && this.user.email.trim().length > 0) {
+    //   prettyBug({'refreshNavigation':this.user});
+    // }
   },
 
   buildNavItems(container, items, isMobile = false) {
     items.forEach(item => {
       if (item.hidden) return;
-
       const li = document.createElement('li');
       li.className = 'nav-item';
       if (item.dropdown) li.classList.add('dropdown');
@@ -97,7 +129,6 @@ const app = {
       link.className = item.dropdown ? 'nav-link dropdown-toggle' : 'nav-link';
       link.href = item.href || '#';
       link.textContent = item.name;
-      if (item.active) link.classList.add('active');
 
       link.addEventListener('click', e => {
         e.preventDefault();
@@ -109,322 +140,208 @@ const app = {
       if (item.dropdown) {
         const ul = document.createElement('ul');
         ul.className = 'dropdown-menu';
-        if (isMobile) {
-          Object.assign(ul.style, {
-            position: 'static', border: 'none', boxShadow: 'none',
-            margin: '0', paddingLeft: '1.2rem'
-          });
-        }
-
+        if (isMobile) Object.assign(ul.style, { position: 'static', border: 'none', boxShadow: 'none', paddingLeft: '1.2rem' });
+        
         item.dropdown.forEach(sub => {
           const sli = document.createElement('li');
           const a = document.createElement('a');
           a.className = 'dropdown-item';
-          a.href = sub.href || '#';
           a.textContent = sub.name;
-
-          a.addEventListener('click', e => {
-            e.preventDefault();
-            if (isMobile) document.querySelector('.btn-close')?.click();
-          });
-
           sli.appendChild(a);
           ul.appendChild(sli);
         });
-
         li.appendChild(ul);
       }
-
       container.appendChild(li);
     });
   },
 
   handleNavClick(item, isMobile) {
     const actions = {
-      "Home":        () => this.showPage(this.isAuthenticated() ? 'dashboard-view' : 'login-view'),
+      "Home":        () => this.showPage('home'),
+      "Login":       () => this.showPage('login-view'),
       "Dashboard":   () => this.showPage('dashboard-view'),
       "Quick Start": () => this.showPage('quick-start'),
       "Features":    () => this.showPage('Features'),
     };
-
     const action = actions[item.name];
     if (action) action();
-
     if (isMobile) document.querySelector('.btn-close')?.click();
   },
 
   // ────────────────────────────────────────────────
-  // Project Workspace (Stakeholder Journey)
+  // WORKSPACE & PROJECT COMPONENTS
   // ────────────────────────────────────────────────
-
-  /**
-   * Transitions the user into a specific project workspace.
-   * Tailored for stakeholders like the Central Heating Company.
-   */
   showWorkspace(project) {
     this.showPage('workspace-view');
     const container = document.getElementById('workspace-content');
     if (!container) return;
-
     container.innerHTML = '';
-
-    // Header section for the workspace
+    // ... (rest of workspace logic remains unchanged)
     const header = document.createElement('div');
+    header.style.textAlign = 'left';
     header.style.marginBottom = '2rem';
-    header.innerHTML = `
-      <h2>${project.title}</h2>
-      <p class="login-subtitle">Native Mobile Application Lifecycle</p>
-    `;
-
-    // Technical specs for developers and clients
-    const techBrief = this.createTechBrief(project);
-    
-    // 24/7 Support channel component
-    const supportPanel = this.createSupportPanel();
-
-    container.append(header, techBrief, supportPanel);
+    header.innerHTML = `<h2 style="font-size: 2rem;">${project.title}</h2><p class="login-subtitle">R&D Lifecycle: Native Mobile Application Suite</p>`;
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
+    grid.style.gap = '20px';
+    const leftCol = document.createElement('div');
+    leftCol.append(this.createTechBrief(project), this.createMilestoneTracker());
+    const rightCol = document.createElement('div');
+    rightCol.append(this.createAIAssistant(), this.createTechLog(), this.createSupportPanel());
+    grid.append(leftCol, rightCol);
+    container.append(header, grid);
   },
 
-  /**
-   * Creates the technical specifications view for the project.
-   */
+  createMilestoneTracker() {
+    const card = document.createElement('div');
+    card.className = 'login-card';
+    card.innerHTML = `<h3 style="margin-bottom:15px;">R&D Roadmap</h3>
+      <div style="border-left: 2px solid var(--border); padding-left: 20px; margin-left: 10px;">
+        <div style="margin-bottom: 20px; position: relative;"><span style="color: green;">✔</span> <strong>Phase 1: Architecture</strong></div>
+        <div style="margin-bottom: 20px; position: relative;"><span style="color: var(--primary);">●</span> <strong>Phase 2: Native Build</strong></div>
+        <div style="position: relative;"><span style="color: #ccc;">○</span> <strong>Phase 3: Deployment</strong></div>
+      </div>`;
+    return card;
+  },
+
+  createAIAssistant() {
+    const div = document.createElement('div');
+    div.className = 'login-card';
+    div.style.border = '1px dashed var(--primary)';
+    div.innerHTML = `<h3 style="color: var(--primary);">✨ AI R&D Insight</h3><p style="font-style: italic; font-size: 0.9rem; margin-top: 10px;">"Optimizing biometric logic for the current build."</p>`;
+    return div;
+  },
+
+  createTechLog() {
+    const log = document.createElement('div');
+    log.className = 'login-card';
+    log.style.backgroundColor = '#1e1e1e';
+    log.style.color = '#4ade80';
+    log.innerHTML = `<h3 style="color: white; font-family: monospace;">> SYSTEM_LOG</h3>
+      <div style="font-family: monospace; font-size: 0.75rem; height: 100px; overflow-y: auto;">
+        <div>[${new Date().toLocaleTimeString()}] UI Navigation updated...</div>
+      </div>`;
+    return log;
+  },
+
   createTechBrief(project) {
     const section = document.createElement('div');
     section.className = 'login-card';
-    section.style.maxWidth = '100%';
-    section.style.marginBottom = '2rem';
-
-    section.innerHTML = `
-      <h3>Technical Specifications</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 1rem;">
-        <div>
-          <label><strong>Native iOS:</strong></label>
-          <p>Swift / SwiftUI</p>
-        </div>
-        <div>
-          <label><strong>Native Android:</strong></label>
-          <p>Kotlin / Jetpack Compose</p>
-        </div>
-        <div>
-          <label><strong>Current Progress:</strong></label>
-          <p>${project.progress}</p>
-        </div>
-      </div>
-    `;
+    section.innerHTML = `<h3>Technical Specifications</h3><p><strong>Stack:</strong> Native Mobile</p><p><strong>Progress:</strong> ${project.progress}</p>`;
     return section;
   },
 
-  /**
-   * Creates the stakeholder support panel for 24/7 lifecycle support.
-   */
   createSupportPanel() {
     const panel = document.createElement('div');
     panel.className = 'login-card';
-    panel.style.maxWidth = '100%';
     panel.style.borderLeft = '5px solid var(--primary)';
-
-    panel.innerHTML = `
-      <h3>24/7 Developer Support</h3>
-      <p>Continuous support for the lifecycle of your heating app.</p>
-      <button class="btn-login" style="margin-top: 1rem; background: var(--dark);">
-        Open Support Ticket
-      </button>
-    `;
-
-    panel.querySelector('button').onclick = () => alert('Support Ticket Initiated for Central Heating App');
+    panel.innerHTML = `<h3>Support</h3><button class="btn-login" style="background: var(--dark);">Open Ticket</button>`;
     return panel;
   },
 
   // ────────────────────────────────────────────────
-  // Project Form & Cards (Programmatic DOM)
+  // PROJECT FORMS & DASHBOARD
   // ────────────────────────────────────────────────
-
-  /**
-   * Dynamically creates the project registration form.
-   */
   createProjectForm() {
     const form = document.createElement('form');
-    form.id = 'newProjectForm';
-
     this.projectFormFields.forEach(f => {
       const div = document.createElement('div');
       div.className = 'form-group';
-      const label = document.createElement('label');
-      label.htmlFor = f.id;
-      label.textContent = f.label;
-      const input = document.createElement('input');
-      Object.assign(input, { id: f.id, name: f.id, type: f.type, placeholder: f.placeholder, required: f.required });
-      div.append(label, input);
+      div.innerHTML = `<label for="${f.id}">${f.label}</label><input id="${f.id}" name="${f.id}" type="${f.type}" placeholder="${f.placeholder}" required>`;
       form.appendChild(div);
     });
-
     const submit = document.createElement('button');
-    submit.type = 'submit';
-    submit.className = 'btn-login';
-    submit.textContent = 'Add Project';
+    submit.type = 'submit'; submit.className = 'btn-login'; submit.textContent = 'Add Project';
     form.appendChild(submit);
 
     form.addEventListener('submit', e => {
       e.preventDefault();
-      const values = {
-        id: Date.now(),
-        title: form.title.value.trim(),
-        status: form.status.value.trim(),
-        progress: form.progress.value.trim() + '%'
-      };
-      this.projects.push(values);
+      const emailValue = form.email.value.trim();
+      
+      document.getElementById('welcome-message').textContent = `Researcher Portal: ${emailValue}`;
+
+      this.user.email = emailValue;
+
+      //prettyBug(this.user);
+      
+      this.projects.push({ 
+        id: Date.now(), 
+        title: form.title.value.trim(), 
+        status: form.status.value.trim(), 
+        progress: '10%' // Default progress value
+      });
+
       this.renderProjects();
-      form.reset();
+      this.refreshNavigation();
       this.showPage('dashboard-view');
     });
-
     return form;
   },
 
-  /**
-   * Creates a visual progress bar component.
-   */
-  createProgressBar(progress) {
-    const track = document.createElement('div');
-    track.className = 'progress-track';
-    const fill = document.createElement('div');
-    fill.className = 'progress-fill';
-    fill.style.width = progress;
-    track.appendChild(fill);
-    return track;
-  },
-
-  /**
-   * Creates a project card with a click event to enter the workspace.
-   */
   createProjectCard(project) {
     const card = document.createElement('div');
     card.className = 'project-card';
     card.style.cursor = 'pointer';
-
-    // Journey Continuation: Clicking a card enters the Workspace
     card.onclick = () => this.showWorkspace(project);
-
-    const h3 = document.createElement('h3');
-    h3.textContent = project.title;
-
-    const statusP = document.createElement('p');
-    statusP.className = 'status';
-    statusP.textContent = 'Status: ';
-    const strong = document.createElement('strong');
-    strong.textContent = project.status;
-    statusP.appendChild(strong);
-
-    const progressTrack = this.createProgressBar(project.progress);
-    const label = document.createElement('p');
-    label.className = 'progress-label';
-    label.textContent = project.progress;
-
-    card.append(h3, statusP, progressTrack, label);
+    card.innerHTML = `<h3>${project.title}</h3><p class="status">Status: <strong>${project.status}</strong></p>
+      <div class="progress-track"><div class="progress-fill" style="width: ${project.progress}"></div></div>
+      <p class="progress-label">${project.progress}</p>`;
     return card;
   },
 
-  /**
-   * Renders the project grid in reverse chronological order.
-   */
   renderProjects() {
     const grid = document.getElementById('project-grid');
     if (!grid) return;
-
     if (!document.getElementById('form-wrapper')) {
       const wrapper = document.createElement('div');
-      wrapper.id = 'form-wrapper';
-      wrapper.className = 'login-card';
+      wrapper.id = 'form-wrapper'; wrapper.className = 'login-card';
       wrapper.innerHTML = '<h3>Register New Research Project</h3>';
       wrapper.appendChild(this.createProjectForm());
-
-      const container = document.querySelector('#dashboard-view .container');
-      if (container) container.insertBefore(wrapper, grid);
+      document.querySelector('#dashboard-view .container').insertBefore(wrapper, grid);
     }
-
     grid.innerHTML = '';
-    // Reverse order: most recent first
     this.projects.slice().reverse().forEach(p => grid.appendChild(this.createProjectCard(p)));
   },
 
   // ────────────────────────────────────────────────
-  // Auth & Initialization
+  // INITIALIZATION
   // ────────────────────────────────────────────────
-
-  /**
-   * Simulates a login delay for the POC.
-   */
-  simulateLogin(email) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => email.includes('@') ? resolve({ email }) : reject(new Error('Invalid email')), 1000);
-    });
-  },
-
-  /**
-   * Initializes authentication listeners and logic.
-   */
   initAuth() {
     const form = document.getElementById('loginForm');
-    if (!form) return;
-
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const btn = form.querySelector('button[type="submit"]');
-      const text = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Authenticating…';
-
-      try {
-        const { email } = await this.simulateLogin(form.email.value.trim());
-        document.getElementById('welcome-message').textContent = `Researcher Portal: ${email}`;
+    if (form) {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        document.getElementById('welcome-message').textContent = `Researcher Portal: ${form.email.value.trim()}`;
         this.renderProjects();
-        this.showPage('dashboard-view');
         this.refreshNavigation();
-      } catch (err) {
-        alert('Login failed: ' + err.message);
-      } finally {
-        btn.textContent = text;
-        btn.disabled = false;
-      }
-    });
+        this.showPage('dashboard-view');
+      });
+    }
 
     document.getElementById('logoutBtn')?.addEventListener('click', () => {
-      document.getElementById('loginForm')?.reset();
-      this.showPage('login-view');
+      document.getElementById('welcome-message').textContent = '';
+      this.showPage('home');
       this.refreshNavigation();
     });
   },
 
-  /**
-   * Initializes mobile menu interactions.
-   */
   initMobileMenu() {
-    const els = {
-      toggler:  document.querySelector('.navbar-toggler'),
-      menu:     document.getElementById('mobileMenu'),
-      backdrop: document.getElementById('backdrop'),
-      close:    document.querySelector('.btn-close')
-    };
-
-    if (!els.toggler || !els.menu || !els.backdrop) return;
-
-    const open = () => { els.menu.classList.add('show'); els.backdrop.classList.add('show'); };
-    const close = () => { els.menu.classList.remove('show'); els.backdrop.classList.remove('show'); };
-
-    els.toggler.addEventListener('click', open);
-    els.close.addEventListener('click', close);
-    els.backdrop.addEventListener('click', close);
-    document.addEventListener('keydown', e => e.key === 'Escape' && close());
+    const toggler = document.querySelector('.navbar-toggler');
+    const menu = document.getElementById('mobileMenu');
+    const backdrop = document.getElementById('backdrop');
+    const close = document.querySelector('.btn-close');
+    const hide = () => { menu.classList.remove('show'); backdrop.classList.remove('show'); };
+    toggler?.addEventListener('click', () => { menu.classList.add('show'); backdrop.classList.add('show'); });
+    [close, backdrop].forEach(el => el?.addEventListener('click', hide));
   },
-
-  /**
-   * Boots the application and builds the initial UI state.
-   */
   init() {
     this.refreshNavigation();
     this.initMobileMenu();
     this.initAuth();
-    this.showPage('login-view');
+    this.showPage('home');
+    //prettyBug(this);
   }
 };
 

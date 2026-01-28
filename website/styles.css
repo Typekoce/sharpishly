@@ -375,3 +375,31 @@ main {
   color: var(--gray);
   margin: 0;
 }
+
+/* ────────────────────────────────────────────────
+   Home / Container
+───────────────────────────────────────────────── */
+
+.container h1 {
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--dark);
+  margin-top: 2rem;
+}
+
+#sub-header {
+  font-size: 1.25rem;
+  color: var(--primary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2rem;
+}
+
+.container p {
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+  color: #555;
+}
