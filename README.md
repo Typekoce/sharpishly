@@ -33,3 +33,6 @@ Minimal, modern, dependency-free responsive navbar + landing page.
 └── ROADMAP.md
 
 ```
+
+# Website Live Preview
+[Sharpishly R&D](https://html-preview.github.io/?url=https://github.com/Typekoce/sharpishly/blob/main/website/index.html)
