@@ -34,4 +34,4 @@ This is a rough, evolving roadmap. Priorities may change based on user feedback 
 
 Feedback and pull requests welcome — especially regarding the R&D workspace UX!
 
-**Last updated:** January 2026
+**Last updated:** 29th January 2026
