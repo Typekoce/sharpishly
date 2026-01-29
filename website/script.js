@@ -6,9 +6,12 @@ const app = {
   // ────────────────────────────────────────────────
   // USER
   // ────────────────────────────────────────────────
-  user:{
-    name:'',
-    email:'',
+  user: {
+    name: '',
+    email: '',
+  },
+  localData:{
+    local:localStorage
   },
   // ────────────────────────────────────────────────
   // DATA: Navigation, Projects, and Forms
@@ -66,10 +69,7 @@ const app = {
       if (el) el.style.display = (id === pageId) ? 'block' : 'none';
     });
 
-    // Rule 1.1: Update Home Page greeting if email is present
-    if (pageId === 'home') {
-      this.updateHomeUI();
-    }
+    if (pageId === 'home') this.updateHomeUI();
 
     if (pageId === 'quick-start') {
       const container = document.getElementById('quick-start-form-container');
@@ -77,7 +77,6 @@ const app = {
         container.appendChild(this.createProjectForm());
       }
     }
-    
   },
 
   updateHomeUI() {
@@ -101,21 +100,15 @@ const app = {
 
     let menuToRender;
     if (hasEmail) {
-      // RULE: Only Home and Dashboard if email is present
       menuToRender = this.menu.filter(item => item.name === "Home" || item.name === "Dashboard");
       const dash = menuToRender.find(i => i.name === "Dashboard");
       if (dash) dash.hidden = false;
     } else {
-      // RULE: Normal menu minus Dashboard if guest
       menuToRender = this.menu.filter(item => item.name !== "Dashboard");
     }
 
     if (desktop) { desktop.innerHTML = ''; this.buildNavItems(desktop, menuToRender, false); }
     if (mobile) { mobile.innerHTML = ''; this.buildNavItems(mobile, menuToRender, true); }
-
-    // if (this.user && this.user.email && this.user.email.trim().length > 0) {
-    //   prettyBug({'refreshNavigation':this.user});
-    // }
   },
 
   buildNavItems(container, items, isMobile = false) {
@@ -177,7 +170,6 @@ const app = {
     const container = document.getElementById('workspace-content');
     if (!container) return;
     container.innerHTML = '';
-    // ... (rest of workspace logic remains unchanged)
     const header = document.createElement('div');
     header.style.textAlign = 'left';
     header.style.marginBottom = '2rem';
@@ -221,7 +213,7 @@ const app = {
     log.style.color = '#4ade80';
     log.innerHTML = `<h3 style="color: white; font-family: monospace;">> SYSTEM_LOG</h3>
       <div style="font-family: monospace; font-size: 0.75rem; height: 100px; overflow-y: auto;">
-        <div>[${new Date().toLocaleTimeString()}] UI Navigation updated...</div>
+        <div>[${new Date().toLocaleTimeString()}] System persistent layer active...</div>
       </div>`;
     return log;
   },
@@ -261,18 +253,16 @@ const app = {
       const emailValue = form.email.value.trim();
       
       document.getElementById('welcome-message').textContent = `Researcher Portal: ${emailValue}`;
-
       this.user.email = emailValue;
-
-      //prettyBug(this.user);
       
       this.projects.push({ 
         id: Date.now(), 
         title: form.title.value.trim(), 
         status: form.status.value.trim(), 
-        progress: '10%' // Default progress value
+        progress: '10%' 
       });
 
+      this.saveToDisk(); // Save to LocalStorage on form submission
       this.renderProjects();
       this.refreshNavigation();
       this.showPage('dashboard-view');
@@ -306,6 +296,35 @@ const app = {
   },
 
   // ────────────────────────────────────────────────
+  // SAVE TO DISK
+  // ────────────────────────────────────────────────
+  saveToDisk() {
+    const sessionData = {
+      email: this.user.email || this.getActiveEmail(),
+      projects: this.projects
+    };
+    localStorage.setItem('sharpishly_session', JSON.stringify(sessionData));
+    
+    console.log("--- LocalStorage Updated ---");
+    console.log(localStorage);
+  },
+
+  loadFromDisk() {
+    const rawData = localStorage.getItem('sharpishly_session');
+    if (rawData) {
+      const data = JSON.parse(rawData);
+      this.localData = data;
+      this.projects = data.projects || this.projects;
+      if (data.email) {
+        this.user.email = data.email;
+        document.getElementById('welcome-message').textContent = `Researcher Portal: ${data.email}`;
+      }
+      return true;
+    }
+    return false;
+  },
+
+  // ────────────────────────────────────────────────
   // INITIALIZATION
   // ────────────────────────────────────────────────
   initAuth() {
@@ -313,7 +332,10 @@ const app = {
     if (form) {
       form.addEventListener('submit', e => {
         e.preventDefault();
-        document.getElementById('welcome-message').textContent = `Researcher Portal: ${form.email.value.trim()}`;
+        const email = form.email.value.trim();
+        document.getElementById('welcome-message').textContent = `Researcher Portal: ${email}`;
+        this.user.email = email;
+        this.saveToDisk();
         this.renderProjects();
         this.refreshNavigation();
         this.showPage('dashboard-view');
@@ -321,6 +343,8 @@ const app = {
     }
 
     document.getElementById('logoutBtn')?.addEventListener('click', () => {
+      localStorage.removeItem('sharpishly_session'); // Clear storage on logout
+      this.user.email = '';
       document.getElementById('welcome-message').textContent = '';
       this.showPage('home');
       this.refreshNavigation();
@@ -336,12 +360,21 @@ const app = {
     toggler?.addEventListener('click', () => { menu.classList.add('show'); backdrop.classList.add('show'); });
     [close, backdrop].forEach(el => el?.addEventListener('click', hide));
   },
+
   init() {
+    this.loadFromDisk(); // Hydrate data from disk before rendering
     this.refreshNavigation();
     this.initMobileMenu();
     this.initAuth();
-    this.showPage('home');
-    //prettyBug(this);
+    
+    // Auto-route to dashboard if a session exists
+    if (this.isAuthenticated()) {
+      this.renderProjects();
+      this.showPage('dashboard-view');
+    } else {
+      this.showPage('home');
+    }
+    prettyBug(this);
   }
 };
 
