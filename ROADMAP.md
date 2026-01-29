@@ -4,36 +4,34 @@ This is a rough, evolving roadmap. Priorities may change based on user feedback 
 
 ## Near-term (next 1–3 months)
 
-- Add proper LICENSE file (MIT recommended)
-- Improve accessibility (ARIA attributes, focus management)
-- Add favicon + basic meta tags (description, theme-color, etc.)
-- Create dark mode toggle / auto-detection
-- Add smooth scroll behavior for in-page anchors
-- Extract CSS variables to separate theme file(s)
+- **Auth Persistence:** Implement `localStorage` to save researcher sessions and project data.
+- **Improved Accessibility:** Enhance ARIA attributes and focus management for the project forms.
+- **UI Refinement:** Add dark mode toggle and smooth scroll behavior for in-page anchors.
+- **Meta Data:** Add favicon and basic SEO meta tags (description, theme-color).
+- **Theme Extraction:** Move CSS variables to a separate theme file for easier customization.
 
 ## Medium-term (3–9 months)
 
-- Add simple hero section component with background image option
-- Create "Features" section layout (cards/grid)
-- Add basic contact form (HTML + minimal JS validation)
-- Implement scroll-to-top button
-- Add basic page templates (pricing, about, contact)
+- **Interactive Workspace:** Build out the "AI R&D Insight" panel to suggest logic based on project titles.
+- **Status Management:** Add the ability to edit project status (Active, Review, Completed) directly from the card.
+- **Reporting Tool:** Create a "Download Feasibility Report" button to export project summaries as PDFs.
+- **Hero Components:** Add a modular hero section with background image options for the Home page.
+- **Validation:** Implement advanced JS validation for the Quick Start and Dashboard forms.
 
 ## Longer-term / nice-to-have
 
-- Full multi-page static site structure
-- Add simple blog/news listing
-- Customer portal login mockup / style guide
-- Performance optimizations (lazy loading, font loading strategy)
-- Add basic automated tests (e.g. Playwright smoke tests)
-- Consider migrating to a lightweight static site generator (optional)
+- **Dynamic Logs:** Real-time simulation of system logs within the project workspace.
+- **Mock Portals:** Expand the style guide for the "Staff" and "Client" dropdown placeholders.
+- **Automated Testing:** Integrate Playwright smoke tests for the navigation filtering logic.
+- **Static Generation:** Evaluate lightweight SSGs (like Eleventy) if the site structure grows.
 
 ## Not planned (at this time)
 
-- Using any frontend framework (React, Vue, Svelte…)
-- Backend integration
-- Complex animations / heavy JavaScript
+- **Framework Migration:** Staying dependency-free (No React, Vue, or Svelte).
+- **Live Backend:** Maintaining a client-side focused "mock-live" experience for demonstration purposes.
 
-Feedback and pull requests welcome — especially for accessibility, mobile UX, and design improvements!
+---
 
-Last updated: January 2026
+Feedback and pull requests welcome — especially regarding the R&D workspace UX!
+
+**Last updated:** 29th January 2026
