@@ -495,7 +495,7 @@ createHRSupportPanel() {
     }
 
     //Debug
-    prettyBug(this);
+    //prettyBug(this);
   }
 };
 
