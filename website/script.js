@@ -204,7 +204,11 @@ showWorkspace(project) {
   rightCol.append(
     this.createHRAIAssistant(),
     this.createHRLog(),
-    this.createHRSupportPanel()
+    this.createHRSupportPanel(),
+    this.createLeaveManager(),    
+    this.createDocumentVault(),   
+    this.createPayrollStatus(),
+    this.createGenericComponent()    
   );
 
   grid.append(leftCol, rightCol);
@@ -347,6 +351,159 @@ createHRSupportPanel() {
 
   return panel;
 },
+
+// ────────────────────────────────────────────────
+  // HR ADD-ON COMPONENTS (PROGRAMMATIC)
+  // ────────────────────────────────────────────────
+
+  createComplianceTracker() {
+    const card = document.createElement('div');
+    card.className = 'login-card';
+
+    const h3 = document.createElement('h3');
+    h3.style.marginBottom = '15px';
+    h3.textContent = 'Compliance & Certifications';
+    card.appendChild(h3);
+
+    const list = document.createElement('div');
+
+    const certs = [
+      { name: 'RICS Certification', status: '✔', color: 'green' },
+      { name: 'Asbestos Awareness', status: '●', color: 'orange' },
+      { name: 'CSCS Gold Card',    status: '○', color: '#ccc' }
+    ];
+
+    certs.forEach(cert => {
+      const item = document.createElement('div');
+      item.style.marginBottom = '10px';
+      
+      const icon = document.createElement('span');
+      icon.style.color = cert.color;
+      icon.style.marginRight = '10px';
+      icon.textContent = cert.status;
+
+      const text = document.createElement('span');
+      text.style.fontWeight = 'bold';
+      text.textContent = cert.name;
+
+      item.append(icon, text);
+      list.appendChild(item);
+    });
+
+    card.appendChild(list);
+    return card;
+  },
+
+  createLeaveManager() {
+    const div = document.createElement('div');
+    div.className = 'login-card';
+    div.style.border = '1px dashed var(--primary)';
+
+    const h3 = document.createElement('h3');
+    h3.style.color = 'var(--primary)';
+    h3.textContent = '📅 Absence Management';
+    div.appendChild(h3);
+
+    const p = document.createElement('p');
+    p.style.fontSize = '0.9rem';
+    p.style.margin = '10px 0';
+    p.textContent = 'Remaining Annual Leave: 14 Days';
+    div.appendChild(p);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-login';
+    btn.style.padding = '5px 15px';
+    btn.textContent = 'Request Time Off';
+    div.appendChild(btn);
+
+    return div;
+  },
+
+  createDocumentVault() {
+    const log = document.createElement('div');
+    log.className = 'login-card';
+    log.style.backgroundColor = '#f8f9fa';
+    log.style.color = '#333';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = '📂 Digital Personnel Folder';
+    log.appendChild(h3);
+
+    const container = document.createElement('div');
+    container.style.fontSize = '0.8rem';
+    container.style.marginTop = '10px';
+
+    ['employment_contract.pdf', 'id_verification.jpg', 'training_cert_2025.pdf'].forEach(file => {
+      const row = document.createElement('div');
+      row.style.padding = '8px';
+      row.style.borderBottom = '1px solid #ddd';
+      row.textContent = `📄 ${file}`;
+      container.appendChild(row);
+    });
+
+    log.appendChild(container);
+    return log;
+  },
+
+  createPayrollStatus() {
+    const panel = document.createElement('div');
+    panel.className = 'login-card';
+    panel.style.borderLeft = '5px solid #28a745';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = 'Payroll & Expenses';
+    panel.appendChild(h3);
+
+    const p = document.createElement('p');
+    p.textContent = 'Last Payslip: Jan 2026';
+    panel.appendChild(p);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-login';
+    btn.style.background = 'var(--dark)';
+    btn.textContent = 'Upload Expense Receipt';
+    panel.appendChild(btn);
+
+    return panel;
+  },
+
+/**
+   * Component Template: [Name of Component]
+   * Usage: this.[methodName]()
+   */
+  createGenericComponent() {
+    // 1. Create Main Card Container
+    const card = document.createElement('div');
+    card.className = 'login-card'; // Reuses your existing CSS
+    // Optional: add unique styling here
+    // card.style.borderTop = '4px solid var(--primary)';
+
+    // 2. Create Header
+    const h3 = document.createElement('h3');
+    h3.textContent = 'Component Title';
+    card.appendChild(h3);
+
+    // 3. Create Content Body
+    const body = document.createElement('div');
+    body.style.marginTop = '15px';
+    
+    // Example content: Simple text or data
+    const info = document.createElement('p');
+    info.style.fontSize = '0.85rem';
+    info.textContent = 'Descriptive text or data goes here.';
+    body.appendChild(info);
+
+    card.appendChild(body);
+
+    // 4. Create Action Area (Optional)
+    const actionBtn = document.createElement('button');
+    actionBtn.className = 'btn-login';
+    actionBtn.textContent = 'Action Label';
+    actionBtn.onclick = () => prettyBug(actionBtn);
+    card.appendChild(actionBtn);
+
+    return card;
+  },
 
   // ────────────────────────────────────────────────
   // PROJECT FORMS & DASHBOARD
