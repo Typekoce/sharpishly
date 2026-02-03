@@ -8,7 +8,7 @@ const app = {
   // ────────────────────────────────────────────────
   user: {
     name: '',
-    email: '',
+    email: 'guest@sharpishly.com', // Added default email
   },
   localData:{
     local:localStorage
@@ -18,18 +18,18 @@ const app = {
   // ────────────────────────────────────────────────
   menu: [
     { name: "Home",        pageId: "home", active: true },
-    { name: "Login",       pageId: "login-view" },
+    // { name: "Login",       pageId: "login-view" },
     { name: "Dashboard",   pageId: "dashboard-view", hidden: true },
     { name: "Quick Start", pageId: "quick-start" },
-    { name: "Features",    pageId: "Features" },
-    { name: "Products",    pageId: "Products", dropdown: [
-      { name: "Lite", href: "#" }, { name: "Pro", href: "#" }, { name: "Enterprise", href: "#" }
-    ]},
-    { name: "Portal",      dropdown: [
-      { name: "Customers", href: "#" }, { name: "Clients", href: "#" }, { name: "Staff", href: "#" }
-    ]},
-    { name: "Pricing",     href: "#" },
-    { name: "Contact",     href: "#" }
+    // { name: "Features",    pageId: "Features" },
+    // { name: "Products",    pageId: "Products", dropdown: [
+    //   { name: "Lite", href: "#" }, { name: "Pro", href: "#" }, { name: "Enterprise", href: "#" }
+    // ]},
+    // { name: "Portal",      dropdown: [
+    //   { name: "Customers", href: "#" }, { name: "Clients", href: "#" }, { name: "Staff", href: "#" }
+    // ]},
+    //{ name: "Pricing",     href: "#" },
+    //{ name: "Contact",     href: "#" }
   ],
 
   projects: [
@@ -41,7 +41,7 @@ const app = {
 
   projectFormFields: [
     { id: "title",  label: "Project Title",  type: "text",  placeholder: "e.g. Quantum Logic", required: true },
-    { id: "status", label: "Current Status", type: "text",  placeholder: "e.g. Active",        required: true },
+    // Current Status removed to reduce user confusion
     { id: "email",  label: "Email",          type: "email", placeholder: "name@company.com",   required: true }
   ],
 
@@ -241,7 +241,11 @@ const app = {
     this.projectFormFields.forEach(f => {
       const div = document.createElement('div');
       div.className = 'form-group';
-      div.innerHTML = `<label for="${f.id}">${f.label}</label><input id="${f.id}" name="${f.id}" type="${f.type}" placeholder="${f.placeholder}" required>`;
+      // Apply default guest email if field is email
+      const defaultValue = f.id === 'email' ? this.user.email : '';
+      div.innerHTML = `<label for="${f.id}">${f.label}</label>
+                       <input id="${f.id}" name="${f.id}" type="${f.type}" 
+                       placeholder="${f.placeholder}" value="${defaultValue}" required>`;
       form.appendChild(div);
     });
     const submit = document.createElement('button');
@@ -258,7 +262,7 @@ const app = {
       this.projects.push({ 
         id: Date.now(), 
         title: form.title.value.trim(), 
-        status: form.status.value.trim(), 
+        status: "Active", // Default status applied here now that it's removed from form
         progress: '10%' 
       });
 
@@ -344,7 +348,7 @@ const app = {
 
     document.getElementById('logoutBtn')?.addEventListener('click', () => {
       localStorage.removeItem('sharpishly_session'); // Clear storage on logout
-      this.user.email = '';
+      this.user.email = 'guest@sharpishly.com'; // Reset to default on logout
       document.getElementById('welcome-message').textContent = '';
       this.showPage('home');
       this.refreshNavigation();
@@ -374,7 +378,6 @@ const app = {
     } else {
       this.showPage('home');
     }
-    prettyBug(this);
   }
 };
 
