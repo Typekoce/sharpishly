@@ -162,76 +162,191 @@ const app = {
     if (isMobile) document.querySelector('.btn-close')?.click();
   },
 
-  // ────────────────────────────────────────────────
-  // WORKSPACE & PROJECT COMPONENTS
-  // ────────────────────────────────────────────────
-  showWorkspace(project) {
-    this.showPage('workspace-view');
-    const container = document.getElementById('workspace-content');
-    if (!container) return;
-    container.innerHTML = '';
-    const header = document.createElement('div');
-    header.style.textAlign = 'left';
-    header.style.marginBottom = '2rem';
-    header.innerHTML = `<h2 style="font-size: 2rem;">${project.title}</h2><p class="login-subtitle">R&D Lifecycle: Native Mobile Application Suite</p>`;
-    const grid = document.createElement('div');
-    grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
-    grid.style.gap = '20px';
-    const leftCol = document.createElement('div');
-    leftCol.append(this.createTechBrief(project), this.createMilestoneTracker());
-    const rightCol = document.createElement('div');
-    rightCol.append(this.createAIAssistant(), this.createTechLog(), this.createSupportPanel());
-    grid.append(leftCol, rightCol);
-    container.append(header, grid);
-  },
+// ────────────────────────────────────────────────
+// WORKSPACE & PROJECT COMPONENTS
+// ────────────────────────────────────────────────
 
-  createMilestoneTracker() {
-    const card = document.createElement('div');
-    card.className = 'login-card';
-    card.innerHTML = `<h3 style="margin-bottom:15px;">R&D Roadmap</h3>
-      <div style="border-left: 2px solid var(--border); padding-left: 20px; margin-left: 10px;">
-        <div style="margin-bottom: 20px; position: relative;"><span style="color: green;">✔</span> <strong>Phase 1: Architecture</strong></div>
-        <div style="margin-bottom: 20px; position: relative;"><span style="color: var(--primary);">●</span> <strong>Phase 2: Native Build</strong></div>
-        <div style="position: relative;"><span style="color: #ccc;">○</span> <strong>Phase 3: Deployment</strong></div>
-      </div>`;
-    return card;
-  },
+showWorkspace(project) {
+  this.showPage('workspace-view');
+  const container = document.getElementById('workspace-content');
+  if (!container) return;
 
-  createAIAssistant() {
-    const div = document.createElement('div');
-    div.className = 'login-card';
-    div.style.border = '1px dashed var(--primary)';
-    div.innerHTML = `<h3 style="color: var(--primary);">✨ AI R&D Insight</h3><p style="font-style: italic; font-size: 0.9rem; margin-top: 10px;">"Optimizing biometric logic for the current build."</p>`;
-    return div;
-  },
+  container.innerHTML = ''; // clear
 
-  createTechLog() {
-    const log = document.createElement('div');
-    log.className = 'login-card';
-    log.style.backgroundColor = '#1e1e1e';
-    log.style.color = '#4ade80';
-    log.innerHTML = `<h3 style="color: white; font-family: monospace;">> SYSTEM_LOG</h3>
-      <div style="font-family: monospace; font-size: 0.75rem; height: 100px; overflow-y: auto;">
-        <div>[${new Date().toLocaleTimeString()}] System persistent layer active...</div>
-      </div>`;
-    return log;
-  },
+  // Header
+  const header = document.createElement('div');
+  header.style.textAlign = 'left';
+  header.style.marginBottom = '2rem';
 
-  createTechBrief(project) {
-    const section = document.createElement('div');
-    section.className = 'login-card';
-    section.innerHTML = `<h3>Technical Specifications</h3><p><strong>Stack:</strong> Native Mobile</p><p><strong>Progress:</strong> ${project.progress}</p>`;
-    return section;
-  },
+  const h2 = document.createElement('h2');
+  h2.style.fontSize = '2rem';
+  h2.textContent = project.title;
+  header.appendChild(h2);
 
-  createSupportPanel() {
-    const panel = document.createElement('div');
-    panel.className = 'login-card';
-    panel.style.borderLeft = '5px solid var(--primary)';
-    panel.innerHTML = `<h3>Support</h3><button class="btn-login" style="background: var(--dark);">Open Ticket</button>`;
-    return panel;
-  },
+  const subtitle = document.createElement('p');
+  subtitle.className = 'login-subtitle';
+  subtitle.textContent = 'Property Survey Management with Full HR Suite';
+  header.appendChild(subtitle);
+
+  // Grid layout
+  const grid = document.createElement('div');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
+  grid.style.gap = '20px';
+
+  const leftCol = document.createElement('div');
+  leftCol.append(
+    this.createSurveyBrief(project),
+    this.createHRMilestoneTracker()
+  );
+
+  const rightCol = document.createElement('div');
+  rightCol.append(
+    this.createHRAIAssistant(),
+    this.createHRLog(),
+    this.createHRSupportPanel()
+  );
+
+  grid.append(leftCol, rightCol);
+  container.append(header, grid);
+},
+
+createHRMilestoneTracker() {
+  const card = document.createElement('div');
+  card.className = 'login-card';
+
+  const h3 = document.createElement('h3');
+  h3.style.marginBottom = '15px';
+  h3.textContent = 'HR Roadmap';
+  card.appendChild(h3);
+
+  const timeline = document.createElement('div');
+  timeline.style.borderLeft = '2px solid var(--border)';
+  timeline.style.paddingLeft = '20px';
+  timeline.style.marginLeft = '10px';
+
+  const phases = [
+    { status: 'done',    text: 'Phase 1: Onboarding & Training' },
+    { status: 'active',  text: 'Phase 2: Performance Management' },
+    { status: 'pending', text: 'Phase 3: Compliance & Reporting'   }
+  ];
+
+  phases.forEach(phase => {
+    const item = document.createElement('div');
+    item.style.marginBottom = '20px';
+    item.style.position = 'relative';
+
+    const marker = document.createElement('span');
+    if (phase.status === 'done') {
+      marker.style.color = 'green';
+      marker.textContent = '✔';
+    } else if (phase.status === 'active') {
+      marker.style.color = 'var(--primary)';
+      marker.textContent = '●';
+    } else {
+      marker.style.color = '#ccc';
+      marker.textContent = '○';
+    }
+
+    const strong = document.createElement('strong');
+    strong.textContent = phase.text;
+
+    item.append(marker, document.createTextNode(' '), strong);
+    timeline.appendChild(item);
+  });
+
+  card.appendChild(timeline);
+  return card;
+},
+
+createHRAIAssistant() {
+  const div = document.createElement('div');
+  div.className = 'login-card';
+  div.style.border = '1px dashed var(--primary)';
+
+  const h3 = document.createElement('h3');
+  h3.style.color = 'var(--primary)';
+  h3.textContent = '✨ AI HR Insight';
+  div.appendChild(h3);
+
+  const p = document.createElement('p');
+  p.style.fontStyle = 'italic';
+  p.style.fontSize = '0.9rem';
+  p.style.marginTop = '10px';
+  p.textContent = 'Optimizing employee performance metrics for survey teams.';
+  div.appendChild(p);
+
+  return div;
+},
+
+createHRLog() {
+  const log = document.createElement('div');
+  log.className = 'login-card';
+  log.style.backgroundColor = '#1e1e1e';
+  log.style.color = '#4ade80';
+
+  const h3 = document.createElement('h3');
+  h3.style.color = 'white';
+  h3.style.fontFamily = 'monospace';
+  h3.textContent = '> HR_SYSTEM_LOG';
+  log.appendChild(h3);
+
+  const logContainer = document.createElement('div');
+  logContainer.style.fontFamily = 'monospace';
+  logContainer.style.fontSize = '0.75rem';
+  logContainer.style.height = '100px';
+  logContainer.style.overflowY = 'auto';
+
+  const entry = document.createElement('div');
+  entry.textContent = `[${new Date().toLocaleTimeString()}] HR database sync active...`;
+  logContainer.appendChild(entry);
+
+  log.appendChild(logContainer);
+  return log;
+},
+
+createSurveyBrief(project) {
+  const section = document.createElement('div');
+  section.className = 'login-card';
+
+  const h3 = document.createElement('h3');
+  h3.textContent = 'Survey Specifications';
+  section.appendChild(h3);
+
+  const p1 = document.createElement('p');
+  const strong1 = document.createElement('strong');
+  strong1.textContent = 'Focus:';
+  p1.appendChild(strong1);
+  p1.appendChild(document.createTextNode(' Property Evaluation & Reporting'));
+  section.appendChild(p1);
+
+  const p2 = document.createElement('p');
+  const strong2 = document.createElement('strong');
+  strong2.textContent = 'Progress:';
+  p2.appendChild(strong2);
+  p2.appendChild(document.createTextNode(` ${project.progress}`));
+  section.appendChild(p2);
+
+  return section;
+},
+
+createHRSupportPanel() {
+  const panel = document.createElement('div');
+  panel.className = 'login-card';
+  panel.style.borderLeft = '5px solid var(--primary)';
+
+  const h3 = document.createElement('h3');
+  h3.textContent = 'HR Support';
+  panel.appendChild(h3);
+
+  const button = document.createElement('button');
+  button.className = 'btn-login';
+  button.style.background = 'var(--dark)';
+  button.textContent = 'Open HR Ticket';
+  panel.appendChild(button);
+
+  return panel;
+},
 
   // ────────────────────────────────────────────────
   // PROJECT FORMS & DASHBOARD
@@ -378,6 +493,9 @@ const app = {
     } else {
       this.showPage('home');
     }
+
+    //Debug
+    prettyBug(this);
   }
 };
 
