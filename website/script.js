@@ -7,11 +7,18 @@ const app = {
   // USER
   // ────────────────────────────────────────────────
   user: {
-    name: '',
+    name: 'Human Resources Example',
     email: 'guest@sharpishly.com', // Added default email
   },
   localData:{
     local:localStorage
+  },
+  data:{
+    page: '',
+    employees:{
+      1:{id:1,firstname:'steve'},
+      2:{id:2,firstname:'Jamie'},
+    }
   },
   // ────────────────────────────────────────────────
   // DATA: Navigation, Projects, and Forms
@@ -34,9 +41,9 @@ const app = {
 
   projects: [
     { id: 1, title: "Native Mobile Application Lifecycle", status: "Active",    progress: "75%" },
-    { id: 2, title: "Neural Network Optimization",         status: "Review",    progress: "40%" },
-    { id: 3, title: "Biometric Security API",              status: "Completed", progress: "100%" },
-    { id: 4, title: "Quantum Computing Logic",             status: "Active",    progress: "75%" },
+    //{ id: 2, title: "Neural Network Optimization",         status: "Review",    progress: "40%" },
+    //{ id: 3, title: "Biometric Security API",              status: "Completed", progress: "100%" },
+    //{ id: 4, title: "Quantum Computing Logic",             status: "Active",    progress: "75%" },
   ],
 
   projectFormFields: [
@@ -44,6 +51,13 @@ const app = {
     // Current Status removed to reduce user confusion
     { id: "email",  label: "Email",          type: "email", placeholder: "name@company.com",   required: true }
   ],
+  // ────────────────────────────────────────────────
+  // SET PAGE
+  // ────────────────────────────────────────────────
+  setPage(name) {
+    this.data.page = name;
+  },
+
 
   // ────────────────────────────────────────────────
   // AUTH STATE HELPERS
@@ -62,6 +76,8 @@ const app = {
   // PAGE NAVIGATION
   // ────────────────────────────────────────────────
   showPage(pageId) {
+  // 1. Update the data block first
+    this.setPage(pageId);
     const pages = ['home', 'login-view', 'dashboard-view', 'quick-start', 'Features', 'Products', 'workspace-view'];
 
     pages.forEach(id => {
@@ -202,9 +218,14 @@ showWorkspace(project) {
 
   const rightCol = document.createElement('div');
   rightCol.append(
+    this.showEmployees(),
     this.createHRAIAssistant(),
     this.createHRLog(),
-    this.createHRSupportPanel()
+    this.createHRSupportPanel(),
+    this.createLeaveManager(),    
+    this.createDocumentVault(),   
+    this.createPayrollStatus(),
+    this.createGenericComponent()    
   );
 
   grid.append(leftCol, rightCol);
@@ -348,20 +369,348 @@ createHRSupportPanel() {
   return panel;
 },
 
+// ────────────────────────────────────────────────
+  // HR ADD-ON COMPONENTS (PROGRAMMATIC)
+  // ────────────────────────────────────────────────
+
+  createComplianceTracker() {
+    const card = document.createElement('div');
+    card.className = 'login-card';
+
+    const h3 = document.createElement('h3');
+    h3.style.marginBottom = '15px';
+    h3.textContent = 'Compliance & Certifications';
+    card.appendChild(h3);
+
+    const list = document.createElement('div');
+
+    const certs = [
+      { name: 'RICS Certification', status: '✔', color: 'green' },
+      { name: 'Asbestos Awareness', status: '●', color: 'orange' },
+      { name: 'CSCS Gold Card',    status: '○', color: '#ccc' }
+    ];
+
+    certs.forEach(cert => {
+      const item = document.createElement('div');
+      item.style.marginBottom = '10px';
+      
+      const icon = document.createElement('span');
+      icon.style.color = cert.color;
+      icon.style.marginRight = '10px';
+      icon.textContent = cert.status;
+
+      const text = document.createElement('span');
+      text.style.fontWeight = 'bold';
+      text.textContent = cert.name;
+
+      item.append(icon, text);
+      list.appendChild(item);
+    });
+
+    card.appendChild(list);
+    return card;
+  },
+
+  createLeaveManager() {
+    const div = document.createElement('div');
+    div.className = 'login-card';
+    div.style.border = '1px dashed var(--primary)';
+
+    const h3 = document.createElement('h3');
+    h3.style.color = 'var(--primary)';
+    h3.textContent = '📅 Absence Management';
+    div.appendChild(h3);
+
+    const p = document.createElement('p');
+    p.style.fontSize = '0.9rem';
+    p.style.margin = '10px 0';
+    p.textContent = 'Remaining Annual Leave: 14 Days';
+    div.appendChild(p);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-login';
+    btn.style.padding = '5px 15px';
+    btn.textContent = 'Request Time Off';
+    div.appendChild(btn);
+
+    return div;
+  },
+
+  createDocumentVault() {
+    const log = document.createElement('div');
+    log.className = 'login-card';
+    log.style.backgroundColor = '#f8f9fa';
+    log.style.color = '#333';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = '📂 Digital Personnel Folder';
+    log.appendChild(h3);
+
+    const container = document.createElement('div');
+    container.style.fontSize = '0.8rem';
+    container.style.marginTop = '10px';
+
+    ['employment_contract.pdf', 'id_verification.jpg', 'training_cert_2025.pdf'].forEach(file => {
+      const row = document.createElement('div');
+      row.style.padding = '8px';
+      row.style.borderBottom = '1px solid #ddd';
+      row.textContent = `📄 ${file}`;
+      container.appendChild(row);
+    });
+
+    log.appendChild(container);
+    return log;
+  },
+
+  createPayrollStatus() {
+    const panel = document.createElement('div');
+    panel.className = 'login-card';
+    panel.style.borderLeft = '5px solid #28a745';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = 'Payroll & Expenses';
+    panel.appendChild(h3);
+
+    const p = document.createElement('p');
+    p.textContent = 'Last Payslip: Jan 2026';
+    panel.appendChild(p);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-login';
+    btn.style.background = 'var(--dark)';
+    btn.textContent = 'Upload Expense Receipt';
+    panel.appendChild(btn);
+
+    return panel;
+  },
+
+/**
+   * Component Template: [Name of Component]
+   * Usage: this.[methodName]()
+   */
+  createGenericComponent() {
+    // 1. Create Main Card Container
+    const card = document.createElement('div');
+    card.className = 'login-card'; // Reuses your existing CSS
+    // Optional: add unique styling here
+    // card.style.borderTop = '4px solid var(--primary)';
+
+    // 2. Create Header
+    const h3 = document.createElement('h3');
+    h3.textContent = 'Component Title';
+    card.appendChild(h3);
+
+    // 3. Create Content Body
+    const body = document.createElement('div');
+    body.style.marginTop = '15px';
+    
+    // Example content: Simple text or data
+    const info = document.createElement('p');
+    info.style.fontSize = '0.85rem';
+    info.textContent = 'Descriptive text or data goes here.';
+    body.appendChild(info);
+
+    card.appendChild(body);
+
+    // 4. Create Action Area (Optional)
+    const actionBtn = document.createElement('button');
+    actionBtn.className = 'btn-login';
+    actionBtn.textContent = 'Action Label';
+    actionBtn.onclick = () => prettyBug(actionBtn);
+    card.appendChild(actionBtn);
+
+    return card;
+  },
+  // ────────────────────────────────────────────────
+  // SHOW EMPLOYEES
+  // ────────────────────────────────────────────────
+
+/**
+   * Component Template: [Name of Component]
+   * Usage: this.[methodName]()
+   */
+  showEmployees() {
+    // 1. Create Main Card Container
+    const card = document.createElement('div');
+    card.className = 'login-card'; // Reuses your existing CSS
+    // Optional: add unique styling here
+    // card.style.borderTop = '4px solid var(--primary)';
+
+    // 2. Create Header
+    const h3 = document.createElement('h3');
+    h3.textContent = 'Employees';
+    card.appendChild(h3);
+
+    // 3. Create Content Body
+    const body = document.createElement('div');
+    body.style.marginTop = '15px';
+    
+    // Example content: Simple text or data
+    const info = document.createElement('p');
+    info.style.fontSize = '0.85rem';
+    info.textContent = 'Please select employee from the list below';
+    body.appendChild(info);
+
+    this.getEmployees(body);
+
+    card.appendChild(body);
+
+    // 4. Create Action Area (Optional)
+    const actionBtn = document.createElement('button');
+    actionBtn.className = 'btn-login';
+    actionBtn.textContent = 'Action Label';
+    actionBtn.onclick = () => prettyBug(actionBtn);
+    card.appendChild(actionBtn);
+
+    return card;
+  },
+// ────────────────────────────────────────────────
+  // GET EMPLOYEES
+  // ────────────────────────────────────────────────
+  getEmployees(body) {
+    const employees = this.data.employees;
+    // Store 'this' context for use inside the click handler
+    const self = this;
+
+    for (let i in employees) {
+      const employee = employees[i];
+      const row = document.createElement('div');
+      
+      row.setAttribute('id', `emp-${employee.id}`);
+      row.textContent = employee.firstname; // Safe text assignment
+      row.style.border = '1px dashed #ccc';
+      row.style.padding = '5px';
+      row.style.cursor = 'pointer';
+
+      // Attach click event using the naming convention
+// Inside getEmployees loop
+row.onclick = function() {
+  self.updateWorkspaceHeader(employee.firstname);
+  self.mountHRAdminSuite(employee); // The new entry point
+};
+
+      body.appendChild(row);
+    }
+  },
+mountHRAdminSuite(employee) {
+  const rightCol = document.getElementById('workspace-content').children[1].children[1];
+  rightCol.innerHTML = ''; // Clear existing generic cards
+
+  const adminCard = document.createElement('div');
+  adminCard.className = 'login-card';
+  
+  const h3 = document.createElement('h3');
+  h3.textContent = `HR Administration: ${employee.firstname}`;
+  adminCard.appendChild(h3);
+
+  // Navigation for HR Categories
+  const nav = document.createElement('div');
+  nav.style.display = 'flex';
+  nav.style.gap = '10px';
+  nav.style.marginBottom = '15px';
+
+  ['Personal', 'Role', 'Tax', 'Pension'].forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-login';
+    btn.style.padding = '5px 10px';
+    btn.style.fontSize = '0.7rem';
+    btn.textContent = cat;
+    btn.onclick = () => this.renderHRCategory(employee, cat, formArea);
+    nav.appendChild(btn);
+  });
+
+  const formArea = document.createElement('div');
+  formArea.id = 'hr-form-area';
+  
+  adminCard.append(nav, formArea);
+  rightCol.appendChild(adminCard);
+  
+  // Default to Personal view
+  this.renderHRCategory(employee, 'Personal', formArea);
+},
+renderHRCategory(employee, category, container) {
+  container.innerHTML = ''; // Clear previous category form
+  
+  const fields = {
+    'Personal': [{id: 'dob', label: 'Date of Birth', type: 'date'}],
+    'Role':     [{id: 'dept', label: 'Department', type: 'text'}, {id: 'role', label: 'Job Title', type: 'text'}],
+    'Tax':      [{id: 'tin', label: 'Tax ID', type: 'text'}, {id: 'code', label: 'Tax Code', type: 'text'}]
+  };
+
+  const currentFields = fields[category] || [];
+  
+  currentFields.forEach(f => {
+    // Reusing your existing convention!
+    this.setFormField(f, container);
+  });
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn-login';
+  saveBtn.textContent = `Save ${category} Data`;
+  saveBtn.style.marginTop = '15px';
+  saveBtn.onclick = () => this.saveHREntry(employee.id, category);
+  
+  container.appendChild(saveBtn);
+},
+  // ────────────────────────────────────────────────
+  // UPDATE WORKSPACE HEADER
+  // ────────────────────────────────────────────────
+  updateWorkspaceHeader(staffName) {
+    const container = document.getElementById('workspace-content');
+    if (!container) return;
+
+    // Find or create the assignment badge
+    let badge = document.getElementById('assignment-badge');
+    
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'assignment-badge';
+      badge.className = 'status'; // Reusing your project-card status style
+      badge.style.marginLeft = '15px';
+      badge.style.fontSize = '0.9rem';
+      
+      // Append to the H2 inside the header
+      const h2 = container.querySelector('h2');
+      if (h2) h2.appendChild(badge);
+    }
+
+    badge.textContent = ` (Assigned to: ${staffName})`;
+  },
   // ────────────────────────────────────────────────
   // PROJECT FORMS & DASHBOARD
   // ────────────────────────────────────────────────
+  setFormField(f,form){
+
+    const div = document.createElement('div');
+    div.className = 'form-group';
+
+    const label = document.createElement('label');
+    label.setAttribute('for',f.id);
+    label.innerHTML = f.label;
+
+    msg = 'hello';
+
+    input = document.createElement('input');
+    if(f.id === 'title'){
+      msg = this.user.name;
+    } else if(f.id ==='email'){
+      msg = this.user.email;
+    }
+    input.value = msg;
+    input.setAttribute('id',f.id);
+
+
+    div.appendChild(label);
+    div.appendChild(input);
+    form.appendChild(div);
+
+    return form;
+  },
   createProjectForm() {
     const form = document.createElement('form');
     this.projectFormFields.forEach(f => {
-      const div = document.createElement('div');
-      div.className = 'form-group';
-      // Apply default guest email if field is email
-      const defaultValue = f.id === 'email' ? this.user.email : '';
-      div.innerHTML = `<label for="${f.id}">${f.label}</label>
-                       <input id="${f.id}" name="${f.id}" type="${f.type}" 
-                       placeholder="${f.placeholder}" value="${defaultValue}" required>`;
-      form.appendChild(div);
+      this.setFormField(f,form);
+
     });
     const submit = document.createElement('button');
     submit.type = 'submit'; submit.className = 'btn-login'; submit.textContent = 'Add Project';
@@ -469,7 +818,10 @@ createHRSupportPanel() {
       this.refreshNavigation();
     });
   },
-
+  hideDashBoardForm(){
+    form = document.getElementById('form-wrapper');
+    form.style.display = 'none';
+  },
   initMobileMenu() {
     const toggler = document.querySelector('.navbar-toggler');
     const menu = document.getElementById('mobileMenu');
@@ -490,8 +842,11 @@ createHRSupportPanel() {
     if (this.isAuthenticated()) {
       this.renderProjects();
       this.showPage('dashboard-view');
+      this.setPage('dashboard');
+      this.hideDashBoardForm();
     } else {
       this.showPage('home');
+      this.setPage('home')
     }
 
     //Debug
