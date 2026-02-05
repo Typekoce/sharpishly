@@ -548,7 +548,7 @@ createHRSupportPanel() {
     // Example content: Simple text or data
     const info = document.createElement('p');
     info.style.fontSize = '0.85rem';
-    info.textContent = 'Descriptive text or data goes here.';
+    info.textContent = 'Please select employee from the list below';
     body.appendChild(info);
 
     this.getEmployees(body);
