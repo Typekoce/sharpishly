@@ -15,9 +15,9 @@ const app = {
   },
   data:{
     page: '',
-    employes:{
+    employees:{
       1:{id:1,firstname:'steve'},
-      2:{id:2,lastname:'Jamie'},
+      2:{id:2,firstname:'Jamie'},
     }
   },
   // ────────────────────────────────────────────────
@@ -218,6 +218,7 @@ showWorkspace(project) {
 
   const rightCol = document.createElement('div');
   rightCol.append(
+    this.showEmployees(),
     this.createHRAIAssistant(),
     this.createHRLog(),
     this.createHRSupportPanel(),
@@ -520,12 +521,74 @@ createHRSupportPanel() {
 
     return card;
   },
+  // ────────────────────────────────────────────────
+  // SHOW EMPLOYEES
+  // ────────────────────────────────────────────────
 
+/**
+   * Component Template: [Name of Component]
+   * Usage: this.[methodName]()
+   */
+  showEmployees() {
+    // 1. Create Main Card Container
+    const card = document.createElement('div');
+    card.className = 'login-card'; // Reuses your existing CSS
+    // Optional: add unique styling here
+    // card.style.borderTop = '4px solid var(--primary)';
+
+    // 2. Create Header
+    const h3 = document.createElement('h3');
+    h3.textContent = 'Employees';
+    card.appendChild(h3);
+
+    // 3. Create Content Body
+    const body = document.createElement('div');
+    body.style.marginTop = '15px';
+    
+    // Example content: Simple text or data
+    const info = document.createElement('p');
+    info.style.fontSize = '0.85rem';
+    info.textContent = 'Descriptive text or data goes here.';
+    body.appendChild(info);
+
+    this.getEmployees(body);
+
+    card.appendChild(body);
+
+    // 4. Create Action Area (Optional)
+    const actionBtn = document.createElement('button');
+    actionBtn.className = 'btn-login';
+    actionBtn.textContent = 'Action Label';
+    actionBtn.onclick = () => prettyBug(actionBtn);
+    card.appendChild(actionBtn);
+
+    return card;
+  },
+  // ────────────────────────────────────────────────
+  // GET EMPLOYEES
+  // ────────────────────────────────────────────────
+  getEmployees(body){
+    const employees = this.data.employees;
+    prettyBug(employees);
+    for(i in employees){
+      prettyBug(employee = employees[i]);
+      prettyBug(firstname = employee.firstname);
+      prettyBug(id = employee.id);
+      const row = document.createElement('div');
+      row.setAttribute('id',id);
+      row.innerHTML = firstname;
+      row.style.border = '1px dashed #ccc';
+      row.onclick = function(a){
+        prettyBug(this);
+      };
+      body.appendChild(row);
+    }
+  },
   // ────────────────────────────────────────────────
   // PROJECT FORMS & DASHBOARD
   // ────────────────────────────────────────────────
   setFormField(f,form){
-    prettyBug(f);
+
     const div = document.createElement('div');
     div.className = 'form-group';
 
@@ -544,7 +607,7 @@ createHRSupportPanel() {
     input.value = msg;
     input.setAttribute('id',f.id);
 
-    prettyBug(label);
+
     div.appendChild(label);
     div.appendChild(input);
     form.appendChild(div);
