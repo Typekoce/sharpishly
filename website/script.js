@@ -7,11 +7,18 @@ const app = {
   // USER
   // ────────────────────────────────────────────────
   user: {
-    name: '',
+    name: 'Human Resources Example',
     email: 'guest@sharpishly.com', // Added default email
   },
   localData:{
     local:localStorage
+  },
+  data:{
+    page: '',
+    employes:{
+      1:{id:1,firstname:'steve'},
+      2:{id:2,lastname:'Jamie'},
+    }
   },
   // ────────────────────────────────────────────────
   // DATA: Navigation, Projects, and Forms
@@ -34,9 +41,9 @@ const app = {
 
   projects: [
     { id: 1, title: "Native Mobile Application Lifecycle", status: "Active",    progress: "75%" },
-    { id: 2, title: "Neural Network Optimization",         status: "Review",    progress: "40%" },
-    { id: 3, title: "Biometric Security API",              status: "Completed", progress: "100%" },
-    { id: 4, title: "Quantum Computing Logic",             status: "Active",    progress: "75%" },
+    //{ id: 2, title: "Neural Network Optimization",         status: "Review",    progress: "40%" },
+    //{ id: 3, title: "Biometric Security API",              status: "Completed", progress: "100%" },
+    //{ id: 4, title: "Quantum Computing Logic",             status: "Active",    progress: "75%" },
   ],
 
   projectFormFields: [
@@ -44,6 +51,13 @@ const app = {
     // Current Status removed to reduce user confusion
     { id: "email",  label: "Email",          type: "email", placeholder: "name@company.com",   required: true }
   ],
+  // ────────────────────────────────────────────────
+  // SET PAGE
+  // ────────────────────────────────────────────────
+  setPage(name) {
+    this.data.page = name;
+  },
+
 
   // ────────────────────────────────────────────────
   // AUTH STATE HELPERS
@@ -62,6 +76,8 @@ const app = {
   // PAGE NAVIGATION
   // ────────────────────────────────────────────────
   showPage(pageId) {
+  // 1. Update the data block first
+    this.setPage(pageId);
     const pages = ['home', 'login-view', 'dashboard-view', 'quick-start', 'Features', 'Products', 'workspace-view'];
 
     pages.forEach(id => {
@@ -508,17 +524,38 @@ createHRSupportPanel() {
   // ────────────────────────────────────────────────
   // PROJECT FORMS & DASHBOARD
   // ────────────────────────────────────────────────
+  setFormField(f,form){
+    prettyBug(f);
+    const div = document.createElement('div');
+    div.className = 'form-group';
+
+    const label = document.createElement('label');
+    label.setAttribute('for',f.id);
+    label.innerHTML = f.label;
+
+    msg = 'hello';
+
+    input = document.createElement('input');
+    if(f.id === 'title'){
+      msg = this.user.name;
+    } else if(f.id ==='email'){
+      msg = this.user.email;
+    }
+    input.value = msg;
+    input.setAttribute('id',f.id);
+
+    prettyBug(label);
+    div.appendChild(label);
+    div.appendChild(input);
+    form.appendChild(div);
+
+    return form;
+  },
   createProjectForm() {
     const form = document.createElement('form');
     this.projectFormFields.forEach(f => {
-      const div = document.createElement('div');
-      div.className = 'form-group';
-      // Apply default guest email if field is email
-      const defaultValue = f.id === 'email' ? this.user.email : '';
-      div.innerHTML = `<label for="${f.id}">${f.label}</label>
-                       <input id="${f.id}" name="${f.id}" type="${f.type}" 
-                       placeholder="${f.placeholder}" value="${defaultValue}" required>`;
-      form.appendChild(div);
+      this.setFormField(f,form);
+
     });
     const submit = document.createElement('button');
     submit.type = 'submit'; submit.className = 'btn-login'; submit.textContent = 'Add Project';
@@ -626,7 +663,10 @@ createHRSupportPanel() {
       this.refreshNavigation();
     });
   },
-
+  hideDashBoardForm(){
+    form = document.getElementById('form-wrapper');
+    form.style.display = 'none';
+  },
   initMobileMenu() {
     const toggler = document.querySelector('.navbar-toggler');
     const menu = document.getElementById('mobileMenu');
@@ -647,8 +687,11 @@ createHRSupportPanel() {
     if (this.isAuthenticated()) {
       this.renderProjects();
       this.showPage('dashboard-view');
+      this.setPage('dashboard');
+      this.hideDashBoardForm();
     } else {
       this.showPage('home');
+      this.setPage('home')
     }
 
     //Debug
