@@ -564,25 +564,117 @@ createHRSupportPanel() {
 
     return card;
   },
-  // ────────────────────────────────────────────────
+// ────────────────────────────────────────────────
   // GET EMPLOYEES
   // ────────────────────────────────────────────────
-  getEmployees(body){
+  getEmployees(body) {
     const employees = this.data.employees;
-    prettyBug(employees);
-    for(i in employees){
-      prettyBug(employee = employees[i]);
-      prettyBug(firstname = employee.firstname);
-      prettyBug(id = employee.id);
+    // Store 'this' context for use inside the click handler
+    const self = this;
+
+    for (let i in employees) {
+      const employee = employees[i];
       const row = document.createElement('div');
-      row.setAttribute('id',id);
-      row.innerHTML = firstname;
+      
+      row.setAttribute('id', `emp-${employee.id}`);
+      row.textContent = employee.firstname; // Safe text assignment
       row.style.border = '1px dashed #ccc';
-      row.onclick = function(a){
-        prettyBug(this);
-      };
+      row.style.padding = '5px';
+      row.style.cursor = 'pointer';
+
+      // Attach click event using the naming convention
+// Inside getEmployees loop
+row.onclick = function() {
+  self.updateWorkspaceHeader(employee.firstname);
+  self.mountHRAdminSuite(employee); // The new entry point
+};
+
       body.appendChild(row);
     }
+  },
+mountHRAdminSuite(employee) {
+  const rightCol = document.getElementById('workspace-content').children[1].children[1];
+  rightCol.innerHTML = ''; // Clear existing generic cards
+
+  const adminCard = document.createElement('div');
+  adminCard.className = 'login-card';
+  
+  const h3 = document.createElement('h3');
+  h3.textContent = `HR Administration: ${employee.firstname}`;
+  adminCard.appendChild(h3);
+
+  // Navigation for HR Categories
+  const nav = document.createElement('div');
+  nav.style.display = 'flex';
+  nav.style.gap = '10px';
+  nav.style.marginBottom = '15px';
+
+  ['Personal', 'Role', 'Tax', 'Pension'].forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-login';
+    btn.style.padding = '5px 10px';
+    btn.style.fontSize = '0.7rem';
+    btn.textContent = cat;
+    btn.onclick = () => this.renderHRCategory(employee, cat, formArea);
+    nav.appendChild(btn);
+  });
+
+  const formArea = document.createElement('div');
+  formArea.id = 'hr-form-area';
+  
+  adminCard.append(nav, formArea);
+  rightCol.appendChild(adminCard);
+  
+  // Default to Personal view
+  this.renderHRCategory(employee, 'Personal', formArea);
+},
+renderHRCategory(employee, category, container) {
+  container.innerHTML = ''; // Clear previous category form
+  
+  const fields = {
+    'Personal': [{id: 'dob', label: 'Date of Birth', type: 'date'}],
+    'Role':     [{id: 'dept', label: 'Department', type: 'text'}, {id: 'role', label: 'Job Title', type: 'text'}],
+    'Tax':      [{id: 'tin', label: 'Tax ID', type: 'text'}, {id: 'code', label: 'Tax Code', type: 'text'}]
+  };
+
+  const currentFields = fields[category] || [];
+  
+  currentFields.forEach(f => {
+    // Reusing your existing convention!
+    this.setFormField(f, container);
+  });
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn-login';
+  saveBtn.textContent = `Save ${category} Data`;
+  saveBtn.style.marginTop = '15px';
+  saveBtn.onclick = () => this.saveHREntry(employee.id, category);
+  
+  container.appendChild(saveBtn);
+},
+  // ────────────────────────────────────────────────
+  // UPDATE WORKSPACE HEADER
+  // ────────────────────────────────────────────────
+  updateWorkspaceHeader(staffName) {
+    const container = document.getElementById('workspace-content');
+    if (!container) return;
+
+    // Find or create the assignment badge
+    let badge = document.getElementById('assignment-badge');
+    
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'assignment-badge';
+      badge.className = 'status'; // Reusing your project-card status style
+      badge.style.marginLeft = '15px';
+      badge.style.fontSize = '0.9rem';
+      
+      // Append to the H2 inside the header
+      const h2 = container.querySelector('h2');
+      if (h2) h2.appendChild(badge);
+    }
+
+    badge.textContent = ` (Assigned to: ${staffName})`;
   },
   // ────────────────────────────────────────────────
   // PROJECT FORMS & DASHBOARD
