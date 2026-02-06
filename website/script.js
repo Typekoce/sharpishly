@@ -521,48 +521,87 @@ createHRSupportPanel() {
 
     return card;
   },
+// ────────────────────────────────────────────────
+  // SHOW EMPLOYEES (Updated with Search)
   // ────────────────────────────────────────────────
-  // SHOW EMPLOYEES
-  // ────────────────────────────────────────────────
-
-/**
-   * Component Template: [Name of Component]
-   * Usage: this.[methodName]()
-   */
   showEmployees() {
-    // 1. Create Main Card Container
     const card = document.createElement('div');
-    card.className = 'login-card'; // Reuses your existing CSS
-    // Optional: add unique styling here
-    // card.style.borderTop = '4px solid var(--primary)';
+    card.className = 'login-card';
 
-    // 2. Create Header
     const h3 = document.createElement('h3');
     h3.textContent = 'Employees';
     card.appendChild(h3);
 
-    // 3. Create Content Body
-    const body = document.createElement('div');
-    body.style.marginTop = '15px';
+    // Create Search Input programmatically
+    const searchWrapper = document.createElement('div');
+    searchWrapper.style.marginBottom = '15px';
     
-    // Example content: Simple text or data
+    const searchInput = document.createElement('input');
+    searchInput.setAttribute('type', 'text');
+    searchInput.setAttribute('placeholder', 'Search staff name...');
+    searchInput.className = 'form-group'; // Reusing your existing CSS class
+    searchInput.style.width = '100%';
+    
+    // Trigger filter on every keystroke
+    searchInput.onkeyup = () => this.filterForEmployee(searchInput.value);
+    
+    searchWrapper.appendChild(searchInput);
+    card.appendChild(searchWrapper);
+
+    const body = document.createElement('div');
+    body.id = 'employee-list-container'; // ID for targeting during filter
+    
     const info = document.createElement('p');
     info.style.fontSize = '0.85rem';
     info.textContent = 'Please select employee from the list below';
     body.appendChild(info);
 
     this.getEmployees(body);
-
     card.appendChild(body);
 
-    // 4. Create Action Area (Optional)
-    const actionBtn = document.createElement('button');
-    actionBtn.className = 'btn-login';
-    actionBtn.textContent = 'Action Label';
-    actionBtn.onclick = () => prettyBug(actionBtn);
-    card.appendChild(actionBtn);
-
     return card;
+  },
+
+// ────────────────────────────────────────────────
+  // FILTER FOR EMPLOYEE (Updated for Error Handling)
+  // ────────────────────────────────────────────────
+  filterForEmployee(term) {
+    const container = document.getElementById('employee-list-container');
+    if (!container) return;
+
+    const rows = container.querySelectorAll('div[id^="emp-"]');
+    const query = term.toLowerCase();
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const match = row.textContent.toLowerCase().includes(query);
+      row.style.display = match ? 'block' : 'none';
+      if (match) visibleCount++;
+    });
+
+    // If zero matches, show the message
+    this.toggleNoResultsMessage(container, visibleCount === 0);
+  },
+
+  // ────────────────────────────────────────────────
+  // TOGGLE NO RESULTS MESSAGE
+  // ────────────────────────────────────────────────
+  toggleNoResultsMessage(container, isEmpty) {
+    let msgEl = document.getElementById('search-no-results');
+
+    if (!msgEl) {
+      msgEl = document.createElement('div');
+      msgEl.setAttribute('id', 'search-no-results');
+      msgEl.style.padding = '10px';
+      msgEl.style.color = 'var(--primary)'; // Using your theme color
+      msgEl.style.fontStyle = 'italic';
+      msgEl.style.fontSize = '0.8rem';
+      msgEl.style.textAlign = 'center';
+      msgEl.textContent = 'No matching employees found.';
+      container.appendChild(msgEl);
+    }
+
+    msgEl.style.display = isEmpty ? 'block' : 'none';
   },
 // ────────────────────────────────────────────────
   // GET EMPLOYEES
