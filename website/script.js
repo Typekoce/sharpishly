@@ -1054,7 +1054,7 @@ form.addEventListener('submit', e => {
       this.setPage('home')
     }
 
-    //Debug
+    // Debug
     // prettyBug(this);
   }
 };
