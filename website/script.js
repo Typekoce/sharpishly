@@ -670,35 +670,52 @@ mountHRAdminSuite(employee) {
   this.renderHRCategory(employee, 'Personal', formArea);
 },
 renderHRCategory(employee, category, container) {
-    container.innerHTML = ''; 
-    
-    if (category === 'Role') {
-      // Use the new Select Field for Roles
-      this.createSelectField({id: 'dept', label: 'Department'}, container, ['Operations', 'Surveying', 'HQ']);
-      this.createSelectField({id: 'role', label: 'Job Title'}, container, this.data.roles);
-    } 
-    else if (category === 'Tax') {
-      // Use the new Select Field for Tax Status
-      this.createSelectField({id: 'tin', label: 'Tax ID'}, container, ['T-800', 'T-1000']); // Example IDs
-      this.createSelectField({id: 'code', label: 'Contract Type'}, container, this.data.tax);
-    }
-    else {
-      // Default to standard inputs for Personal/Pension
-      const fields = {
-        'Personal': [{id: 'dob', label: 'Date of Birth', type: 'date'}],
-      };
-      const currentFields = fields[category] || [];
-      currentFields.forEach(f => this.setFormField(f, container));
-    }
+  container.innerHTML = ''; 
 
-    // Add Save Button
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'btn-login';
-    saveBtn.textContent = `Update ${category} Records`;
-    saveBtn.style.marginTop = '15px';
-    saveBtn.onclick = () => this.saveHREntry(employee.id, category);
-    container.appendChild(saveBtn);
-  },
+  // 1. Render the fields based on category
+  if (category === 'Assignment') {
+    const h4 = document.createElement('h4');
+    h4.textContent = "Assign to Research Project";
+    container.appendChild(h4);
+    this.createSelectField({id: 'projSelect', label: 'Select Active Project'}, container, this.projects);
+  } 
+  else if (category === 'Role') {
+    this.createSelectField({id: 'dept', label: 'Department'}, container, ['Operations', 'Surveying', 'HQ']);
+    this.createSelectField({id: 'role', label: 'Job Title'}, container, this.data.roles);
+  } 
+  else if (category === 'Tax') {
+    this.createSelectField({id: 'tin', label: 'Tax ID'}, container, ['T-800', 'T-1000']);
+    this.createSelectField({id: 'code', label: 'Contract Type'}, container, this.data.tax);
+  }
+  else {
+    const fields = { 'Personal': [{id: 'dob', label: 'Date of Birth', type: 'date'}] };
+    const currentFields = fields[category] || [];
+    currentFields.forEach(f => this.setFormField(f, container));
+  }
+
+  // 2. Add the Action Button
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn-login';
+  saveBtn.style.marginTop = '15px';
+  saveBtn.textContent = `Update ${category} Records`;
+
+  // 3. Conditional Save Logic
+  saveBtn.onclick = () => {
+    if (category === 'Assignment') {
+      const pId = document.getElementById('projSelect').value;
+      const project = this.projects.find(p => p.id == pId);
+      employee.currentProject = project.title;
+      this.updateWorkspaceHeader(employee);
+      this.saveToDisk(); // Crucial for persistence
+      this.alert(`${employee.firstname} assigned to ${project.title}`, "success");
+    } else {
+      // Handles Personal, Role, Tax via the existing save method
+      this.saveHREntry(employee.id, category);
+    }
+  };
+  
+  container.appendChild(saveBtn);
+},
   // ────────────────────────────────────────────────
   // UPDATE WORKSPACE HEADER
   // ────────────────────────────────────────────────
@@ -996,6 +1013,29 @@ form.addEventListener('submit', e => {
     div.appendChild(label);
     div.appendChild(select);
     container.appendChild(div);
+  },
+  // ────────────────────────────────────────────────
+  // UPDATED: WORKSPACE HEADER (Project Linkage)
+  // ────────────────────────────────────────────────
+  updateWorkspaceHeader(employee) {
+    const container = document.getElementById('workspace-content');
+    if (!container) return;
+
+    let badge = document.getElementById('assignment-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'assignment-badge';
+      badge.className = 'status'; 
+      badge.style.marginLeft = '15px';
+      badge.style.fontSize = '0.8rem';
+      badge.style.background = 'var(--secondary-bg)'; // Distinct color
+      const h2 = container.querySelector('h2');
+      if (h2) h2.appendChild(badge);
+    }
+
+    // Display Staff Name + Assigned Project (if it exists)
+    const projectInfo = employee.currentProject ? ` | Project: ${employee.currentProject}` : ' | Unassigned';
+    badge.textContent = `(Staff: ${employee.firstname}${projectInfo})`;
   },
   init() {
     this.loadFromDisk(); // Hydrate data from disk before rendering
