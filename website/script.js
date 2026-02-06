@@ -635,7 +635,7 @@ row.onclick = function() {
   },
 mountHRAdminSuite(employee) {
   const rightCol = document.getElementById('workspace-content').children[1].children[1];
-  rightCol.innerHTML = ''; // Clear existing generic cards
+  rightCol.innerHTML = ''; 
 
   const adminCard = document.createElement('div');
   adminCard.className = 'login-card';
@@ -644,13 +644,13 @@ mountHRAdminSuite(employee) {
   h3.textContent = `HR Administration: ${employee.firstname}`;
   adminCard.appendChild(h3);
 
-  // Navigation for HR Categories
   const nav = document.createElement('div');
   nav.style.display = 'flex';
   nav.style.gap = '10px';
   nav.style.marginBottom = '15px';
 
-  ['Personal', 'Role', 'Tax', 'Pension'].forEach(cat => {
+  // UPDATED: Replaced 'Pension' with 'Assignment' to match your latest logic
+  ['Personal', 'Role', 'Tax', 'Assignment'].forEach(cat => {
     const btn = document.createElement('button');
     btn.className = 'btn-login';
     btn.style.padding = '5px 10px';
@@ -666,7 +666,6 @@ mountHRAdminSuite(employee) {
   adminCard.append(nav, formArea);
   rightCol.appendChild(adminCard);
   
-  // Default to Personal view
   this.renderHRCategory(employee, 'Personal', formArea);
 },
 renderHRCategory(employee, category, container) {
