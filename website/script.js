@@ -670,29 +670,35 @@ mountHRAdminSuite(employee) {
   this.renderHRCategory(employee, 'Personal', formArea);
 },
 renderHRCategory(employee, category, container) {
-  container.innerHTML = ''; // Clear previous category form
-  
-  const fields = {
-    'Personal': [{id: 'dob', label: 'Date of Birth', type: 'date'}],
-    'Role':     [{id: 'dept', label: 'Department', type: 'text'}, {id: 'role', label: 'Job Title', type: 'text'}],
-    'Tax':      [{id: 'tin', label: 'Tax ID', type: 'text'}, {id: 'code', label: 'Tax Code', type: 'text'}]
-  };
+    container.innerHTML = ''; 
+    
+    if (category === 'Role') {
+      // Use the new Select Field for Roles
+      this.createSelectField({id: 'dept', label: 'Department'}, container, ['Operations', 'Surveying', 'HQ']);
+      this.createSelectField({id: 'role', label: 'Job Title'}, container, this.data.roles);
+    } 
+    else if (category === 'Tax') {
+      // Use the new Select Field for Tax Status
+      this.createSelectField({id: 'tin', label: 'Tax ID'}, container, ['T-800', 'T-1000']); // Example IDs
+      this.createSelectField({id: 'code', label: 'Contract Type'}, container, this.data.tax);
+    }
+    else {
+      // Default to standard inputs for Personal/Pension
+      const fields = {
+        'Personal': [{id: 'dob', label: 'Date of Birth', type: 'date'}],
+      };
+      const currentFields = fields[category] || [];
+      currentFields.forEach(f => this.setFormField(f, container));
+    }
 
-  const currentFields = fields[category] || [];
-  
-  currentFields.forEach(f => {
-    // Reusing your existing convention!
-    this.setFormField(f, container);
-  });
-
-  const saveBtn = document.createElement('button');
-  saveBtn.className = 'btn-login';
-  saveBtn.textContent = `Save ${category} Data`;
-  saveBtn.style.marginTop = '15px';
-  saveBtn.onclick = () => this.saveHREntry(employee.id, category);
-  
-  container.appendChild(saveBtn);
-},
+    // Add Save Button
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-login';
+    saveBtn.textContent = `Update ${category} Records`;
+    saveBtn.style.marginTop = '15px';
+    saveBtn.onclick = () => this.saveHREntry(employee.id, category);
+    container.appendChild(saveBtn);
+  },
   // ────────────────────────────────────────────────
   // UPDATE WORKSPACE HEADER
   // ────────────────────────────────────────────────
@@ -962,7 +968,35 @@ form.addEventListener('submit', e => {
     toggler?.addEventListener('click', () => { menu.classList.add('show'); backdrop.classList.add('show'); });
     [close, backdrop].forEach(el => el?.addEventListener('click', hide));
   },
+// ────────────────────────────────────────────────
+  // CREATE SELECT FIELD (Dynamic Dropdowns)
+  // ────────────────────────────────────────────────
+  createSelectField(f, container, optionsArray) {
+    const div = document.createElement('div');
+    div.className = 'form-group';
 
+    const label = document.createElement('label');
+    label.setAttribute('for', f.id);
+    label.textContent = f.label;
+
+    const select = document.createElement('select');
+    select.setAttribute('id', f.id);
+    select.className = 'form-group'; // Reusing your input styling
+    select.style.width = '100%';
+    select.style.padding = '0.75rem';
+
+    // Build options from the data array
+    optionsArray.forEach(opt => {
+      const o = document.createElement('option');
+      o.value = opt;
+      o.textContent = opt;
+      select.appendChild(o);
+    });
+
+    div.appendChild(label);
+    div.appendChild(select);
+    container.appendChild(div);
+  },
   init() {
     this.loadFromDisk(); // Hydrate data from disk before rendering
     this.refreshNavigation();
