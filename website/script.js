@@ -212,20 +212,20 @@ showWorkspace(project) {
 
   const leftCol = document.createElement('div');
   leftCol.append(
-    this.createSurveyBrief(project),
-    this.createHRMilestoneTracker()
+    this.createPayrollStatus(),
+    this.createHRSupportPanel(),
+    this.createLeaveManager(), 
   );
 
   const rightCol = document.createElement('div');
   rightCol.append(
     this.showEmployees(),
-    this.createHRAIAssistant(),
-    this.createHRLog(),
-    this.createHRSupportPanel(),
-    this.createLeaveManager(),    
+    this.createSurveyBrief(project),
+    this.createHRMilestoneTracker(),  
     this.createDocumentVault(),   
-    this.createPayrollStatus(),
-    this.createGenericComponent()    
+    this.createGenericComponent(),
+    this.createHRAIAssistant(),
+    this.createHRLog(),    
   );
 
   grid.append(leftCol, rightCol);
