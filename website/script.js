@@ -817,6 +817,8 @@ renderHRCategory(employee, category, container) {
       this.saveToDisk(); // Save to LocalStorage on form submission
       this.renderProjects();
       this.refreshNavigation();
+    // Trigger the centralized alert
+      this.alert(`Project "${projectTitle}" has been created successfully!`, "success");
       this.showPage('dashboard-view');
     });
     return form;
@@ -898,6 +900,8 @@ renderHRCategory(employee, category, container) {
       localStorage.removeItem('sharpishly_session'); // Clear storage on logout
       this.user.email = 'guest@sharpishly.com'; // Reset to default on logout
       document.getElementById('welcome-message').textContent = '';
+      // Trigger the centralized alert before switching pages
+      this.alert("You have been signed out successfully.", "info");
       this.showPage('home');
       this.refreshNavigation();
     });
