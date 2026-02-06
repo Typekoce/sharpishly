@@ -715,6 +715,51 @@ renderHRCategory(employee, category, container) {
 
     badge.textContent = ` (Assigned to: ${staffName})`;
   },
+// ────────────────────────────────────────────────
+  // SYSTEM ALERTS (Bootstrap Style)
+  // ────────────────────────────────────────────────
+  alert(message, type = 'success') {
+    const container = document.getElementById('alert-container');
+    if (!container) return;
+
+    // 1. Create Alert Div
+    const alertDiv = document.createElement('div');
+    
+    // Map types to Bootstrap classes
+    // Types: primary, secondary, success, danger, warning, info, light, dark
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.style.boxShadow = '0 0.5rem 1rem rgba(0, 0, 0, 0.15)';
+    alertDiv.style.marginBottom = '10px';
+    alertDiv.style.display = 'block';
+
+    // 2. Add Message Text
+    const textNode = document.createTextNode(message);
+    alertDiv.appendChild(textNode);
+
+    // 3. Create Close Button (Standard Bootstrap Close)
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-close';
+    btn.setAttribute('aria-label', 'Close');
+    btn.onclick = () => {
+        alertDiv.classList.remove('show');
+        setTimeout(() => alertDiv.remove(), 150);
+    };
+    
+    alertDiv.appendChild(btn);
+
+    // 4. Add to Stack
+    container.appendChild(alertDiv);
+
+    // 5. Lifecycle Management (Auto-remove after 4s)
+    setTimeout(() => {
+      if (alertDiv.parentNode) {
+        alertDiv.classList.remove('show');
+        setTimeout(() => alertDiv.remove(), 150);
+      }
+    }, 4000);
+  },
   // ────────────────────────────────────────────────
   // PROJECT FORMS & DASHBOARD
   // ────────────────────────────────────────────────
@@ -879,6 +924,7 @@ renderHRCategory(employee, category, container) {
     
     // Auto-route to dashboard if a session exists
     if (this.isAuthenticated()) {
+      this.alert("Session access granted", "success");
       this.renderProjects();
       this.showPage('dashboard-view');
       this.setPage('dashboard');
