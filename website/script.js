@@ -18,7 +18,9 @@ const app = {
     employees:{
       1:{id:1,firstname:'steve'},
       2:{id:2,firstname:'Jamie'},
-    }
+    },
+    roles: ['Manager','Customer Service'],
+    tax: ['Paye','Self Employed','Fix Term Contract']
   },
   // ────────────────────────────────────────────────
   // DATA: Navigation, Projects, and Forms
@@ -800,30 +802,60 @@ renderHRCategory(employee, category, container) {
     submit.type = 'submit'; submit.className = 'btn-login'; submit.textContent = 'Add Project';
     form.appendChild(submit);
 
-    form.addEventListener('submit', e => {
+form.addEventListener('submit', e => {
       e.preventDefault();
       const emailValue = form.email.value.trim();
+      const projectTitle = form.title.value.trim();
       
+      // 1. Check for duplicates first
+      if (this.preventDuplicateProject(projectTitle)) {
+        this.alert(`Error: A project named "${projectTitle}" already exists.`, "danger");
+        return; // Exit the function to prevent pushing to array
+      }
+
+      // 2. Proceed with update if unique
       document.getElementById('welcome-message').textContent = `Researcher Portal: ${emailValue}`;
       this.user.email = emailValue;
       
       this.projects.push({ 
         id: Date.now(), 
-        title: form.title.value.trim(), 
-        status: "Active", // Default status applied here now that it's removed from form
+        title: projectTitle, 
+        status: "Active",
         progress: '10%' 
       });
 
-      this.saveToDisk(); // Save to LocalStorage on form submission
+      this.saveToDisk();
       this.renderProjects();
       this.refreshNavigation();
-    // Trigger the centralized alert
+      
       this.alert(`Project "${projectTitle}" has been created successfully!`, "success");
       this.showPage('dashboard-view');
     });
     return form;
   },
+// ────────────────────────────────────────────────
+  // PREVENT DUPLICATE PROJECT
+  // ────────────────────────────────────────────────
+  preventDuplicateProject(title) {
+    // Returns true if a project with the same name already exists
+    return this.projects.some(p => p.title.toLowerCase() === title.toLowerCase());
+  },
+  // ────────────────────────────────────────────────
+  // PURGE ALL PROJECTS
+  // ────────────────────────────────────────────────
+  purgeProjects() {
+    // 1. Empty the array (preserves the reference)
+    this.projects.length = 0;
 
+    // 2. Sync to localStorage so they don't return on refresh
+    this.saveToDisk();
+
+    // 3. Refresh the UI
+    this.renderProjects();
+
+    // 4. Notify the user
+    this.alert("All projects have been removed.", "warning");
+  },
   createProjectCard(project) {
     const card = document.createElement('div');
     card.className = 'project-card';
@@ -847,6 +879,17 @@ renderHRCategory(employee, category, container) {
     }
     grid.innerHTML = '';
     this.projects.slice().reverse().forEach(p => grid.appendChild(this.createProjectCard(p)));
+    // Inside renderProjects() or where you build your header
+    const purgeBtn = document.createElement('button');
+    purgeBtn.className = 'btn-login';
+    purgeBtn.style.background = 'var(--danger-bg)';
+    purgeBtn.style.color = 'var(--danger-text)';
+    purgeBtn.textContent = 'Purge All Projects';
+    purgeBtn.onclick = () => {
+        if(confirm("Are you sure? This cannot be undone.")) {
+            this.purgeProjects();
+        }
+};
   },
 
   // ────────────────────────────────────────────────
@@ -939,7 +982,7 @@ renderHRCategory(employee, category, container) {
     }
 
     //Debug
-    //prettyBug(this);
+    prettyBug(this);
   }
 };
 
