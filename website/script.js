@@ -18,7 +18,9 @@ const app = {
     employees:{
       1:{id:1,firstname:'steve'},
       2:{id:2,firstname:'Jamie'},
-    }
+    },
+    roles: ['Manager','Customer Service'],
+    tax: ['Paye','Self Employed','Fix Term Contract']
   },
   // ────────────────────────────────────────────────
   // DATA: Navigation, Projects, and Forms
@@ -212,20 +214,20 @@ showWorkspace(project) {
 
   const leftCol = document.createElement('div');
   leftCol.append(
-    this.createSurveyBrief(project),
-    this.createHRMilestoneTracker()
+    this.createPayrollStatus(),
+    this.createHRSupportPanel(),
+    this.createLeaveManager(), 
   );
 
   const rightCol = document.createElement('div');
   rightCol.append(
     this.showEmployees(),
-    this.createHRAIAssistant(),
-    this.createHRLog(),
-    this.createHRSupportPanel(),
-    this.createLeaveManager(),    
+    this.createSurveyBrief(project),
+    this.createHRMilestoneTracker(),  
     this.createDocumentVault(),   
-    this.createPayrollStatus(),
-    this.createGenericComponent()    
+    this.createGenericComponent(),
+    this.createHRAIAssistant(),
+    this.createHRLog(),    
   );
 
   grid.append(leftCol, rightCol);
@@ -521,48 +523,87 @@ createHRSupportPanel() {
 
     return card;
   },
+// ────────────────────────────────────────────────
+  // SHOW EMPLOYEES (Updated with Search)
   // ────────────────────────────────────────────────
-  // SHOW EMPLOYEES
-  // ────────────────────────────────────────────────
-
-/**
-   * Component Template: [Name of Component]
-   * Usage: this.[methodName]()
-   */
   showEmployees() {
-    // 1. Create Main Card Container
     const card = document.createElement('div');
-    card.className = 'login-card'; // Reuses your existing CSS
-    // Optional: add unique styling here
-    // card.style.borderTop = '4px solid var(--primary)';
+    card.className = 'login-card';
 
-    // 2. Create Header
     const h3 = document.createElement('h3');
     h3.textContent = 'Employees';
     card.appendChild(h3);
 
-    // 3. Create Content Body
-    const body = document.createElement('div');
-    body.style.marginTop = '15px';
+    // Create Search Input programmatically
+    const searchWrapper = document.createElement('div');
+    searchWrapper.style.marginBottom = '15px';
     
-    // Example content: Simple text or data
+    const searchInput = document.createElement('input');
+    searchInput.setAttribute('type', 'text');
+    searchInput.setAttribute('placeholder', 'Search staff name...');
+    searchInput.className = 'form-group'; // Reusing your existing CSS class
+    searchInput.style.width = '100%';
+    
+    // Trigger filter on every keystroke
+    searchInput.onkeyup = () => this.filterForEmployee(searchInput.value);
+    
+    searchWrapper.appendChild(searchInput);
+    card.appendChild(searchWrapper);
+
+    const body = document.createElement('div');
+    body.id = 'employee-list-container'; // ID for targeting during filter
+    
     const info = document.createElement('p');
     info.style.fontSize = '0.85rem';
     info.textContent = 'Please select employee from the list below';
     body.appendChild(info);
 
     this.getEmployees(body);
-
     card.appendChild(body);
 
-    // 4. Create Action Area (Optional)
-    const actionBtn = document.createElement('button');
-    actionBtn.className = 'btn-login';
-    actionBtn.textContent = 'Action Label';
-    actionBtn.onclick = () => prettyBug(actionBtn);
-    card.appendChild(actionBtn);
-
     return card;
+  },
+
+// ────────────────────────────────────────────────
+  // FILTER FOR EMPLOYEE (Updated for Error Handling)
+  // ────────────────────────────────────────────────
+  filterForEmployee(term) {
+    const container = document.getElementById('employee-list-container');
+    if (!container) return;
+
+    const rows = container.querySelectorAll('div[id^="emp-"]');
+    const query = term.toLowerCase();
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const match = row.textContent.toLowerCase().includes(query);
+      row.style.display = match ? 'block' : 'none';
+      if (match) visibleCount++;
+    });
+
+    // If zero matches, show the message
+    this.toggleNoResultsMessage(container, visibleCount === 0);
+  },
+
+  // ────────────────────────────────────────────────
+  // TOGGLE NO RESULTS MESSAGE
+  // ────────────────────────────────────────────────
+  toggleNoResultsMessage(container, isEmpty) {
+    let msgEl = document.getElementById('search-no-results');
+
+    if (!msgEl) {
+      msgEl = document.createElement('div');
+      msgEl.setAttribute('id', 'search-no-results');
+      msgEl.style.padding = '10px';
+      msgEl.style.color = 'var(--primary)'; // Using your theme color
+      msgEl.style.fontStyle = 'italic';
+      msgEl.style.fontSize = '0.8rem';
+      msgEl.style.textAlign = 'center';
+      msgEl.textContent = 'No matching employees found.';
+      container.appendChild(msgEl);
+    }
+
+    msgEl.style.display = isEmpty ? 'block' : 'none';
   },
 // ────────────────────────────────────────────────
   // GET EMPLOYEES
@@ -629,29 +670,35 @@ mountHRAdminSuite(employee) {
   this.renderHRCategory(employee, 'Personal', formArea);
 },
 renderHRCategory(employee, category, container) {
-  container.innerHTML = ''; // Clear previous category form
-  
-  const fields = {
-    'Personal': [{id: 'dob', label: 'Date of Birth', type: 'date'}],
-    'Role':     [{id: 'dept', label: 'Department', type: 'text'}, {id: 'role', label: 'Job Title', type: 'text'}],
-    'Tax':      [{id: 'tin', label: 'Tax ID', type: 'text'}, {id: 'code', label: 'Tax Code', type: 'text'}]
-  };
+    container.innerHTML = ''; 
+    
+    if (category === 'Role') {
+      // Use the new Select Field for Roles
+      this.createSelectField({id: 'dept', label: 'Department'}, container, ['Operations', 'Surveying', 'HQ']);
+      this.createSelectField({id: 'role', label: 'Job Title'}, container, this.data.roles);
+    } 
+    else if (category === 'Tax') {
+      // Use the new Select Field for Tax Status
+      this.createSelectField({id: 'tin', label: 'Tax ID'}, container, ['T-800', 'T-1000']); // Example IDs
+      this.createSelectField({id: 'code', label: 'Contract Type'}, container, this.data.tax);
+    }
+    else {
+      // Default to standard inputs for Personal/Pension
+      const fields = {
+        'Personal': [{id: 'dob', label: 'Date of Birth', type: 'date'}],
+      };
+      const currentFields = fields[category] || [];
+      currentFields.forEach(f => this.setFormField(f, container));
+    }
 
-  const currentFields = fields[category] || [];
-  
-  currentFields.forEach(f => {
-    // Reusing your existing convention!
-    this.setFormField(f, container);
-  });
-
-  const saveBtn = document.createElement('button');
-  saveBtn.className = 'btn-login';
-  saveBtn.textContent = `Save ${category} Data`;
-  saveBtn.style.marginTop = '15px';
-  saveBtn.onclick = () => this.saveHREntry(employee.id, category);
-  
-  container.appendChild(saveBtn);
-},
+    // Add Save Button
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-login';
+    saveBtn.textContent = `Update ${category} Records`;
+    saveBtn.style.marginTop = '15px';
+    saveBtn.onclick = () => this.saveHREntry(employee.id, category);
+    container.appendChild(saveBtn);
+  },
   // ────────────────────────────────────────────────
   // UPDATE WORKSPACE HEADER
   // ────────────────────────────────────────────────
@@ -675,6 +722,51 @@ renderHRCategory(employee, category, container) {
     }
 
     badge.textContent = ` (Assigned to: ${staffName})`;
+  },
+// ────────────────────────────────────────────────
+  // SYSTEM ALERTS (Bootstrap Style)
+  // ────────────────────────────────────────────────
+  alert(message, type = 'success') {
+    const container = document.getElementById('alert-container');
+    if (!container) return;
+
+    // 1. Create Alert Div
+    const alertDiv = document.createElement('div');
+    
+    // Map types to Bootstrap classes
+    // Types: primary, secondary, success, danger, warning, info, light, dark
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.style.boxShadow = '0 0.5rem 1rem rgba(0, 0, 0, 0.15)';
+    alertDiv.style.marginBottom = '10px';
+    alertDiv.style.display = 'block';
+
+    // 2. Add Message Text
+    const textNode = document.createTextNode(message);
+    alertDiv.appendChild(textNode);
+
+    // 3. Create Close Button (Standard Bootstrap Close)
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-close';
+    btn.setAttribute('aria-label', 'Close');
+    btn.onclick = () => {
+        alertDiv.classList.remove('show');
+        setTimeout(() => alertDiv.remove(), 150);
+    };
+    
+    alertDiv.appendChild(btn);
+
+    // 4. Add to Stack
+    container.appendChild(alertDiv);
+
+    // 5. Lifecycle Management (Auto-remove after 4s)
+    setTimeout(() => {
+      if (alertDiv.parentNode) {
+        alertDiv.classList.remove('show');
+        setTimeout(() => alertDiv.remove(), 150);
+      }
+    }, 4000);
   },
   // ────────────────────────────────────────────────
   // PROJECT FORMS & DASHBOARD
@@ -716,28 +808,60 @@ renderHRCategory(employee, category, container) {
     submit.type = 'submit'; submit.className = 'btn-login'; submit.textContent = 'Add Project';
     form.appendChild(submit);
 
-    form.addEventListener('submit', e => {
+form.addEventListener('submit', e => {
       e.preventDefault();
       const emailValue = form.email.value.trim();
+      const projectTitle = form.title.value.trim();
       
+      // 1. Check for duplicates first
+      if (this.preventDuplicateProject(projectTitle)) {
+        this.alert(`Error: A project named "${projectTitle}" already exists.`, "danger");
+        return; // Exit the function to prevent pushing to array
+      }
+
+      // 2. Proceed with update if unique
       document.getElementById('welcome-message').textContent = `Researcher Portal: ${emailValue}`;
       this.user.email = emailValue;
       
       this.projects.push({ 
         id: Date.now(), 
-        title: form.title.value.trim(), 
-        status: "Active", // Default status applied here now that it's removed from form
+        title: projectTitle, 
+        status: "Active",
         progress: '10%' 
       });
 
-      this.saveToDisk(); // Save to LocalStorage on form submission
+      this.saveToDisk();
       this.renderProjects();
       this.refreshNavigation();
+      
+      this.alert(`Project "${projectTitle}" has been created successfully!`, "success");
       this.showPage('dashboard-view');
     });
     return form;
   },
+// ────────────────────────────────────────────────
+  // PREVENT DUPLICATE PROJECT
+  // ────────────────────────────────────────────────
+  preventDuplicateProject(title) {
+    // Returns true if a project with the same name already exists
+    return this.projects.some(p => p.title.toLowerCase() === title.toLowerCase());
+  },
+  // ────────────────────────────────────────────────
+  // PURGE ALL PROJECTS
+  // ────────────────────────────────────────────────
+  purgeProjects() {
+    // 1. Empty the array (preserves the reference)
+    this.projects.length = 0;
 
+    // 2. Sync to localStorage so they don't return on refresh
+    this.saveToDisk();
+
+    // 3. Refresh the UI
+    this.renderProjects();
+
+    // 4. Notify the user
+    this.alert("All projects have been removed.", "warning");
+  },
   createProjectCard(project) {
     const card = document.createElement('div');
     card.className = 'project-card';
@@ -761,6 +885,17 @@ renderHRCategory(employee, category, container) {
     }
     grid.innerHTML = '';
     this.projects.slice().reverse().forEach(p => grid.appendChild(this.createProjectCard(p)));
+    // Inside renderProjects() or where you build your header
+    const purgeBtn = document.createElement('button');
+    purgeBtn.className = 'btn-login';
+    purgeBtn.style.background = 'var(--danger-bg)';
+    purgeBtn.style.color = 'var(--danger-text)';
+    purgeBtn.textContent = 'Purge All Projects';
+    purgeBtn.onclick = () => {
+        if(confirm("Are you sure? This cannot be undone.")) {
+            this.purgeProjects();
+        }
+};
   },
 
   // ────────────────────────────────────────────────
@@ -814,6 +949,8 @@ renderHRCategory(employee, category, container) {
       localStorage.removeItem('sharpishly_session'); // Clear storage on logout
       this.user.email = 'guest@sharpishly.com'; // Reset to default on logout
       document.getElementById('welcome-message').textContent = '';
+      // Trigger the centralized alert before switching pages
+      this.alert("You have been signed out successfully.", "info");
       this.showPage('home');
       this.refreshNavigation();
     });
@@ -831,7 +968,35 @@ renderHRCategory(employee, category, container) {
     toggler?.addEventListener('click', () => { menu.classList.add('show'); backdrop.classList.add('show'); });
     [close, backdrop].forEach(el => el?.addEventListener('click', hide));
   },
+// ────────────────────────────────────────────────
+  // CREATE SELECT FIELD (Dynamic Dropdowns)
+  // ────────────────────────────────────────────────
+  createSelectField(f, container, optionsArray) {
+    const div = document.createElement('div');
+    div.className = 'form-group';
 
+    const label = document.createElement('label');
+    label.setAttribute('for', f.id);
+    label.textContent = f.label;
+
+    const select = document.createElement('select');
+    select.setAttribute('id', f.id);
+    select.className = 'form-group'; // Reusing your input styling
+    select.style.width = '100%';
+    select.style.padding = '0.75rem';
+
+    // Build options from the data array
+    optionsArray.forEach(opt => {
+      const o = document.createElement('option');
+      o.value = opt;
+      o.textContent = opt;
+      select.appendChild(o);
+    });
+
+    div.appendChild(label);
+    div.appendChild(select);
+    container.appendChild(div);
+  },
   init() {
     this.loadFromDisk(); // Hydrate data from disk before rendering
     this.refreshNavigation();
@@ -840,6 +1005,7 @@ renderHRCategory(employee, category, container) {
     
     // Auto-route to dashboard if a session exists
     if (this.isAuthenticated()) {
+      this.alert("Session access granted", "success");
       this.renderProjects();
       this.showPage('dashboard-view');
       this.setPage('dashboard');
@@ -850,7 +1016,7 @@ renderHRCategory(employee, category, container) {
     }
 
     //Debug
-    //prettyBug(this);
+    prettyBug(this);
   }
 };
 
