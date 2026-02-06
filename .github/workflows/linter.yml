@@ -1,4 +1,4 @@
-name: Lint JavaScript
+name: Lint Standalone JavaScript
 
 on:
   pull_request:
@@ -13,42 +13,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18' # or your preferred Node.js version
-
-      - name: Install ESLint
-        run: npm install eslint
+      - name: Install ESLint (using a specific version to avoid node)
+        run: |
+          curl -sLO https://registry.npmjs.org/eslint/-/eslint-8.56.0.tgz #or latest version
+          tar -xzf eslint-8.56.0.tgz
+          ./package/bin/eslint --version #verify it works
 
       - name: Configure ESLint (if needed)
-        # Create a .eslintrc.js file in your repository root if you don't have one
-        # Example .eslintrc.js:
-        # module.exports = {
-        #   env: {
-        #     browser: true,
-        #     es2021: true,
-        #   },
-        #   extends: 'eslint:recommended',
-        #   parserOptions: {
-        #     ecmaVersion: 12,
-        #   },
-        #   rules: {
-        #     // Add your custom rules here
-        #   },
-        # };
-        # Alternatively, you can use a predefined configuration, such as airbnb, google, or standard.
-        # Example: npm install eslint-config-airbnb-base eslint-plugin-import
-        # and configure .eslintrc.js accordingly.
-        # Example .eslintrc.js using airbnb-base:
-        # module.exports = {
-        #    extends: 'airbnb-base',
-        # };
-        # If you already have an eslint config file, this step may not be needed.
         run: |
           if [ ! -f .eslintrc.js ]; then
             echo "module.exports = { extends: 'eslint:recommended', env: { browser: true, es2021: true } };" > .eslintrc.js
           fi
 
       - name: Lint script.js
-        run: npx eslint script.js
+        run: ./package/bin/eslint script.js
