@@ -214,6 +214,7 @@ showWorkspace(project) {
 
   const leftCol = document.createElement('div');
   leftCol.append(
+    this.showEmployees(),
     this.createPayrollStatus(),
     this.createHRSupportPanel(),
     this.createLeaveManager(), 
@@ -221,7 +222,6 @@ showWorkspace(project) {
 
   const rightCol = document.createElement('div');
   rightCol.append(
-    this.showEmployees(),
     this.createSurveyBrief(project),
     this.createHRMilestoneTracker(),  
     this.createDocumentVault(),   
@@ -463,7 +463,77 @@ createHRSupportPanel() {
     log.appendChild(container);
     return log;
   },
+// ────────────────────────────────────────────────
+  // MODAL SYSTEM (Bootstrap Style)
+  // ────────────────────────────────────────────────
+  createModal(titleText = 'System Message', contentNode = null) {
+    // 1. Create Overlay/Backdrop
+    const backdrop = document.createElement('div');
+    backdrop.id = 'modal-backdrop';
+    Object.assign(backdrop.style, {
+      position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+      backgroundColor: 'rgba(0,0,0,0.7)', zIndex: '1050',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      backdropFilter: 'blur(4px)', transition: 'opacity 0.3s ease'
+    });
 
+    // 2. Create Modal Container
+    const modal = document.createElement('div');
+    modal.className = 'login-card'; // Reusing your existing card styles
+    Object.assign(modal.style, {
+      width: '90%', maxWidth: '500px', position: 'relative',
+      padding: '2rem', boxShadow: '0 1rem 3rem rgba(0,0,0,0.5)',
+      transform: 'translateY(0)', animation: 'modalSlideIn 0.3s ease-out'
+    });
+
+    // 3. Header Area
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    header.style.marginBottom = '1.5rem';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = titleText;
+    h3.style.margin = '0';
+
+    const closeX = document.createElement('button');
+    closeX.innerHTML = '&times;';
+    closeX.style.cssText = 'background:none; border:none; font-size:1.5rem; color:var(--primary); cursor:pointer;';
+    closeX.onclick = () => backdrop.remove();
+
+    header.append(h3, closeX);
+
+    // 4. Content Area
+    const body = document.createElement('div');
+    body.style.marginBottom = '1.5rem';
+    
+    if (typeof contentNode === 'string') {
+      const p = document.createElement('p');
+      p.textContent = contentNode;
+      body.appendChild(p);
+    } else if (contentNode) {
+      body.appendChild(contentNode);
+    }
+
+    // 5. Footer / Close Button
+    const footer = document.createElement('div');
+    footer.style.textAlign = 'right';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'btn-login';
+    closeBtn.textContent = 'Close';
+    closeBtn.onclick = () => backdrop.remove();
+    footer.appendChild(closeBtn);
+
+    // Assembly
+    modal.append(header, body, footer);
+    backdrop.appendChild(modal);
+    document.body.appendChild(backdrop);
+
+    // Close on backdrop click (optional UX feature)
+    backdrop.onclick = (e) => { if (e.target === backdrop) backdrop.remove(); };
+  },
   createPayrollStatus() {
     const panel = document.createElement('div');
     panel.className = 'login-card';
@@ -481,6 +551,13 @@ createHRSupportPanel() {
     btn.className = 'btn-login';
     btn.style.background = 'var(--dark)';
     btn.textContent = 'Upload Expense Receipt';
+    // Inside createPayrollStatus
+// UPDATED: Use arrow function (=>) so 'this' refers to the 'app' object
+    btn.onclick = () => {
+      const content = document.createElement('p');
+      content.textContent = "Please select your expense receipt (.jpg, .pdf) for upload to the R&D vault.";
+      this.createModal('Expense Upload', content); 
+    };
     panel.appendChild(btn);
 
     return panel;
@@ -1055,7 +1132,7 @@ form.addEventListener('submit', e => {
     }
 
     // Debug
-    // prettyBug(this);
+    //prettyBug(this);
   }
 };
 
