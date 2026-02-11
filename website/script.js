@@ -1135,15 +1135,24 @@ form.addEventListener('submit', e => {
     // Build options from the data array
     optionsArray.forEach(opt => {
       const o = document.createElement('option');
-      o.value = opt;
-      o.textContent = opt;
+      
+      // Check if opt is a Project Object or a simple String
+      if (typeof opt === 'object' && opt !== null) {
+        o.value = opt.id;        // The "ID" goes to the logic
+        o.textContent = opt.title; // The "Title" goes to the user
+      } else {
+        o.value = opt;
+        o.textContent = opt;
+      }
       select.appendChild(o);
     });
+
 
     div.appendChild(label);
     div.appendChild(select);
     container.appendChild(div);
   },
+  
   // ────────────────────────────────────────────────
   // UPDATED: WORKSPACE HEADER (Project Linkage)
   // ────────────────────────────────────────────────
