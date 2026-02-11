@@ -366,8 +366,62 @@ createHRSupportPanel() {
   button.className = 'btn-login';
   button.style.background = 'var(--dark)';
   button.textContent = 'Open HR Ticket';
-  panel.appendChild(button);
 
+  button.onclick = () => {
+    const ticketForm = document.createElement('div');
+
+    // Issue Type Group
+    const typeGroup = document.createElement('div');
+    typeGroup.className = 'form-group';
+    
+    const labelType = document.createElement('label');
+    labelType.textContent = 'Issue Type';
+    
+    const select = document.createElement('select');
+    select.id = 'ticket-type';
+    Object.assign(select.style, { width: '100%', marginBottom: '10px' });
+    
+    ['Payroll Query', 'Technical Issue', 'Contract Change', 'Other'].forEach(optText => {
+      const opt = document.createElement('option');
+      opt.value = optText;
+      opt.textContent = optText;
+      select.appendChild(opt);
+    });
+    
+    typeGroup.append(labelType, select);
+
+    // Description Group
+    const descGroup = document.createElement('div');
+    descGroup.className = 'form-group';
+    
+    const labelDesc = document.createElement('label');
+    labelDesc.textContent = 'Description';
+    
+    const textarea = document.createElement('textarea');
+    textarea.id = 'ticket-desc';
+    textarea.placeholder = 'Describe the issue...';
+    Object.assign(textarea.style, { width: '100%', height: '80px' });
+    
+    descGroup.append(labelDesc, textarea);
+
+    // Submit Button
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'btn-login';
+    submitBtn.textContent = 'Submit Ticket';
+    submitBtn.onclick = () => {
+      const type = select.value;
+      this.alert(`Ticket Created: ${type}. HR will review this shortly.`, "success");
+      const backdrop = document.getElementById('modal-backdrop');
+      if (backdrop) backdrop.remove();
+    };
+
+    ticketForm.append(typeGroup, descGroup, submitBtn);
+
+    // Launch Modal
+    this.createModal('Open HR Support Ticket', ticketForm);
+  };
+
+  panel.appendChild(button);
   return panel;
 },
 
