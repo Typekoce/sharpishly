@@ -500,3 +500,25 @@ main {
 .fade.show {
   opacity: 1;
 }
+
+/* Dark Mode Definitions */
+[data-theme="dark"] {
+  --body-bg: #121212;
+  --dark: #f8f9fa;
+  --light: #212529;
+  --border: #333;
+  --secondary-bg: #1e1e1e;
+}
+
+[data-theme="dark"] body {
+  background-color: var(--body-bg);
+  color: var(--dark);
+}
+
+[data-theme="dark"] .navbar, 
+[data-theme="dark"] .login-card, 
+[data-theme="dark"] .offcanvas {
+  background-color: var(--secondary-bg);
+  border-color: var(--border);
+  color: var(--dark);
+}

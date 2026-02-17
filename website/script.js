@@ -27,25 +27,13 @@ const app = {
   // ────────────────────────────────────────────────
   menu: [
     { name: "Home",        pageId: "home", active: true },
-    // { name: "Login",       pageId: "login-view" },
     { name: "Dashboard",   pageId: "dashboard-view", hidden: true },
     { name: "Quick Start", pageId: "quick-start" },
-    // { name: "Features",    pageId: "Features" },
-    // { name: "Products",    pageId: "Products", dropdown: [
-    //   { name: "Lite", href: "#" }, { name: "Pro", href: "#" }, { name: "Enterprise", href: "#" }
-    // ]},
-    // { name: "Portal",      dropdown: [
-    //   { name: "Customers", href: "#" }, { name: "Clients", href: "#" }, { name: "Staff", href: "#" }
-    // ]},
-    //{ name: "Pricing",     href: "#" },
-    //{ name: "Contact",     href: "#" }
+    { name: "Settings",    pageId: "settings-view" },
   ],
 
   projects: [
     { id: 1, title: "Native Mobile Application Lifecycle", status: "Active",    progress: "75%" },
-    //{ id: 2, title: "Neural Network Optimization",         status: "Review",    progress: "40%" },
-    //{ id: 3, title: "Biometric Security API",              status: "Completed", progress: "100%" },
-    //{ id: 4, title: "Quantum Computing Logic",             status: "Active",    progress: "75%" },
   ],
 
   projectFormFields: [
@@ -58,6 +46,7 @@ const app = {
   // ────────────────────────────────────────────────
   setPage(name) {
     this.data.page = name;
+    console.log(this.data.page);
   },
 
 
@@ -79,8 +68,18 @@ const app = {
   // ────────────────────────────────────────────────
   showPage(pageId) {
   // 1. Update the data block first
+  // Naming needs to be consistent: handleNavClick(), menu, showPage()
     this.setPage(pageId);
-    const pages = ['home', 'login-view', 'dashboard-view', 'quick-start', 'Features', 'Products', 'workspace-view'];
+    const pages = [
+      'home', 
+      'login-view', 
+      'dashboard-view', 
+      'quick-start', 
+      'features', 
+      'products', 
+      'workspace-view',
+      'settings-view'
+    ];
 
     pages.forEach(id => {
       const el = document.getElementById(id);
@@ -89,14 +88,25 @@ const app = {
 
     if (pageId === 'home') this.updateHomeUI();
 
-    if (pageId === 'quick-start') {
+    this.selectPageQuickStart(pageId);
+
+    this.selectPageSettings(pageId);
+
+  },
+selectPageSettings(pageId){
+      //prettyBug('select page settings:' + pageId);
+      if (pageId === 'settings-view') {
+       //prettyBug(this);
+    }
+},
+selectPageQuickStart(pageId){
+      if (pageId === 'quick-start') {
       const container = document.getElementById('quick-start-form-container');
       if (container && container.children.length === 0) {
         container.appendChild(this.createProjectForm());
       }
     }
-  },
-
+},
   updateHomeUI() {
     const email = this.getActiveEmail();
     const homeH1 = document.querySelector('#home h1');
@@ -173,7 +183,8 @@ const app = {
       "Login":       () => this.showPage('login-view'),
       "Dashboard":   () => this.showPage('dashboard-view'),
       "Quick Start": () => this.showPage('quick-start'),
-      "Features":    () => this.showPage('Features'),
+      "Settings":    () => this.showPage('settings-view'),
+      
     };
     const action = actions[item.name];
     if (action) action();
@@ -1176,11 +1187,39 @@ form.addEventListener('submit', e => {
     const projectInfo = employee.currentProject ? ` | Project: ${employee.currentProject}` : ' | Unassigned';
     badge.textContent = `(Staff: ${employee.firstname}${projectInfo})`;
   },
+  // Add this inside the app object
+initSettings() {
+  const btn = document.getElementById('theme-toggle-btn');
+  if (!btn) return;
+
+  // Check current theme on load
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  this.applyTheme(currentTheme);
+
+  btn.onclick = () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const newTheme = isDark ? 'light' : 'dark';
+    this.applyTheme(newTheme);
+  };
+},
+
+applyTheme(theme) {
+  const btn = document.getElementById('theme-toggle-btn');
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  
+  if (btn) {
+    btn.textContent = theme === 'dark' ? 'Disable' : 'Enable';
+    btn.style.background = theme === 'dark' ? 'var(--gray)' : 'var(--primary)';
+  }
+},
+// Don't forget to call this.initSettings() in your init() function!
   init() {
     this.loadFromDisk(); // Hydrate data from disk before rendering
     this.refreshNavigation();
     this.initMobileMenu();
     this.initAuth();
+    this.initSettings();
     
     // Auto-route to dashboard if a session exists
     if (this.isAuthenticated()) {
