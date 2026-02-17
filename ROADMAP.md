@@ -38,7 +38,16 @@ This is a rough, evolving roadmap. Priorities may change based on user feedback 
 - **Work Assignment Tab:** Link specific employees to project IDs via the HR Suite.
 ...
 
+
+## ✅ Completed
+- **Infrastructure:** Dockerized Nginx environment on Ubuntu VM.
+- **UI/UX:** Settings page with persistent Dark Mode.
+- **Refactor:** Standardized kebab-case naming conventions.
+
+## 🟦 In Progress (Current Milestone)
+- **API Connectivity:** Implementing `requestPost` and `requestGet` wrappers for fetch API.
+- **Service Layer:** Abstracting data calls to move away from pure LocalStorage.
 ---
 Feedback and pull requests welcome — especially regarding the R&D workspace UX!
 
-**Last updated:** 6th February 2026
+**Last updated:** 17th February 2026

@@ -30,6 +30,7 @@ const app = {
     { name: "Dashboard",   pageId: "dashboard-view", hidden: true },
     { name: "Quick Start", pageId: "quick-start" },
     { name: "Settings",    pageId: "settings-view" },
+    { name: "User Profile",    pageId: "user-profile-view" },
   ],
 
   projects: [
@@ -78,7 +79,8 @@ const app = {
       'features', 
       'products', 
       'workspace-view',
-      'settings-view'
+      'settings-view',
+      'user-profile-view'
     ];
 
     pages.forEach(id => {
@@ -90,13 +92,21 @@ const app = {
 
     this.selectPageQuickStart(pageId);
 
+    this.selectPageUserProfile(pageId);
+
     this.selectPageSettings(pageId);
 
   },
+selectPageUserProfile(pageId){
+      if (pageId === 'user-profile-view') {
+       //prettyBug(this);      
+       this.alert('Theme user profile are still under development');
+
+    }
+},
 selectPageSettings(pageId){
-      //prettyBug('select page settings:' + pageId);
       if (pageId === 'settings-view') {
-       //prettyBug(this);
+      this.alert('Theme settings are still under development');
     }
 },
 selectPageQuickStart(pageId){
@@ -184,6 +194,7 @@ selectPageQuickStart(pageId){
       "Dashboard":   () => this.showPage('dashboard-view'),
       "Quick Start": () => this.showPage('quick-start'),
       "Settings":    () => this.showPage('settings-view'),
+      "User Profile":    () => this.showPage('user-profile-view'),
       
     };
     const action = actions[item.name];

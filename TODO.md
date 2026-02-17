@@ -50,3 +50,9 @@
 - [x] Create Dockerfile and docker-compose.yml for Nginx.
 - [x] Verify host-to-VM networking (Port 8080).
 - [ ] Implement Docker container health checks.
+
+- [x] Unify HTML/JS naming conventions (kebab-case).
+- [ ] Create `requestGet(url, headers)` helper using Fetch API.
+- [ ] Create `requestPost(url, data, headers)` helper.
+- [ ] Add global error handling for API timeouts and 404s.
+- [ ] Update `submitProject` to use `requestPost` instead of just saving to LocalStorage.
