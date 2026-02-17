@@ -46,3 +46,7 @@
     Logout Confirmation Page: Simple page or modal to confirm user logout and redirect to home.
     
 ```
+- [x] Install and configure Docker on Ubuntu VM.
+- [x] Create Dockerfile and docker-compose.yml for Nginx.
+- [x] Verify host-to-VM networking (Port 8080).
+- [ ] Implement Docker container health checks.

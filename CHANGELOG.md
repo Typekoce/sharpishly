@@ -29,3 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] – 2026-01 (initial commit)
 
 Initial public version
+### [Unreleased] - 2026-02-17
+#### Added
+- Docker support: Added `Dockerfile` and `docker-compose.yml`.
+- Networking: Configured Nginx to serve the `/website` directory on port 8080.
+- Helper scripts: Added `docker.sh` for streamlined container management.

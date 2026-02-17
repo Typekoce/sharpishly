@@ -33,6 +33,11 @@ This is a rough, evolving roadmap. Priorities may change based on user feedback 
 - **Framework Migration:** Staying dependency-free (No React, Vue, or Svelte).
 - **Live Backend:** Maintaining a client-side focused "mock-live" experience.
 
+## ✅ Completed (Recent Milestones)
+- **Containerization:** Successfully dockerized the application using Nginx on an Ubuntu VM.
+- **Work Assignment Tab:** Link specific employees to project IDs via the HR Suite.
+...
+
 ---
 Feedback and pull requests welcome — especially regarding the R&D workspace UX!
 
