@@ -387,7 +387,7 @@ createHRSupportPanel() {
 
   const button = document.createElement('button');
   button.className = 'btn-login';
-  button.style.background = 'var(--dark)';
+  //button.style.background = 'var(--dark)';
   button.textContent = 'Open HR Ticket';
 
   button.onclick = () => {
@@ -626,7 +626,7 @@ createHRSupportPanel() {
 
     const btn = document.createElement('button');
     btn.className = 'btn-login';
-    btn.style.background = 'var(--dark)';
+    //btn.style.background = 'var(--dark)';
     btn.textContent = 'Upload Expense Receipt';
     // Inside createPayrollStatus
 // UPDATED: Use arrow function (=>) so 'this' refers to the 'app' object

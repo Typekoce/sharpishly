@@ -522,3 +522,15 @@ main {
   border-color: var(--border);
   color: var(--dark);
 }
+
+/* Default state (Light Mode) */
+.btn-expense {
+  background-color: var(--dark) !important;
+  color: white;
+}
+
+/* Dark Mode adjustment */
+[data-theme="dark"] .btn-expense {
+  background-color: var(--primary) !important; /* Use blue so it stands out */
+  color: white;
+}
