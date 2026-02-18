@@ -56,3 +56,13 @@
 - [ ] Create `requestPost(url, data, headers)` helper.
 - [ ] Add global error handling for API timeouts and 404s.
 - [ ] Update `submitProject` to use `requestPost` instead of just saving to LocalStorage.
+
+## ✅ Completed
+- [x] Create standalone `/docs` manual.
+- [x] Implement multi-card User Profile forms.
+- [x] Fix card clearance and CSS theme bugs.
+
+## 🟦 Next Up
+- [ ] Connect `app.data.roles` to the Expertise dropdown in Profile.
+- [ ] Implement `requestGet` / `requestPost` (Milestone #8).
+- [ ] Add "Export Profile to PDF" feature.

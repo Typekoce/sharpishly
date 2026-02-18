@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharpishly R&D | Developer Manual</title>
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary: #0d6efd;
+            --dark: #212529;
+            --light-bg: #f8f9fa;
+            --border: #dee2e6;
+            --code-bg: #272822;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.6; color: var(--dark); display: flex; }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--light-bg);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .logo { font-weight: bold; font-size: 1.2rem; color: var(--primary); margin-bottom: 2rem; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        .nav-group { margin-bottom: 1.5rem; }
+        .nav-group h4 { font-size: 0.8rem; text-transform: uppercase; color: #6c757d; margin-bottom: 10px; letter-spacing: 1px; }
+        .nav-item { display: block; padding: 8px 12px; text-decoration: none; color: var(--dark); border-radius: 4px; font-size: 0.95rem; cursor: pointer; }
+        .nav-item:hover { background: #e9ecef; }
+        .nav-item.active { background: var(--primary); color: white; }
+
+        /* Main Content Area */
+        #content {
+            margin-left: var(--sidebar-width);
+            padding: 40px 60px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        section { display: none; }
+        section.active { display: block; animation: fadeIn 0.3s ease; }
+
+        h1 { font-size: 2.5rem; margin-bottom: 1rem; color: var(--primary); }
+        h2 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin: 2rem 0 1rem; }
+        p { margin-bottom: 1rem; color: #444; }
+
+        /* Doxygen-style Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 1.5rem 0;
+            border-left: 5px solid var(--primary);
+        }
+
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; background: #eee; font-size: 0.75rem; font-weight: bold; margin-left: 10px; }
+        .badge-async { background: #ffd33d; color: #000; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border); }
+            #content { margin-left: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="logo">Sharpishly R&D <br><small>v1.0.0 Manual</small></div>
+    
+    <div class="nav-group">
+        <h4>Architecture</h4>
+        <a class="nav-item active" onclick="showSection('intro')">Introduction</a>
+        <a class="nav-item" onclick="showSection('layout-system')">Layout System</a>
+        <a class="nav-item" onclick="showSection('routing')">Routing & Navigation</a>
+    </div>
+
+    <div class="nav-group">
+        <h4>API Reference</h4>
+        <a class="nav-item" onclick="showSection('api-helpers')">Fetch Helpers</a>
+        <a class="nav-item" onclick="showSection('auth-logic')">Authentication</a>
+    </div>
+
+    <div class="nav-group">
+        <h4>Deployment</h4>
+        <a class="nav-item" onclick="showSection('docker-setup')">Docker & Nginx</a>
+    </div>
+</nav>
+
+<main id="content">
+    <section id="intro" class="active">
+        <h1>Developer Manual</h1>
+        <p>This manual provides technical documentation for the Sharpishly R&D client-side application. The app is built using a "Data-Driven" Vanilla JavaScript architecture designed for high performance and zero-dependency deployments.</p>
+        <h2>Core Principles</h2>
+        <ul>
+            <li><strong>No Frameworks:</strong> Direct DOM manipulation for maximum speed.</li>
+            <li><strong>Single Source of Truth:</strong> All UI state is derived from the <code>app.layout</code> and <code>app.data</code> objects.</li>
+            <li><strong>Persistence:</strong> Utilization of <code>localStorage</code> for session and project data.</li>
+        </ul>
+    </section>
+
+    <section id="layout-system">
+        <h1>Layout System</h1>
+        <p>The application uses a centralized layout object to manage section visibility and titles.</p>
+        <pre>
+layout: {
+  1: { title: 'Home', template: 'home' },
+  5: { title: 'Settings', template: 'settings-view' },
+  6: { title: 'User Profile', template: 'user-profile-view' }
+}</pre>
+        <p>By mapping titles to template IDs, the system ensures that navigation clicks and page rendering remain perfectly synchronized.</p>
+    </section>
+
+    <section id="api-helpers">
+        <h1>API Helpers <span class="badge badge-async">Asynchronous</span></h1>
+        <p>The application abstracts the <code>Fetch API</code> into two primary helpers to handle global error logging and data parsing.</p>
+        <h2>requestGet(url)</h2>
+        <pre>
+async requestGet(url) {
+  const response = await fetch(url);
+  return await response.json();
+}</pre>
+        <h2>requestPost(url, payload)</h2>
+        <pre>
+async requestPost(url, payload) {
+  return await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+}</pre>
+    </section>
+
+    <section id="docker-setup">
+        <h1>Docker Setup</h1>
+        <p>The application is containerized using Nginx to ensure consistent serving across different environments (Windows/Ubuntu).</p>
+        <pre>
+# docker-compose.yml
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/usr/share/nginx/html</pre>
+    <p>To deploy, run: <code>docker-compose up -d</code></p>
+    </section>
+</main>
+
+<script>
+    function showSection(sectionId) {
+        // Update Sections
+        document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+
+        // Update Nav Link Styles
+        document.querySelectorAll('.nav-item').forEach(nav => {
+            nav.classList.remove('active');
+            if(nav.getAttribute('onclick').includes(sectionId)) {
+                nav.classList.add('active');
+            }
+        });
+
+        // Scroll to top
+        window.scrollTo(0, 0);
+    }
+</script>
+
+</body>
+</html>

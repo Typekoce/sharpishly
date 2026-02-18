@@ -40,6 +40,7 @@ layout: {
     { name: "Quick Start", pageId: "quick-start" },
     { name: "Settings",    pageId: "settings-view" },
     { name: "User Profile",    pageId: "user-profile-view" },
+    { name: "Manual",       href: "/docs/index.html", external: true } // Link to your new docs
   ],
 
   projects: [
@@ -1226,33 +1227,25 @@ applyTheme(theme) {
   }
 },
 initProfile() {
-  // Sync initial user data to form
-  const nameInput = document.getElementById('profile-name');
-  const emailInput = document.getElementById('profile-email');
-  
-  if (nameInput) nameInput.value = this.user.name;
-  if (emailInput) emailInput.value = this.user.email;
+    const personalForm = document.getElementById('profile-personal-form');
+    const cvForm = document.getElementById('profile-cv-form');
 
-  // Handle Personal Details Submission
-  document.getElementById('profile-personal-form')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    this.user.name = nameInput.value;
-    this.alert("Personal details updated locally", "success");
-    this.refreshNavigation(); // Update name in navbar if necessary
-  });
-
-  // Handle CV/File Upload Simulation
-  document.getElementById('profile-cv-form')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const file = document.getElementById('profile-cv-file').files[0];
-    if (file) {
-      this.alert(`Uploading ${file.name}...`, "info");
-      // Later this will use your requestPost() helper
-      setTimeout(() => this.alert("CV processed successfully", "success"), 1500);
-    } else {
-      this.alert("Professional details saved", "success");
+    // Load existing data from app.user (which is hydrated from disk)
+    if (document.getElementById('profile-name')) {
+        document.getElementById('profile-name').value = this.user.name || '';
+        document.getElementById('profile-email').value = this.user.email || '';
     }
-  });
+
+    personalForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.user.name = document.getElementById('profile-name').value;
+        this.user.address = document.getElementById('profile-address').value;
+        // ... save other fields to this.user ...
+        
+        this.saveToDisk(); // Save to localStorage
+        this.alert("Profile saved to disk", "success");
+        this.refreshNavigation();
+    });
 },
 // Don't forget to call this.initSettings() in your init() function!
   init() {
