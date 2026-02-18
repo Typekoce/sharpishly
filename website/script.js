@@ -13,6 +13,15 @@ const app = {
   localData:{
     local:localStorage
   },
+layout: {
+  1: { title: 'Home',         template: 'home' },
+  2: { title: 'Login',        template: 'login-view' },
+  3: { title: 'Dashboard',    template: 'dashboard-view' },
+  4: { title: 'Quick Start',  template: 'quick-start' },
+  5: { title: 'Settings',     template: 'settings-view' },
+  6: { title: 'User Profile', template: 'user-profile-view' },
+  7: { title: 'Workspace',    template: 'workspace-view' }
+},
   data:{
     page: '',
     employees:{
@@ -71,22 +80,16 @@ const app = {
   // 1. Update the data block first
   // Naming needs to be consistent: handleNavClick(), menu, showPage()
     this.setPage(pageId);
-    const pages = [
-      'home', 
-      'login-view', 
-      'dashboard-view', 
-      'quick-start', 
-      'features', 
-      'products', 
-      'workspace-view',
-      'settings-view',
-      'user-profile-view'
-    ];
+    const pages = this.pages;
 
-    pages.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = (id === pageId) ? 'block' : 'none';
-    });
+// Loop through the layout object values
+  Object.values(this.layout).forEach(page => {
+    const el = document.getElementById(page.template);
+    if (el) {
+      // Show the element if its template matches the requested pageId
+      el.style.display = (page.template === pageId) ? 'block' : 'none';
+    }
+  });
 
     if (pageId === 'home') this.updateHomeUI();
 
@@ -187,20 +190,18 @@ selectPageQuickStart(pageId){
     });
   },
 
-  handleNavClick(item, isMobile) {
-    const actions = {
-      "Home":        () => this.showPage('home'),
-      "Login":       () => this.showPage('login-view'),
-      "Dashboard":   () => this.showPage('dashboard-view'),
-      "Quick Start": () => this.showPage('quick-start'),
-      "Settings":    () => this.showPage('settings-view'),
-      "User Profile":    () => this.showPage('user-profile-view'),
-      
-    };
-    const action = actions[item.name];
-    if (action) action();
-    if (isMobile) document.querySelector('.btn-close')?.click();
-  },
+handleNavClick(item, isMobile) {
+  // Find the layout entry where the title matches the clicked item name
+  const pageEntry = Object.values(this.layout).find(p => p.title === item.name);
+
+  if (pageEntry) {
+    this.showPage(pageEntry.template);
+  }
+
+  if (isMobile) {
+    document.querySelector('.btn-close')?.click();
+  }
+},
 
 // ────────────────────────────────────────────────
 // WORKSPACE & PROJECT COMPONENTS
@@ -1245,7 +1246,7 @@ applyTheme(theme) {
     }
 
     // Debug
-    //prettyBug(this);
+    prettyBug(this);
   }
 };
 
