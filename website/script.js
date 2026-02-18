@@ -1225,6 +1225,35 @@ applyTheme(theme) {
     btn.style.background = theme === 'dark' ? 'var(--gray)' : 'var(--primary)';
   }
 },
+initProfile() {
+  // Sync initial user data to form
+  const nameInput = document.getElementById('profile-name');
+  const emailInput = document.getElementById('profile-email');
+  
+  if (nameInput) nameInput.value = this.user.name;
+  if (emailInput) emailInput.value = this.user.email;
+
+  // Handle Personal Details Submission
+  document.getElementById('profile-personal-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    this.user.name = nameInput.value;
+    this.alert("Personal details updated locally", "success");
+    this.refreshNavigation(); // Update name in navbar if necessary
+  });
+
+  // Handle CV/File Upload Simulation
+  document.getElementById('profile-cv-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const file = document.getElementById('profile-cv-file').files[0];
+    if (file) {
+      this.alert(`Uploading ${file.name}...`, "info");
+      // Later this will use your requestPost() helper
+      setTimeout(() => this.alert("CV processed successfully", "success"), 1500);
+    } else {
+      this.alert("Professional details saved", "success");
+    }
+  });
+},
 // Don't forget to call this.initSettings() in your init() function!
   init() {
     this.loadFromDisk(); // Hydrate data from disk before rendering
@@ -1232,6 +1261,7 @@ applyTheme(theme) {
     this.initMobileMenu();
     this.initAuth();
     this.initSettings();
+    this.initProfile();
     
     // Auto-route to dashboard if a session exists
     if (this.isAuthenticated()) {

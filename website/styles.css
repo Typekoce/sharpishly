@@ -534,3 +534,12 @@ main {
   background-color: var(--primary) !important; /* Use blue so it stands out */
   color: white;
 }
+
+
+.login-card {
+  /* ... keep existing styles ... */
+  display: block;      /* Ensures it takes up full width of the container */
+  width: 100%;         /* Forces it to span the container width */
+  margin-bottom: 2rem; /* Creates the "clearance" for the next element */
+  clear: both;         /* Technical safety to clear any floated elements */
+}
