@@ -1,6 +1,8 @@
 /***********************************************
  * Sharpishly R&D – Application Logic
  ***********************************************/
+
+
   // ────────────────────────────────────────────────
   // USER MODEL
   // ────────────────────────────────────────────────
@@ -34,6 +36,32 @@ class userController {
   }
 
 };
+
+
+  // ────────────────────────────────────────────────
+  // HOME CONTROLLER
+  // ────────────────────────────────────────────────
+class HomeController {
+  constructor() {
+    this.templateId = 'home';
+  }
+
+  render() {
+    const email = app.localUserModel.getEmail();
+    const h1 = document.querySelector('#home h1');
+    const sub = document.getElementById('sub-header');
+
+    if (email && email !== 'foo' && h1) {
+      h1.textContent = "Welcome Back, Researcher";
+      if (sub) sub.innerHTML = `Session active for: <strong>${email}</strong>`;
+    } else if (h1) {
+      h1.textContent = "Sharpishly R&D©";
+      if (sub) sub.textContent = "R&D accessible to everyone";
+    }
+  }
+}
+
+
 const app = {
   // ────────────────────────────────────────────────
   // USER MODEL
@@ -44,6 +72,11 @@ const app = {
   // USER CONTROLLER
   // ────────────────────────────────────────────────
   localUserController:new userController(),
+
+  // ────────────────────────────────────────────────
+  // HOME CONTROLLER
+  // ────────────────────────────────────────────────
+  homeCtrl: new HomeController(),
 
   // ────────────────────────────────────────────────
   // USER
