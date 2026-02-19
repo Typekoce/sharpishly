@@ -1,7 +1,7 @@
 /***********************************************
  * Sharpishly R&D – Application Logic
  ***********************************************/
-
+  // Gemini: https://gemini.google.com/app/cccc1302ac7625c6
 
   // ────────────────────────────────────────────────
   // USER MODEL
@@ -19,6 +19,10 @@ class userModel {
   // ────────────────────────────────────────────────
   getEmail() {
     return 'test@sharpishly.com';
+  }
+
+  getName() {
+    return 'Steve Austin';
   }
 
 };
@@ -47,7 +51,8 @@ class HomeController {
   }
 
   render() {
-    const email = app.localUserModel.getEmail();
+    const user = new userModel();
+    const email = user.getEmail();
     const h1 = document.querySelector('#home h1');
     const sub = document.getElementById('sub-header');
 
@@ -61,23 +66,146 @@ class HomeController {
   }
 }
 
+  // ────────────────────────────────────────────────
+  // QUICK START CONTROLLER
+  // ────────────────────────────────────────────────
+  class QuickStartController {
+  constructor(projectFormFields) {
+    this.templateId = 'quick-start';
+    this.projectFormFields = projectFormFields;
+    this.user = new userModel();
+  }
+
+  // ────────────────────────────────────────────────
+  // PROJECT FORMS & DASHBOARD
+  // ────────────────────────────────────────────────
+  setFormField(f,form){
+
+    const div = document.createElement('div');
+    div.className = 'form-group';
+
+    const label = document.createElement('label');
+    label.setAttribute('for',f.id);
+    label.innerHTML = f.label;
+
+    const msg = 'hello';
+
+    const input = document.createElement('input');
+    if(f.id === 'title'){
+      const msg = 'title';
+    } else if(f.id ==='email'){
+      const msg = 'email';
+    }
+    input.value = msg;
+    input.setAttribute('id',f.id);
+
+
+    div.appendChild(label);
+    div.appendChild(input);
+    form.appendChild(div);
+
+    return form;
+  }
+
+// ────────────────────────────────────────────────
+  // PREVENT DUPLICATE PROJECT
+  // ────────────────────────────────────────────────
+  preventDuplicateProject(title) {
+    // Returns true if a project with the same name already exists
+    return this.projects.some(p => p.title.toLowerCase() === title.toLowerCase());
+  }
+  
+  view(){
+      const container = document.getElementById('quick-start-form-container');
+      if (container && container.children.length === 0) {
+        container.appendChild(this.createProjectForm());
+      }
+  };
+  createProjectForm() {
+    const form = document.createElement('form');
+    this.projectFormFields.forEach(f => {
+      this.setFormField(f,form);
+
+    });
+    const submit = document.createElement('button');
+    submit.type = 'submit'; submit.className = 'btn-login'; submit.textContent = 'Add Project';
+    form.appendChild(submit);
+
+form.addEventListener('submit', e => {
+      e.preventDefault();
+      const emailValue = form.email.value.trim();
+      const projectTitle = form.title.value.trim();
+      
+      // 1. Check for duplicates first
+      if (this.preventDuplicateProject(projectTitle)) {
+        this.alert(`Error: A project named "${projectTitle}" already exists.`, "danger");
+        return; // Exit the function to prevent pushing to array
+      }
+
+      // 2. Proceed with update if unique
+      document.getElementById('welcome-message').textContent = `Researcher Portal: ${emailValue}`;
+      this.user.email = emailValue;
+      
+      this.projects.push({ 
+        id: Date.now(), 
+        title: projectTitle, 
+        status: "Active",
+        progress: '10%' 
+      });
+
+      this.saveToDisk();
+      this.renderProjects();
+      
+      this.alert(`Project "${projectTitle}" has been created successfully!`, "success");
+      this.showPage('dashboard-view');
+    });
+    return form;
+  }
+
+  // ────────────────────────────────────────────────
+  // SAVE TO DISK
+  // ────────────────────────────────────────────────
+  saveToDisk() {
+    const sessionData = {
+      email: this.user.email || this.getActiveEmail(),
+      projects: this.projects
+    };
+    localStorage.setItem('sharpishly_session', JSON.stringify(sessionData));
+    
+    console.log("--- LocalStorage Updated ---");
+    console.log(localStorage);
+  }
+  renderProjects() {
+    const grid = document.getElementById('project-grid');
+    if (!grid) return;
+    if (!document.getElementById('form-wrapper')) {
+      const wrapper = document.createElement('div');
+      wrapper.id = 'form-wrapper'; wrapper.className = 'login-card';
+      wrapper.innerHTML = '<h3>Register New Research Project</h3>';
+      wrapper.appendChild(this.createProjectForm());
+      document.querySelector('#dashboard-view .container').insertBefore(wrapper, grid);
+    }
+    grid.innerHTML = '';
+    this.projects.slice().reverse().forEach(p => grid.appendChild(this.createProjectCard(p)));
+    // Inside renderProjects() or where you build your header
+    const purgeBtn = document.createElement('button');
+    purgeBtn.className = 'btn-login';
+    purgeBtn.style.background = 'var(--danger-bg)';
+    purgeBtn.style.color = 'var(--danger-text)';
+    purgeBtn.textContent = 'Purge All Projects';
+    purgeBtn.onclick = () => {
+        if(confirm("Are you sure? This cannot be undone.")) {
+            this.purgeProjects();
+        }
+};
+  }
+  render() {
+    this.view();
+  }
+}
+
 
 const app = {
-  // ────────────────────────────────────────────────
-  // USER MODEL
-  // ────────────────────────────────────────────────
-  localUserModel:new userModel(),
-
-  // ────────────────────────────────────────────────
-  // USER CONTROLLER
-  // ────────────────────────────────────────────────
-  localUserController:new userController(),
-
-  // ────────────────────────────────────────────────
-  // HOME CONTROLLER
-  // ────────────────────────────────────────────────
-  homeCtrl: new HomeController(),
-
   // ────────────────────────────────────────────────
   // USER
   // ────────────────────────────────────────────────
@@ -158,7 +286,7 @@ layout: {
     this.setPage(pageId);
     const pages = this.pages;
 
-// Loop through the layout object values
+  // Loop through the layout object values
   Object.values(this.layout).forEach(page => {
     const el = document.getElementById(page.template);
     if (el) {
@@ -167,9 +295,17 @@ layout: {
     }
   });
 
-    if (pageId === 'home') this.updateHomeUI();
+  if (pageId === 'home') {
+      const homeCtrl = new HomeController();
+      homeCtrl.render();
+  }
 
-    this.selectPageQuickStart(pageId);
+    if (pageId === 'quick-start') {
+        const quickCtrl = new QuickStartController(this.projectFormFields);
+        quickCtrl.render();
+        this.refreshNavigation();
+
+    }
 
     this.selectPageUserProfile(pageId);
 
@@ -188,27 +324,6 @@ selectPageSettings(pageId){
       this.alert('Theme settings are still under development');
     }
 },
-selectPageQuickStart(pageId){
-      if (pageId === 'quick-start') {
-      const container = document.getElementById('quick-start-form-container');
-      if (container && container.children.length === 0) {
-        container.appendChild(this.createProjectForm());
-      }
-    }
-},
-  updateHomeUI() {
-    const email = this.getActiveEmail();
-    const homeH1 = document.querySelector('#home h1');
-    const homeSub = document.querySelector('#home p.lead') || document.getElementById('sub-header');
-    
-    if (email && homeH1) {
-      homeH1.textContent = "Welcome Back, Researcher";
-      if (homeSub) homeSub.innerHTML = `Session active for: <strong>${email}</strong>`;
-    } else if (homeH1) {
-      homeH1.textContent = "Sharpishly R&D©";
-      if (homeSub) homeSub.textContent = "R&D accessible to everyone";
-    }
-  },
 
   refreshNavigation() {
     const desktop = document.querySelector('#navbarNav .navbar-nav');
@@ -1014,84 +1129,7 @@ renderHRCategory(employee, category, container) {
       }
     }, 4000);
   },
-  // ────────────────────────────────────────────────
-  // PROJECT FORMS & DASHBOARD
-  // ────────────────────────────────────────────────
-  setFormField(f,form){
 
-    const div = document.createElement('div');
-    div.className = 'form-group';
-
-    const label = document.createElement('label');
-    label.setAttribute('for',f.id);
-    label.innerHTML = f.label;
-
-    msg = 'hello';
-
-    input = document.createElement('input');
-    if(f.id === 'title'){
-      msg = this.user.name;
-    } else if(f.id ==='email'){
-      msg = this.user.email;
-    }
-    input.value = msg;
-    input.setAttribute('id',f.id);
-
-
-    div.appendChild(label);
-    div.appendChild(input);
-    form.appendChild(div);
-
-    return form;
-  },
-  createProjectForm() {
-    const form = document.createElement('form');
-    this.projectFormFields.forEach(f => {
-      this.setFormField(f,form);
-
-    });
-    const submit = document.createElement('button');
-    submit.type = 'submit'; submit.className = 'btn-login'; submit.textContent = 'Add Project';
-    form.appendChild(submit);
-
-form.addEventListener('submit', e => {
-      e.preventDefault();
-      const emailValue = form.email.value.trim();
-      const projectTitle = form.title.value.trim();
-      
-      // 1. Check for duplicates first
-      if (this.preventDuplicateProject(projectTitle)) {
-        this.alert(`Error: A project named "${projectTitle}" already exists.`, "danger");
-        return; // Exit the function to prevent pushing to array
-      }
-
-      // 2. Proceed with update if unique
-      document.getElementById('welcome-message').textContent = `Researcher Portal: ${emailValue}`;
-      this.user.email = emailValue;
-      
-      this.projects.push({ 
-        id: Date.now(), 
-        title: projectTitle, 
-        status: "Active",
-        progress: '10%' 
-      });
-
-      this.saveToDisk();
-      this.renderProjects();
-      this.refreshNavigation();
-      
-      this.alert(`Project "${projectTitle}" has been created successfully!`, "success");
-      this.showPage('dashboard-view');
-    });
-    return form;
-  },
-// ────────────────────────────────────────────────
-  // PREVENT DUPLICATE PROJECT
-  // ────────────────────────────────────────────────
-  preventDuplicateProject(title) {
-    // Returns true if a project with the same name already exists
-    return this.projects.some(p => p.title.toLowerCase() === title.toLowerCase());
-  },
   // ────────────────────────────────────────────────
   // PURGE ALL PROJECTS
   // ────────────────────────────────────────────────
@@ -1119,44 +1157,7 @@ form.addEventListener('submit', e => {
     return card;
   },
 
-  renderProjects() {
-    const grid = document.getElementById('project-grid');
-    if (!grid) return;
-    if (!document.getElementById('form-wrapper')) {
-      const wrapper = document.createElement('div');
-      wrapper.id = 'form-wrapper'; wrapper.className = 'login-card';
-      wrapper.innerHTML = '<h3>Register New Research Project</h3>';
-      wrapper.appendChild(this.createProjectForm());
-      document.querySelector('#dashboard-view .container').insertBefore(wrapper, grid);
-    }
-    grid.innerHTML = '';
-    this.projects.slice().reverse().forEach(p => grid.appendChild(this.createProjectCard(p)));
-    // Inside renderProjects() or where you build your header
-    const purgeBtn = document.createElement('button');
-    purgeBtn.className = 'btn-login';
-    purgeBtn.style.background = 'var(--danger-bg)';
-    purgeBtn.style.color = 'var(--danger-text)';
-    purgeBtn.textContent = 'Purge All Projects';
-    purgeBtn.onclick = () => {
-        if(confirm("Are you sure? This cannot be undone.")) {
-            this.purgeProjects();
-        }
-};
-  },
 
-  // ────────────────────────────────────────────────
-  // SAVE TO DISK
-  // ────────────────────────────────────────────────
-  saveToDisk() {
-    const sessionData = {
-      email: this.user.email || this.getActiveEmail(),
-      projects: this.projects
-    };
-    localStorage.setItem('sharpishly_session', JSON.stringify(sessionData));
-    
-    console.log("--- LocalStorage Updated ---");
-    console.log(localStorage);
-  },
 
   loadFromDisk() {
     const rawData = localStorage.getItem('sharpishly_session');
