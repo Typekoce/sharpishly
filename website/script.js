@@ -41,6 +41,18 @@ class userController {
 
 };
 
+  // ────────────────────────────────────────────────
+  // DASHBOARD CONTROLLER
+  // ────────────────────────────────────────────────
+  class DashboardController{
+    constructor(pageId){
+      this.templateId = pageId;
+    }
+
+    render(){
+      prettyBug(this);
+    }
+  };
 
   // ────────────────────────────────────────────────
   // HOME CONTROLLER
@@ -138,7 +150,7 @@ form.addEventListener('submit', e => {
       
       // 1. Check for duplicates first
       if (this.preventDuplicateProject(projectTitle)) {
-        this.alert(`Error: A project named "${projectTitle}" already exists.`, "danger");
+        app.alert(`Error: A project named "${projectTitle}" already exists.`, "danger");
         return; // Exit the function to prevent pushing to array
       }
 
@@ -156,8 +168,8 @@ form.addEventListener('submit', e => {
       this.saveToDisk();
       this.renderProjects();
       
-      this.alert(`Project "${projectTitle}" has been created successfully!`, "success");
-      this.showPage('dashboard-view');
+      app.alert(`Project "${projectTitle}" has been created successfully!`, "success");
+      app.showPage('dashboard-view');
     });
     return form;
   }
@@ -307,6 +319,11 @@ layout: {
 
     }
 
+  if (pageId === 'dashboard') {
+      const dashboardCtrl = new DashboardController(pageId);
+      dashboardCtrl.render();
+  }
+
     this.selectPageUserProfile(pageId);
 
     this.selectPageSettings(pageId);
@@ -315,13 +332,13 @@ layout: {
 selectPageUserProfile(pageId){
       if (pageId === 'user-profile-view') {
        //prettyBug(this);      
-       this.alert('Theme user profile are still under development');
+       app.alert('Theme user profile are still under development');
 
     }
 },
 selectPageSettings(pageId){
       if (pageId === 'settings-view') {
-      this.alert('Theme settings are still under development');
+      app.alert('Theme settings are still under development');
     }
 },
 
@@ -386,7 +403,7 @@ handleNavClick(item, isMobile) {
   const pageEntry = Object.values(this.layout).find(p => p.title === item.name);
 
   if (pageEntry) {
-    this.showPage(pageEntry.template);
+    app.showPage(pageEntry.template);
   }
 
   if (isMobile) {
@@ -399,7 +416,7 @@ handleNavClick(item, isMobile) {
 // ────────────────────────────────────────────────
 
 showWorkspace(project) {
-  this.showPage('workspace-view');
+  app.showPage('workspace-view');
   const container = document.getElementById('workspace-content');
   if (!container) return;
 
@@ -624,7 +641,7 @@ createHRSupportPanel() {
     submitBtn.textContent = 'Submit Ticket';
     submitBtn.onclick = () => {
       const type = select.value;
-      this.alert(`Ticket Created: ${type}. HR will review this shortly.`, "success");
+      app.alert(`Ticket Created: ${type}. HR will review this shortly.`, "success");
       const backdrop = document.getElementById('modal-backdrop');
       if (backdrop) backdrop.remove();
     };
@@ -1051,7 +1068,7 @@ renderHRCategory(employee, category, container) {
       employee.currentProject = project.title;
       this.updateWorkspaceHeader(employee);
       this.saveToDisk(); // Crucial for persistence
-      this.alert(`${employee.firstname} assigned to ${project.title}`, "success");
+      app.alert(`${employee.firstname} assigned to ${project.title}`, "success");
     } else {
       // Handles Personal, Role, Tax via the existing save method
       this.saveHREntry(employee.id, category);
@@ -1144,7 +1161,7 @@ renderHRCategory(employee, category, container) {
     this.renderProjects();
 
     // 4. Notify the user
-    this.alert("All projects have been removed.", "warning");
+    app.alert("All projects have been removed.", "warning");
   },
   createProjectCard(project) {
     const card = document.createElement('div');
@@ -1188,7 +1205,7 @@ renderHRCategory(employee, category, container) {
         this.saveToDisk();
         this.renderProjects();
         this.refreshNavigation();
-        this.showPage('dashboard-view');
+        app.showPage('dashboard-view');
       });
     }
 
@@ -1197,8 +1214,8 @@ renderHRCategory(employee, category, container) {
       this.user.email = 'guest@sharpishly.com'; // Reset to default on logout
       document.getElementById('welcome-message').textContent = '';
       // Trigger the centralized alert before switching pages
-      this.alert("You have been signed out successfully.", "info");
-      this.showPage('home');
+      app.alert("You have been signed out successfully.", "info");
+      app.showPage('home');
       this.refreshNavigation();
     });
   },
@@ -1324,7 +1341,7 @@ initProfile() {
         // ... save other fields to this.user ...
         
         this.saveToDisk(); // Save to localStorage
-        this.alert("Profile saved to disk", "success");
+        app.alert("Profile saved to disk", "success");
         this.refreshNavigation();
     });
 },
@@ -1339,18 +1356,18 @@ initProfile() {
     
     // Auto-route to dashboard if a session exists
     if (this.isAuthenticated()) {
-      this.alert("Session access granted", "success");
+      app.alert("Session access granted", "success");
       //this.renderProjects();
-      this.showPage('dashboard-view');
+      app.showPage('dashboard-view');
       this.setPage('dashboard');
       this.hideDashBoardForm();
     } else {
-      this.showPage('home');
+      app.showPage('home');
       this.setPage('home')
     }
 
     // Debug
-    prettyBug(this);
+    //prettyBug(this);
   }
 };
 

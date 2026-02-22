@@ -78,3 +78,21 @@
 - [ ] **Data Hydration:** Ensure `initProfile` saves all fields to `localStorage`.
 - [ ] **CRM Foundation:** Define `app.data.contacts` for researcher tracking.
 - [ ] **Dynamic Content:** Move `View` strings to `app.data.content` for CMS capability.
+
+# TODO
+
+## ✅ MVC & View Refactor
+- [x] Create centralized `View` object for HTML templates.
+- [x] Implement `HomeController` and `QuickStartController`.
+- [x] Fix `this.projects` undefined error in validation.
+
+## 🟦 Next Up: Component Expansion
+- [ ] **SettingsController:** Migrate theme toggling and localData management to MVC.
+- [ ] **UserProfileController:** Move personal details and CV upload logic to a controller.
+- [ ] **Error Handling:** Add null-checks to `hideDashBoardForm` to prevent init crashes.
+
+## 🟧 Future Modules (The Big Four)
+- [ ] **CRM:** Track researcher interactions via `ContactController`.
+- [ ] **CMS:** Abstract `View` strings into `app.data.content`.
+- [ ] **Social Suite:** Create unified social media upload helpers.
+- [ ] **3D Integration:** Add research visualization canvas.
