@@ -66,3 +66,15 @@
 - [ ] Connect `app.data.roles` to the Expertise dropdown in Profile.
 - [ ] Implement `requestGet` / `requestPost` (Milestone #8).
 - [ ] Add "Export Profile to PDF" feature.
+
+# TODO
+
+## ✅ MVC & Bug Fixes
+- [x] Extract inline HTML to `View` layer.
+- [x] Fix `this.projects` scope error.
+- [x] Resolve `hideDashBoardForm` null pointer exception.
+
+## 🟦 Next Up (Logic & Data)
+- [ ] **Data Hydration:** Ensure `initProfile` saves all fields to `localStorage`.
+- [ ] **CRM Foundation:** Define `app.data.contacts` for researcher tracking.
+- [ ] **Dynamic Content:** Move `View` strings to `app.data.content` for CMS capability.

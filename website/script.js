@@ -112,7 +112,7 @@ class HomeController {
   // ────────────────────────────────────────────────
   preventDuplicateProject(title) {
     // Returns true if a project with the same name already exists
-    return this.projects.some(p => p.title.toLowerCase() === title.toLowerCase());
+    return app.projects.some(p => p.title.toLowerCase() === title.toLowerCase());
   }
   
   view(){
@@ -146,7 +146,7 @@ form.addEventListener('submit', e => {
       document.getElementById('welcome-message').textContent = `Researcher Portal: ${emailValue}`;
       this.user.email = emailValue;
       
-      this.projects.push({ 
+      app.projects.push({ 
         id: Date.now(), 
         title: projectTitle, 
         status: "Active",
@@ -168,7 +168,7 @@ form.addEventListener('submit', e => {
   saveToDisk() {
     const sessionData = {
       email: this.user.email || this.getActiveEmail(),
-      projects: this.projects
+      projects: app.projects
     };
     localStorage.setItem('sharpishly_session', JSON.stringify(sessionData));
     
@@ -186,7 +186,7 @@ form.addEventListener('submit', e => {
       document.querySelector('#dashboard-view .container').insertBefore(wrapper, grid);
     }
     grid.innerHTML = '';
-    this.projects.slice().reverse().forEach(p => grid.appendChild(this.createProjectCard(p)));
+    app.projects.slice().reverse().forEach(p => grid.appendChild(app.createProjectCard(p)));
     // Inside renderProjects() or where you build your header
     const purgeBtn = document.createElement('button');
     purgeBtn.className = 'btn-login';
@@ -1021,7 +1021,7 @@ renderHRCategory(employee, category, container) {
     const h4 = document.createElement('h4');
     h4.textContent = "Assign to Research Project";
     container.appendChild(h4);
-    this.createSelectField({id: 'projSelect', label: 'Select Active Project'}, container, this.projects);
+    this.createSelectField({id: 'projSelect', label: 'Select Active Project'}, container, app.projects);
   } 
   else if (category === 'Role') {
     this.createSelectField({id: 'dept', label: 'Department'}, container, ['Operations', 'Surveying', 'HQ']);
@@ -1047,7 +1047,7 @@ renderHRCategory(employee, category, container) {
   saveBtn.onclick = () => {
     if (category === 'Assignment') {
       const pId = document.getElementById('projSelect').value;
-      const project = this.projects.find(p => p.id == pId);
+      const project = app.projects.find(p => p.id == pId);
       employee.currentProject = project.title;
       this.updateWorkspaceHeader(employee);
       this.saveToDisk(); // Crucial for persistence
@@ -1135,7 +1135,7 @@ renderHRCategory(employee, category, container) {
   // ────────────────────────────────────────────────
   purgeProjects() {
     // 1. Empty the array (preserves the reference)
-    this.projects.length = 0;
+    app.projects.length = 0;
 
     // 2. Sync to localStorage so they don't return on refresh
     this.saveToDisk();
@@ -1164,7 +1164,7 @@ renderHRCategory(employee, category, container) {
     if (rawData) {
       const data = JSON.parse(rawData);
       this.localData = data;
-      this.projects = data.projects || this.projects;
+      app.projects = data.projects || this.projects;
       if (data.email) {
         this.user.email = data.email;
         document.getElementById('welcome-message').textContent = `Researcher Portal: ${data.email}`;
@@ -1202,10 +1202,15 @@ renderHRCategory(employee, category, container) {
       this.refreshNavigation();
     });
   },
-  hideDashBoardForm(){
-    form = document.getElementById('form-wrapper');
+// Line 1205 in your current script.js
+hideDashBoardForm() {
+  const form = document.getElementById('project-form'); // Ensure this ID exists in index.html
+  if (form) {
     form.style.display = 'none';
-  },
+  } else {
+    console.warn("hideDashBoardForm: Element with ID 'project-form' not found.");
+  }
+},
   initMobileMenu() {
     const toggler = document.querySelector('.navbar-toggler');
     const menu = document.getElementById('mobileMenu');
@@ -1335,7 +1340,7 @@ initProfile() {
     // Auto-route to dashboard if a session exists
     if (this.isAuthenticated()) {
       this.alert("Session access granted", "success");
-      this.renderProjects();
+      //this.renderProjects();
       this.showPage('dashboard-view');
       this.setPage('dashboard');
       this.hideDashBoardForm();
