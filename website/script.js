@@ -55,6 +55,25 @@ class userController {
   };
 
   // ────────────────────────────────────────────────
+  // USER PROFILE CONTROLLER
+  // ────────────────────────────────────────────────
+  class UserProfileController{
+    constructor(pageId){
+      this.templateId = pageId;
+      this.msg = "Under Construction";
+      this.UserProfile();
+      
+    }
+    UserProfile(pageId){
+      app.alert(this.msg);
+    };
+    render(){
+      prettyBug(this);
+    }
+  };
+
+
+  // ────────────────────────────────────────────────
   // HOME CONTROLLER
   // ────────────────────────────────────────────────
 class HomeController {
@@ -119,7 +138,7 @@ class HomeController {
     return form;
   }
 
-// ────────────────────────────────────────────────
+  // ────────────────────────────────────────────────
   // PREVENT DUPLICATE PROJECT
   // ────────────────────────────────────────────────
   preventDuplicateProject(title) {
@@ -255,7 +274,7 @@ layout: {
     { name: "Quick Start", pageId: "quick-start" },
     { name: "Settings",    pageId: "settings-view" },
     { name: "User Profile",    pageId: "user-profile-view" },
-    { name: "Manual",       href: "/docs/index.html", external: true } // Link to your new docs
+    //{ name: "Manual",       href: "/docs/index.html", external: true } // Link to your new docs
   ],
 
   projects: [
@@ -324,18 +343,14 @@ layout: {
       dashboardCtrl.render();
   }
 
-    this.selectPageUserProfile(pageId);
+  if (pageId === 'user-profile-view') {
+      const userProfileCtrl = new UserProfileController(pageId);
+      userProfileCtrl.render();
+  }
 
     this.selectPageSettings(pageId);
 
   },
-selectPageUserProfile(pageId){
-      if (pageId === 'user-profile-view') {
-       //prettyBug(this);      
-       app.alert('Theme user profile are still under development');
-
-    }
-},
 selectPageSettings(pageId){
       if (pageId === 'settings-view') {
       app.alert('Theme settings are still under development');
