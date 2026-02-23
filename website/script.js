@@ -62,8 +62,25 @@ class userController {
       this.templateId = pageId;
       this.msg = "Under Construction";
       this.UserProfile();
+      this.populateExpertise();
       
     }
+    // Add this inside class UserProfileController
+populateExpertise() {
+  const select = document.getElementById('profile-expertise'); // Ensure this ID exists in index.html
+  if (!select) return;
+
+  // Clear existing options
+  select.innerHTML = '<option value="">Select Expertise...</option>';
+
+  // Pull from the centralized data in the main app/model
+  app.data.roles.forEach(role => {
+    const opt = document.createElement('option');
+    opt.value = role.toLowerCase().replace(/\s+/g, '-');
+    opt.textContent = role;
+    select.appendChild(opt);
+  });
+};
     UserProfile(pageId){
       app.alert(this.msg);
     };
