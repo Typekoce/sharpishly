@@ -1399,7 +1399,7 @@ initProfile() {
     }
 
     // Debug
-    //prettyBug(this);
+    prettyBug(this);
   }
 };
 

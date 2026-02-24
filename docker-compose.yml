@@ -1,11 +1,25 @@
 version: '3.8'
 
 services:
+  # PHP Processor
+  php:
+    image: php:8.2-fpm
+    container_name: sharpishly-php
+    volumes:
+      - ./php:/var/www/html/php
+      - ./website:/var/www/html
+    restart: always
+
+  # Nginx Web Server
   web:
-    build: .
+    image: nginx:alpine
     container_name: sharpishly-app
     ports:
       - "8080:80"
     volumes:
       - ./website:/usr/share/nginx/html
+      - ./php:/usr/share/nginx/html/php
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
     restart: always
