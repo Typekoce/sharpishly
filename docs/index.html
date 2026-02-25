@@ -98,6 +98,12 @@
         <h4>Deployment</h4>
         <a class="nav-item" onclick="showSection('docker-setup')">Docker & Nginx</a>
     </div>
+
+    <div class="nav-group">
+        <h4>Backend Architecture</h4>
+        <a class="nav-item" onclick="showSection('docker-lemp')">Docker & LEMP Stack</a>
+        <a class="nav-item" onclick="showSection('php-front-controller')">PHP Front Controller</a>
+    </div>
 </nav>
 
 <main id="content">
@@ -157,6 +163,47 @@ services:
       - .:/usr/share/nginx/html</pre>
     <p>To deploy, run: <code>docker-compose up -d</code></p>
     </section>
+<section id="docker-lemp">
+    <h1>Docker & LEMP Stack</h1>
+    <p>The application has transitioned from a static frontend to a containerized <strong>LEMP</strong> (Linux, Nginx, MySQL/MariaDB, PHP) stack. This ensures environment parity between development and production.</p>
+    
+    <h2>Service Orchestration</h2>
+    <pre>
+# docker-compose.yml summary
+services:
+  php: # PHP 8.2-FPM Processor
+    image: php:8.2-fpm
+    volumes: ['./php:/var/www/html/php']
+    
+  web: # Nginx Web Server & Proxy
+    image: nginx:alpine
+    ports: ["8080:80"]
+    depends_on: [php]</pre>
+
+    <h2>Deployment</h2>
+    <p>To start the environment, use the provided shell scripts:</p>
+    <ul>
+        <li><code>./docker.sh</code>: Builds and starts containers.</li>
+        <li><code>./docker_down.sh</code>: Stops and removes containers.</li>
+    </ul>
+</section>
+
+<section id="php-front-controller">
+    <h1>PHP Front Controller</h1>
+    <p>Backend routing is handled by a centralized <strong>Front Controller</strong> pattern located at <code>php/index.php</code>. This captures all requests to the <code>/php/</code> URI and dispatches them to specialized controllers.</p>
+    
+    
+    
+    <h2>Routing Logic</h2>
+    <p>The <code>FrontController</code> class parses the request URI into three segments:</p>
+    <pre>
+1. Controller (e.g., App\Controllers\UserController)
+2. Method     (e.g., login)
+3. Parameters (e.g., [id])</pre>
+
+    <h2>Logging & Debugging</h2>
+    <p>Every backend request is logged to <code>php/app.log</code>. This includes the timestamp, the exact parsed path, and the JSON-encoded parameters, which is essential for debugging Milestone #8 API calls.</p>
+</section>
 </main>
 
 <script>

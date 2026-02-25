@@ -136,3 +136,13 @@ Once the Workspace logic is moved, you will be ready to move away from `localSto
 * **Goal:** Transition the `userModel` and `DashboardController` to fetch/save data to a (mock or real) backend instead of just local memory.
 
 **Which of these would you like to tackle first? I can provide the code for the Expertise dropdown population if you want to clear that TODO item.**
+
+- [x] Implement Docker container health checks and multi-container orchestration.
+- [x] Unify HTML/JS naming conventions (kebab-case).
+- [x] Set up PHP Front Controller and Autoloader.
+
+## 🟦 Next Up
+- [ ] **Bridge Frontend to PHP:** Update `requestGet` and `requestPost` in `script.js` to target `/php/` endpoints.
+- [ ] **Backend Persistence:** Integrate a database (SQLite or MySQL) into the PHP service to replace LocalStorage.
+- [ ] **Auth Logic:** Move `isAuthenticated` check from JS to a PHP Session-based check.
+- [ ] **Log Rotation:** Ensure `php/app.log` does not grow indefinitely in the Docker volume.

@@ -36,3 +36,24 @@ Minimal, modern, dependency-free responsive navbar + landing page.
 
 # Website Live Preview
 [Sharpishly R&D](https://html-preview.github.io/?url=https://github.com/Typekoce/sharpishly/blob/main/website/index.html)
+
+# Sharpishly Research & Development
+
+Minimal, modern, dependency-free responsive navbar + landing page.
+
+## Technologies
+- HTML5 / CSS3 / Vanilla JS
+- **PHP 8.2 (FPM)**
+- **Nginx (Web Server & Reverse Proxy)**
+- **Docker & Docker Compose**
+
+## Project structure
+```website/
+├── website/            # Frontend assets (HTML, CSS, JS)
+├── php/                # Backend logic
+│   ├── src/            # MVC Core & Controllers
+│   ├── logs/           # Application logging
+│   └── index.php       # PHP Front Controller
+├── nginx.conf          # Reverse Proxy Configuration
+├── Dockerfile          # Nginx container build
+└── docker-compose.yml  # Multi-container orchestration
