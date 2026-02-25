@@ -9,6 +9,7 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY ./website /usr/share/nginx/html
 # Update this line to match your rename:
 COPY ./php/index.php /usr/share/nginx/html/php/index.php
+COPY ./php/logs/app.log /usr/share/nginx/html/php/logs/app.log
 
 # Expose port 80
 EXPOSE 80
