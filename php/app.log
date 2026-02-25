@@ -5,3 +5,81 @@
   → method = index
   → params = []
 
+[2026-02-25T16:46:48+00:00] REQUEST_URI = /php/
+  → parsed path = php
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-25T16:47:19+00:00] REQUEST_URI = /php/
+  → parsed path = php
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-25T16:57:32+00:00] REQUEST_URI = /php/
+  → parsed path = php
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-25T16:57:32+00:00] REQUEST_URI = /favicon.ico
+  → parsed path = favicon.ico
+  → controller = Favicon.ico
+  → method = index
+  → params = []
+
+[2026-02-25T16:57:45+00:00] REQUEST_URI = /php/home/about
+  → parsed path = php/home/about
+  → controller = Home
+  → method = about
+  → params = []
+
+[2026-02-25T17:00:19+00:00] REQUEST_URI = /php/home/about
+  → parsed path = php/home/about
+  → controller = Home
+  → method = about
+  → params = []
+
+[2026-02-25T17:00:19+00:00] REQUEST_URI = /favicon.ico
+  → parsed path = favicon.ico
+  → controller = Favicon.ico
+  → method = index
+  → params = []
+
+[2026-02-25T17:00:35+00:00] REQUEST_URI = /php/contact/about
+  → parsed path = php/contact/about
+  → controller = Contact
+  → method = about
+  → params = []
+
+[2026-02-25T17:01:18+00:00] REQUEST_URI = /php/contact/about
+  → parsed path = php/contact/about
+  → controller = Contact
+  → method = about
+  → params = []
+
+[2026-02-25T17:01:18+00:00] REQUEST_URI = /favicon.ico
+  → parsed path = favicon.ico
+  → controller = Favicon.ico
+  → method = index
+  → params = []
+
+[2026-02-25T17:02:58+00:00] REQUEST_URI = /php/
+  → parsed path = php
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-25T17:03:05+00:00] REQUEST_URI = /php/contact
+  → parsed path = php/contact
+  → controller = Contact
+  → method = index
+  → params = []
+
+[2026-02-25T17:03:15+00:00] REQUEST_URI = /php/contact/about
+  → parsed path = php/contact/about
+  → controller = Contact
+  → method = about
+  → params = []
+
