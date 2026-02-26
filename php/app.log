@@ -95,3 +95,93 @@
   → method = index
   → params = []
 
+[2026-02-26T17:00:49+00:00] REQUEST_URI = /php/
+  → parsed path = php
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-26T17:11:00+00:00] REQUEST_URI = /php/home/about
+  → parsed path = php/home/about
+  → controller = Home
+  → method = about
+  → params = []
+
+[2026-02-26T17:11:16+00:00] REQUEST_URI = /php/home/about
+  → parsed path = php/home/about
+  → controller = Home
+  → method = about
+  → params = []
+
+[2026-02-26T17:13:31+00:00] REQUEST_URI = /php/home/about
+  → parsed path = php/home/about
+  → controller = Home
+  → method = about
+  → params = []
+
+[2026-02-26T17:13:32+00:00] REQUEST_URI = /php/home/about
+  → parsed path = php/home/about
+  → controller = Home
+  → method = about
+  → params = []
+
+[2026-02-26T17:13:41+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-26T17:14:08+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-26T17:15:28+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-26T17:16:01+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-26T17:16:03+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-26T17:16:28+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-26T17:16:29+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-26T17:16:30+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-26T17:16:52+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-26T17:17:06+00:00] REQUEST_URI = /php/
+  → parsed path = php
+  → controller = Home
+  → method = index
+  → params = []
+
