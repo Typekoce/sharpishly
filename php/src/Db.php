@@ -110,8 +110,69 @@ class Db
         }
     }
 
-    private function escapeIdentifier(string $id): string
+    /**
+     * Save (INSERT or UPDATE) a record
+     *
+     * @param array $data Associative array with:
+     *   - 'tbl'        => table name (required)
+     *   - 'id'         => if present → UPDATE, else INSERT
+     *   - other keys   → column names and values
+     * @return int Last insert ID (on insert) or number of affected rows (on update)
+     * @throws InvalidArgumentException
+     * @throws PDOException
+     */
+    public function save(array $data): int
     {
-        return '`' . str_replace('`', '``', $id) . '`';
+        if (empty($data['tbl'])) {
+            throw new InvalidArgumentException("Table name ('tbl') is required");
+        }
+
+        $table = $this->escapeIdentifier($data['tbl']);
+        unset($data['tbl']); // remove meta key
+
+        // Decide INSERT or UPDATE
+        $isUpdate = !empty($data['id']) && is_numeric($data['id']) && $data['id'] > 0;
+        $id = $isUpdate ? (int)$data['id'] : null;
+        unset($data['id']); // remove id from columns to set
+
+        if (empty($data)) {
+            throw new InvalidArgumentException("No fields to save");
+        }
+
+        $columns = array_keys($data);
+        $placeholders = array_map(fn($col) => ':' . $col, $columns);
+
+        if ($isUpdate) {
+            // UPDATE
+            $setParts = [];
+            foreach ($columns as $col) {
+                $setParts[] = $this->escapeIdentifier($col) . ' = :' . $col;
+            }
+            $setClause = implode(', ', $setParts);
+
+            $sql = "UPDATE $table SET $setClause WHERE id = :id";
+            $params = $data;
+            $params['id'] = $id;
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+
+            return $stmt->rowCount(); // usually 1 or 0
+        } else {
+            // INSERT
+            $columnsEscaped = array_map([$this, 'escapeIdentifier'], $columns);
+            $sql = "INSERT INTO $table (" . implode(', ', $columnsEscaped) . ") 
+                    VALUES (" . implode(', ', $placeholders) . ")";
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($data);
+
+            return (int)$this->pdo->lastInsertId();
+        }
+    }
+
+    private function escapeIdentifier(string $identifier): string
+    {
+        return '`' . str_replace('`', '``', $identifier) . '`';
     }
 }

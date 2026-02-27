@@ -154,3 +154,39 @@ Once the Workspace logic is moved, you will be ready to move away from `localSto
 [ ] Backend: Map ProjectController to use CSVProcessor for 50k row upload.
 
 [ ] Frontend: Implement DashboardController polling for status() API.
+
+This looks solid! Your `Db.php` class is now genuinely functional for basic CRUD, and using `getenv()` is the right move for security.
+
+### Commit Message
+
+```text
+feat(core): implement CRUD methods in Db class and extend HomeController
+
+- Added save() method to Db class supporting both INSERT and UPDATE operations
+- Implemented identifier escaping to prevent SQL injection in save()
+- Updated HomeController to demonstrate database save, update, and find functionality
+- Switched database configuration to use environment variables (getenv)
+
+```
+
+---
+
+### 📋 Updated TODO.md
+
+Here are the next tasks based on your scaffolding progress:
+
+1. **[ ] Backend:** Implement `delete()` method in `Db.php`.
+2. **[ ] Backend:** Finalize `CSVProcessor.php` to use the `Db::save` method for handling 50k rows.
+3. **[ ] Frontend:** Update dashboard UI to poll `ProjectController` for `status()` updates.
+4. **[ ] Project Management:** Set up GitHub Projects/Issues (similar to Jira/Asana) to track these remaining tasks.
+
+---
+
+### 💡 Project Management Integration
+
+Since you want to move away from local files toward professional tools, here is the recommended approach:
+
+* **Jira/Asana:** If you are using these, I recommend installing the **GitHub App** for Jira/Asana. This allows you to reference issue IDs (e.g., `SHARP-123`) in your commit messages, automatically linking the commit to the task in Jira.
+* **GitHub Projects:** Given this is a repository, GitHub’s built-in **Projects** feature is the most seamless approach. It supports Kanban boards and links directly to Pull Requests.
+
+**Would you like me to create a `docs/workflow.md` file outlining how to link commits to project management tickets?**

@@ -13,6 +13,11 @@ class HomeController
 {
     public function index(): void
     {
+        
+        $this->save();    
+    
+        $this->db();
+
         $header = $this->view('home/header');
         $main = $this->view('home/main');
         $footer = $this->view('home/footer');
@@ -79,12 +84,44 @@ class HomeController
         }    
     }
 
+    public function save(){
+
+        $db = new Db();
+
+        // ── INSERT new job ───────────────────────────────────────
+        $save = [
+            'tbl'           => 'jobs',
+            'file_path'     => 'php/uploads/test.csv',
+            'status'        => 'pending',
+            'total_rows'    => 300000,
+            'processed_rows'=> 12345,
+            'created_at'    => date('Y-m-d H:i:s'),  // better format
+            'updated_at'    => date('Y-m-d H:i:s'),
+        ];
+
+        $newId = $db->save($save);
+        echo "Created job with ID: $newId\n";
+
+        // ── UPDATE existing job ──────────────────────────────────
+        $update = [
+            'tbl'           => 'jobs',
+            'id'            => $newId,
+            'status'        => 'processing',
+            'processed_rows'=> 15000,
+            'updated_at'    => date('Y-m-d H:i:s'),
+        ];
+
+        $affected = $db->save($update);
+        echo "Updated $affected row(s)\n";    
+
+    }
+
     public function db(){
         try {
             $db = new Db();
 
             $conditions = [
-                'tbl'   => 'students',
+                'tbl'   => 'jobs',
                 'order' => ['id' => 'desc'],
                 'limit' => '100',
                 // You can add more later, e.g.:

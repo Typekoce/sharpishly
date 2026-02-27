@@ -383,3 +383,57 @@
   → method = index
   → params = []
 
+[2026-02-27T14:22:12+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:34:24+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:34:28+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:35:15+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:35:16+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:44:54+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:46:21+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:47:29+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:49:41+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
