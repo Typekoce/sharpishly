@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Db;          // ← important: import the Db class
+use App\Smarty;
 // or use \App\Db if you place it in root namespace
 
 class HomeController
@@ -14,6 +15,33 @@ class HomeController
     {
         echo "<h1>Welcome to my tiny MVC</h1>";
         echo "<p>Current time: " . date('Y-m-d H:i:s') . "</p>";
+
+        try {
+            // Assuming autoloading is set up
+            $smarty = new Smarty();
+
+            $list = array(
+                array('title'=>'Wolverine'),
+                array('title'=>'Cyclops'),
+                array('title'=>'Jean Grey')
+            );
+
+            $partial = "<li>{{{title}}}</li>";
+
+            $ul = $smarty->partial($partial,$list);
+
+            $file = "<b>{{{title}}}</b><i>{{{name}}}</i><ul>" . $ul . "</ul>";
+
+            $arr = ['title' => 'foo'];
+
+            // Option 1: render to string
+            $output = $smarty->render($file, $arr);
+            echo $output;   // → <b>foo</b><i></i>
+        } catch(\Exception $e){
+            echo "<div style=\"color: red; font-weight: bold;\">";
+            echo "Smarty error: " . htmlspecialchars($e->getMessage());
+            echo "</div>";
+        }
 
         try {
             $db = new Db();
