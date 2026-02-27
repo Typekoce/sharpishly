@@ -146,3 +146,11 @@ Once the Workspace logic is moved, you will be ready to move away from `localSto
 - [ ] **Backend Persistence:** Integrate a database (SQLite or MySQL) into the PHP service to replace LocalStorage.
 - [ ] **Auth Logic:** Move `isAuthenticated` check from JS to a PHP Session-based check.
 - [ ] **Log Rotation:** Ensure `php/app.log` does not grow indefinitely in the Docker volume.
+
+[x] DevOps: Implement automated setup.sh with health checks.
+
+[x] Backend: Validate PHP-to-MySQL connectivity via .env.
+
+[ ] Backend: Map ProjectController to use CSVProcessor for 50k row upload.
+
+[ ] Frontend: Implement DashboardController polling for status() API.

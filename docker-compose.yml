@@ -6,9 +6,9 @@ services:
     container_name: sharpishly-db
     restart: always
     environment:
-      MYSQL_DATABASE: sharpishly
-      MYSQL_USER: user
-      MYSQL_PASSWORD: pass
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - mysql_data:/var/lib/mysql
@@ -18,9 +18,16 @@ services:
       retries: 10
 
   php:
-    build: . # Uses the Dockerfile in your root folder
+    build: .
     container_name: sharpishly-php
     user: "1000:1000"
+    # --- INDENTATION FIXED HERE ---
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    # -----------------------------
     volumes:
       - ./php:/var/www/html/php
       - ./website:/var/www/html
@@ -31,9 +38,14 @@ services:
     restart: always
 
   worker:
-    build: . # Uses the same Dockerfile to ensure drivers exist here too
+    build: .
     container_name: sharpishly-worker
     user: "1000:1000"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
     volumes:
       - ./php:/var/www/html/php
     command: ["php", "/var/www/html/php/src/worker-daemon.php"]

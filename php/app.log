@@ -221,3 +221,75 @@
   → method = index
   → params = []
 
+[2026-02-27T13:31:17+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T13:32:48+00:00] REQUEST_URI = /favicon.ico
+  → parsed path = favicon.ico
+  → controller = Favicon.ico
+  → method = index
+  → params = []
+
+[2026-02-27T13:32:53+00:00] REQUEST_URI = /php/
+  → parsed path = php
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T13:32:58+00:00] REQUEST_URI = /php/home/about
+  → parsed path = php/home/about
+  → controller = Home
+  → method = about
+  → params = []
+
+[2026-02-27T13:33:05+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T13:35:03+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T13:35:04+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T13:35:15+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T13:35:15+00:00] REQUEST_URI = /favicon.ico
+  → parsed path = favicon.ico
+  → controller = Favicon.ico
+  → method = index
+  → params = []
+
+[2026-02-27T13:36:21+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T13:41:42+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T13:49:11+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
