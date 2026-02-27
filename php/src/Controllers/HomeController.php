@@ -13,9 +13,44 @@ class HomeController
 {
     public function index(): void
     {
-        echo "<h1>Welcome to my tiny MVC</h1>";
-        echo "<p>Current time: " . date('Y-m-d H:i:s') . "</p>";
+        $header = $this->view('home/header');
+        $main = $this->view('home/main');
+        $footer = $this->view('home/footer');
 
+        $smarty = new Smarty();
+
+        $arr = [
+            'title' => 'Sharpishly',
+            'dashboard'=>'Your Dashboard'
+        ];
+
+        // Option 1: render to string
+        $main = $smarty->render($main, $arr);
+
+        echo $header . $main . $footer;
+        die();
+
+    }
+
+    public function about(string $name = 'Guest'): void
+    {
+        echo "<h1>About page</h1>";
+        echo "<p>Hello, " . htmlspecialchars($name) . "!</p>";
+    }
+
+    public function view($folder="home"){
+        
+        $file = dirname(__DIR__) . "/views/" . $folder . ".html";
+
+        if(file_exists($file)){
+            return file_get_contents($file);
+        }
+
+        return false;
+
+    }
+
+    public function smarty(){
         try {
             // Assuming autoloading is set up
             $smarty = new Smarty();
@@ -41,8 +76,10 @@ class HomeController
             echo "<div style=\"color: red; font-weight: bold;\">";
             echo "Smarty error: " . htmlspecialchars($e->getMessage());
             echo "</div>";
-        }
+        }    
+    }
 
+    public function db(){
         try {
             $db = new Db();
 
@@ -64,12 +101,6 @@ class HomeController
             echo "<div style=\"color: red; font-weight: bold;\">";
             echo "Database error: " . htmlspecialchars($e->getMessage());
             echo "</div>";
-        }
-    }
-
-    public function about(string $name = 'Guest'): void
-    {
-        echo "<h1>About page</h1>";
-        echo "<p>Hello, " . htmlspecialchars($name) . "!</p>";
+        }    
     }
 }
