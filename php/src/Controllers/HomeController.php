@@ -5,36 +5,44 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Db;          // ← important: import the Db class
+use App\Db;
 use App\Smarty;
-// or use \App\Db if you place it in root namespace
+use Exception;
 
 class HomeController
 {
+    private Db $db;
+
+    public function __construct()
+    {
+        $this->db = new Db();
+    }
+
     public function index(): void
     {
-        
-        $this->save();    
-    
-        $this->db();
-
-        $header = $this->view('home/header');
-        $main = $this->view('home/main');
-        $footer = $this->view('home/footer');
+        // Show dashboard with latest jobs
+        $jobs = $this->db->find([
+            'tbl'   => 'jobs',
+            'order' => ['id' => 'desc'],
+            'limit' => 10,
+        ]);
 
         $smarty = new Smarty();
 
-        $arr = [
-            'title' => 'Sharpishly',
-            'dashboard'=>'Your Dashboard'
+        $data = [
+            'title'     => 'Sharpishly Dashboard',
+            'dashboard' => 'Your Dashboard',
+            'jobs'      => $jobs,
         ];
 
-        // Option 1: render to string
-        $main = $smarty->render($main, $arr);
+        // Simple header + main + footer composition
+        $header = $this->getViewContent('layouts/header');
+        $footer = $this->getViewContent('layouts/footer');
+        $main   = $this->getViewContent('home/main');
 
-        echo $header . $main . $footer;
-        die();
+        $renderedMain = $smarty->render($main, $data);
 
+        echo $header . $renderedMain . $footer;
     }
 
     public function about(string $name = 'Guest'): void
@@ -43,101 +51,82 @@ class HomeController
         echo "<p>Hello, " . htmlspecialchars($name) . "!</p>";
     }
 
-    public function view($folder="home"){
-        
-        $file = dirname(__DIR__) . "/views/" . $folder . ".html";
+    /**
+     * Migration route – creates table + seeds example data
+     */
+    public function migrate(): void
+    {
+        try {
+            $table = 'jobs_test';
 
-        if(file_exists($file)){
+            $schema = [
+                'tbl'            => $table,
+                'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
+                'file_path'      => 'VARCHAR(255) NOT NULL',
+                'status'         => "ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending'",
+                'total_rows'     => 'INT DEFAULT 0',
+                'processed_rows' => 'INT DEFAULT 0',
+                'created_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+                'updated_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+                'ENGINE'         => 'InnoDB',
+            ];
+
+            $this->db->create($schema);
+            echo "<p style=\"color: green;\">Table <strong>$table</strong> created (or already exists).</p>";
+
+            // Seed one record if table is empty
+            $existing = $this->db->find([
+                'tbl'    => $table,
+                'limit'  => 1,
+                'fields' => ['id'],
+            ]);
+
+            if (empty($existing)) {
+                $save = [
+                    'tbl'           => $table,
+                    'file_path'     => 'php/uploads/test.' . rand(10000, 99999) . '.csv',
+                    'status'        => 'pending',
+                    'total_rows'    => rand(50000, 500000),
+                    'processed_rows'=> 0,
+                    'created_at'    => date('Y-m-d H:i:s'),
+                    'updated_at'    => date('Y-m-d H:i:s'),
+                ];
+
+                $newId = $this->db->save($save);
+                echo "<p style=\"color: green;\">Seeded record ID: $newId</p>";
+            } else {
+                echo "<p>Table already has data → skipping seed.</p>";
+            }
+
+            // Show what we have now
+            $results = $this->db->find([
+                'tbl'   => $table,
+                'order' => ['id' => 'desc'],
+                'limit' => 5,
+            ]);
+
+            echo "<h3>Last records in $table:</h3><pre>";
+            print_r($results);
+            echo "</pre>";
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo "<h1>Migration Error</h1>";
+            echo "<pre style=\"color: red;\">" . htmlspecialchars($e->getMessage()) . "</pre>";
+        }
+    }
+
+    /**
+     * Helper: load view file content
+     */
+    private function getViewContent(string $path): string
+    {
+        $file = dirname(__DIR__, 1) . "/views/$path.html";  // adjust path if needed
+
+        if (file_exists($file)) {
             return file_get_contents($file);
         }
 
-        return false;
-
-    }
-
-    public function smarty(){
-        try {
-            // Assuming autoloading is set up
-            $smarty = new Smarty();
-
-            $list = array(
-                array('title'=>'Wolverine'),
-                array('title'=>'Cyclops'),
-                array('title'=>'Jean Grey')
-            );
-
-            $partial = "<li>{{{title}}}</li>";
-
-            $ul = $smarty->partial($partial,$list);
-
-            $file = "<b>{{{title}}}</b><i>{{{name}}}</i><ul>" . $ul . "</ul>";
-
-            $arr = ['title' => 'foo'];
-
-            // Option 1: render to string
-            $output = $smarty->render($file, $arr);
-            echo $output;   // → <b>foo</b><i></i>
-        } catch(\Exception $e){
-            echo "<div style=\"color: red; font-weight: bold;\">";
-            echo "Smarty error: " . htmlspecialchars($e->getMessage());
-            echo "</div>";
-        }    
-    }
-
-    public function save(){
-
-        $db = new Db();
-
-        // ── INSERT new job ───────────────────────────────────────
-        $save = [
-            'tbl'           => 'jobs',
-            'file_path'     => 'php/uploads/test.csv',
-            'status'        => 'pending',
-            'total_rows'    => 300000,
-            'processed_rows'=> 12345,
-            'created_at'    => date('Y-m-d H:i:s'),  // better format
-            'updated_at'    => date('Y-m-d H:i:s'),
-        ];
-
-        $newId = $db->save($save);
-        echo "Created job with ID: $newId\n";
-
-        // ── UPDATE existing job ──────────────────────────────────
-        $update = [
-            'tbl'           => 'jobs',
-            'id'            => $newId,
-            'status'        => 'processing',
-            'processed_rows'=> 15000,
-            'updated_at'    => date('Y-m-d H:i:s'),
-        ];
-
-        $affected = $db->save($update);
-        echo "Updated $affected row(s)\n";    
-
-    }
-
-    public function db(){
-        try {
-            $db = new Db();
-
-            $conditions = [
-                'tbl'   => 'jobs',
-                'order' => ['id' => 'desc'],
-                'limit' => '100',
-                // You can add more later, e.g.:
-                // 'where'  => ['age >' => 18],
-                // 'fields' => ['id', 'name', 'grade'],
-            ];
-
-            $results = $db->find($conditions);
-
-            echo "<pre>";
-            print_r($results);
-            echo "</pre>";
-        } catch (\Exception $e) {
-            echo "<div style=\"color: red; font-weight: bold;\">";
-            echo "Database error: " . htmlspecialchars($e->getMessage());
-            echo "</div>";
-        }    
+        return "<!-- View not found: $path -->";
     }
 }

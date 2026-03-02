@@ -1,0 +1,17 @@
+# Logs
+php/app.log
+php/logs/*.log
+
+# Environment & Sensitive
+.env
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Docker Data
+mysql_data/
+
+# Temporary Uploads
+php/uploads/*
+!php/uploads/.gitkeep

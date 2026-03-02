@@ -437,3 +437,207 @@
   → method = index
   → params = []
 
+[2026-02-27T14:56:48+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:57:43+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:57:46+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T14:58:02+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-02-27T15:05:48+00:00] REQUEST_URI = /php/
+  → parsed path = php
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T15:56:59+00:00] REQUEST_URI = /favicon.ico
+  → parsed path = favicon.ico
+  → controller = Favicon.ico
+  → method = index
+  → params = []
+
+[2026-03-02T15:57:05+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:00:56+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:26:16+00:00] REQUEST_URI = /php/home/migrate
+  → parsed path = php/home/migrate
+  → controller = Home
+  → method = migrate
+  → params = []
+
+[2026-03-02T16:27:12+00:00] REQUEST_URI = /php/home/migrate
+  → parsed path = php/home/migrate
+  → controller = Home
+  → method = migrate
+  → params = []
+
+[2026-03-02T16:27:59+00:00] REQUEST_URI = /php/home/migrate
+  → parsed path = php/home/migrate
+  → controller = Home
+  → method = migrate
+  → params = []
+
+[2026-03-02T16:30:32+00:00] REQUEST_URI = /php/home/migrate
+  → parsed path = php/home/migrate
+  → controller = Home
+  → method = migrate
+  → params = []
+
+[2026-03-02T16:37:11+00:00] REQUEST_URI = /php/home/migrate
+  → parsed path = php/home/migrate
+  → controller = Home
+  → method = migrate
+  → params = []
+
+[2026-03-02T16:37:30+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:38:36+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:38:58+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:39:58+00:00] REQUEST_URI = /php/
+  → parsed path = php
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:40:04+00:00] REQUEST_URI = /php/home/about
+  → parsed path = php/home/about
+  → controller = Home
+  → method = about
+  → params = []
+
+[2026-03-02T16:40:08+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:40:08+00:00] REQUEST_URI = /favicon.ico
+  → parsed path = favicon.ico
+  → controller = Favicon.ico
+  → method = index
+  → params = []
+
+[2026-03-02T16:41:22+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:42:47+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:42:48+00:00] REQUEST_URI = /favicon.ico
+  → parsed path = favicon.ico
+  → controller = Favicon.ico
+  → method = index
+  → params = []
+
+[2026-03-02T16:45:46+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:45:47+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:45:48+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:45:54+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:46:31+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:46:48+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:47:05+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:47:44+00:00] REQUEST_URI = /php/home/migrate
+  → parsed path = php/home/migrate
+  → controller = Home
+  → method = migrate
+  → params = []
+
+[2026-03-02T16:49:24+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-02T16:49:35+00:00] REQUEST_URI = /php/home/migrate
+  → parsed path = php/home/migrate
+  → controller = Home
+  → method = migrate
+  → params = []
+
+[2026-03-02T16:51:04+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+

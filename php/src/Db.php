@@ -15,12 +15,7 @@ class Db
 
     public function __construct()
     {
-        // ← CHANGE THESE VALUES to match your real database
-        // $host     = 'db';          // or 'localhost', or container name in Docker
-        // $dbname   = 'sharpishly';  // ← your database name
-        // $user     = 'user';           // ← change this
-        // $password = 'pass';  // ← change this
-        // $charset  = 'utf8mb4';
+
         $host     = getenv('DB_HOST');
         $dbname   = getenv('DB_NAME');
         $user     = getenv('DB_USER');
@@ -175,4 +170,25 @@ class Db
     {
         return '`' . str_replace('`', '``', $identifier) . '`';
     }
+
+// src/Db.php
+public function create(array $schema): void
+{
+    $table = $schema['tbl'] ?? throw new InvalidArgumentException("Missing 'tbl'");
+    unset($schema['tbl']);
+
+    $engine  = $schema['ENGINE'] ?? 'InnoDB';
+    unset($schema['ENGINE']);
+
+    $colDefs = [];
+    foreach ($schema as $col => $def) {
+        $colDefs[] = $this->escapeIdentifier($col) . ' ' . $def;
+    }
+
+    $sql = "CREATE TABLE IF NOT EXISTS " . $this->escapeIdentifier($table) . " (
+        " . implode(",\n        ", $colDefs) . "
+    ) ENGINE=$engine DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+    $this->pdo->exec($sql);
+}
 }
