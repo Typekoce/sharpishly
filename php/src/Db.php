@@ -11,7 +11,7 @@ use InvalidArgumentException;
 
 class Db
 {
-    private ?PDO $pdo = null;
+    public ?PDO $pdo = null;
 
     public function __construct()
     {
@@ -166,29 +166,29 @@ class Db
         }
     }
 
-    private function escapeIdentifier(string $identifier): string
+    public function escapeIdentifier(string|int $identifier): string
     {
-        return '`' . str_replace('`', '``', $identifier) . '`';
+        return '`' . str_replace('`', '``', (string)$identifier) . '`';
     }
 
-// src/Db.php
-public function create(array $schema): void
-{
-    $table = $schema['tbl'] ?? throw new InvalidArgumentException("Missing 'tbl'");
-    unset($schema['tbl']);
+    // src/Db.php
+    public function create(array $schema): void
+    {
+        $table = $schema['tbl'] ?? throw new InvalidArgumentException("Missing 'tbl'");
+        unset($schema['tbl']);
 
-    $engine  = $schema['ENGINE'] ?? 'InnoDB';
-    unset($schema['ENGINE']);
+        $engine  = $schema['ENGINE'] ?? 'InnoDB';
+        unset($schema['ENGINE']);
 
-    $colDefs = [];
-    foreach ($schema as $col => $def) {
-        $colDefs[] = $this->escapeIdentifier($col) . ' ' . $def;
+        $colDefs = [];
+        foreach ($schema as $col => $def) {
+            $colDefs[] = $this->escapeIdentifier($col) . ' ' . $def;
+        }
+
+        $sql = "CREATE TABLE IF NOT EXISTS " . $this->escapeIdentifier($table) . " (
+            " . implode(",\n        ", $colDefs) . "
+        ) ENGINE=$engine DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+        $this->pdo->exec($sql);
     }
-
-    $sql = "CREATE TABLE IF NOT EXISTS " . $this->escapeIdentifier($table) . " (
-        " . implode(",\n        ", $colDefs) . "
-    ) ENGINE=$engine DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-
-    $this->pdo->exec($sql);
-}
 }

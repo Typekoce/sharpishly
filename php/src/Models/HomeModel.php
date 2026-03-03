@@ -1,7 +1,4 @@
-<?php
-// src/Models/HomeModel.php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Models;
 
@@ -28,30 +25,38 @@ class HomeModel
 
         try {
 
-
-            // Add inside the try block of your migrate() method
-            $this->createTable('video_uploads', [
-                'id'                => 'BIGINT AUTO_INCREMENT PRIMARY KEY',
-                'original_path'     => 'VARCHAR(512) NOT NULL',
-                'original_filename' => 'VARCHAR(255) NOT NULL',
-                'status'            => "ENUM('pending','processing','completed','failed') DEFAULT 'pending'",
-                'created_at'        => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+            // Table: social (example – add more tables as needed)
+            $this->createTable('social', [
+                'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
+                //'file_path'      => 'VARCHAR(255) NOT NULL',
+                'status'         => "ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending'",
+                //'total_rows'     => 'INT DEFAULT 0',
+                'processed_rows' => 'INT DEFAULT 0',
+                'created_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+                'updated_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            ], [
+                'engine'  => 'InnoDB',
+                'charset' => 'utf8mb4',
+                'collate' => 'utf8mb4_unicode_ci',
             ]);
+            $report .= "[OK] Table 'social' created or already exists\n";
 
-            $this->createTable('social_posts', [
-                'id'                => 'BIGINT AUTO_INCREMENT PRIMARY KEY',
-                'video_upload_id'   => 'BIGINT NOT NULL',
-                'platform'          => "ENUM('youtube','tiktok','instagram','facebook') NOT NULL",
-                'custom_title'      => 'VARCHAR(255)',
-                'custom_description'=> 'TEXT',
-                'custom_hashtags'   => 'TEXT',
-                'optimized_path'    => 'VARCHAR(512)',
-                'post_url'          => 'VARCHAR(255)',
-                'status'            => "ENUM('pending','posted','failed') DEFAULT 'pending'",
-                'posted_at'         => 'TIMESTAMP NULL',
-                'FOREIGN KEY (video_upload_id) REFERENCES video_uploads(id) ON DELETE CASCADE',
+            // Table: users (example – add more tables as needed)
+            $this->createTable('users', [
+                'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
+                //'file_path'      => 'VARCHAR(255) NOT NULL',
+                'status'         => "ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending'",
+                //'total_rows'     => 'INT DEFAULT 0',
+                'processed_rows' => 'INT DEFAULT 0',
+                'created_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+                'updated_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            ], [
+                'engine'  => 'InnoDB',
+                'charset' => 'utf8mb4',
+                'collate' => 'utf8mb4_unicode_ci',
             ]);
-                    
+            $report .= "[OK] Table 'users' created or already exists\n";
+
             // Table: jobs (example – add more tables as needed)
             $this->createTable('jobs', [
                 'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
@@ -83,13 +88,13 @@ class HomeModel
             ]);
 
             // Add indexes & foreign key (run after table creation)
-            $this->db->getPdo()->exec("
-                ALTER TABLE csv_records
-                ADD INDEX idx_job_id (job_id),
-                ADD FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
-                ON UPDATE CASCADE;
-            ");
-            $report .= "[OK] Indexes & foreign key added to csv_records\n";
+            // $this->db->getPdo()->exec("
+            //     ALTER TABLE csv_records
+            //     ADD INDEX idx_job_id (job_id),
+            //     ADD FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
+            //     ON UPDATE CASCADE;
+            // ");
+            // $report .= "[OK] Indexes & foreign key added to csv_records\n";
 
             // Simple seeding example – only if table is empty
             $count = $this->db->find(['tbl' => 'jobs', 'limit' => 1]);
@@ -115,9 +120,6 @@ class HomeModel
         return $report;
     }
 
-    /**
-     * Helper: create table from array schema (moved from Db)
-     */
     private function createTable(string $table, array $columns, array $options = []): void
     {
         if (empty($columns)) {
@@ -137,7 +139,8 @@ class HomeModel
             " . implode(",\n            ", $colDefs) . "
         ) ENGINE=$engine DEFAULT CHARSET=$charset COLLATE=$collate;";
 
-        $this->db->getPdo()->exec($sql);
+        // FIXED: use public property directly instead of non-existent getPdo()
+        $this->db->pdo->exec($sql);
     }
 
     // Placeholder – to be implemented later
