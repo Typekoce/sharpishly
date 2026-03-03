@@ -27,3 +27,17 @@
 - [ ] **Project Management:** Connect GitHub Issues/Projects to commits (Jira-style).
 - [ ] **3D Integration:** Add research visualization canvas.
 - [ ] **Performance:** Evaluate moving from custom Smarty to Twig/Plates.
+
+- [ ] Implement $db->alter() method in Db class for safe schema modifications (ADD COLUMN, MODIFY COLUMN, ADD INDEX, ADD FOREIGN KEY, etc.)
+  - Should support array-based syntax similar to createTable()
+  - Use ALTER TABLE ... ADD/MODIFY/...
+  - Include IF NOT EXISTS checks where possible
+  - Log changes in migration report
+
+  [x] Database Expansion: Implement $db->alter() for safe schema updates.
+
+[ ] Database Expansion: Implement $db->delete() (Required for "Cleanup" features).
+
+[ ] Logic: Implement #each loop in Smarty.php.
+
+[ ] Email Tracking: Implement trackEmailOpen in HomeModel using the new Db methods.

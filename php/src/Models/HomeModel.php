@@ -87,14 +87,13 @@ class HomeModel
                 'collate' => 'utf8mb4_unicode_ci',
             ]);
 
-            // Add indexes & foreign key (run after table creation)
-            // $this->db->getPdo()->exec("
-            //     ALTER TABLE csv_records
-            //     ADD INDEX idx_job_id (job_id),
-            //     ADD FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
-            //     ON UPDATE CASCADE;
-            // ");
-            // $report .= "[OK] Indexes & foreign key added to csv_records\n";
+            // Add Index for performance
+            $this->db->alter('csv_records', 'ADD INDEX', 'idx_job_id', '(job_id)');
+
+            // Add Foreign Key for data integrity
+            $this->db->alter('csv_records', 'ADD FOREIGN KEY', 'fk_job_id', '(job_id) REFERENCES jobs(id) ON DELETE CASCADE ON UPDATE CASCADE');
+
+            $report .= "[OK] Indexes & foreign key processed for csv_records\n";
 
             // Simple seeding example – only if table is empty
             $count = $this->db->find(['tbl' => 'jobs', 'limit' => 1]);

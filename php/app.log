@@ -262,3 +262,9 @@
   → method = migrate
   → params = []
 
+[2026-03-03T15:41:47+00:00] REQUEST_URI = /php/home/migrate
+  → parsed path = php/home/migrate
+  → controller = Home
+  → method = migrate
+  → params = []
+

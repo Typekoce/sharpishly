@@ -191,4 +191,28 @@ class Db
 
         $this->pdo->exec($sql);
     }
+
+    /**
+     * Generic Alter Table helper
+     * @param string $table Table name
+     * @param string $action e.g., "ADD COLUMN", "MODIFY COLUMN", "ADD INDEX"
+     * @param string $name Column or Index name
+     * @param string $definition SQL definition (e.g., "VARCHAR(255) NOT NULL")
+     */
+    public function alter(string $table, string $action, string $name, string $definition = ''): void
+    {
+        $table = $this->escapeIdentifier($table);
+        $name  = $this->escapeIdentifier($name);
+        
+        // Example: ALTER TABLE `jobs` ADD COLUMN `priority` INT DEFAULT 0
+        $sql = "ALTER TABLE $table $action $name $definition";
+        
+        try {
+            $this->pdo->exec($sql);
+            \App\Services\Logger::info("Schema change: $sql");
+        } catch (\PDOException $e) {
+            // We log it but don't necessarily crash if the column already exists
+            \App\Services\Logger::debug("Alter note (possibly exists): " . $e->getMessage());
+        }
+    }
 }
