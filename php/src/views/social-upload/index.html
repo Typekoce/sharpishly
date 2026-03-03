@@ -1,0 +1,25 @@
+<h1>Upload Once → Post Everywhere</h1>
+<form action="/php/social-upload/upload" method="post" enctype="multipart/form-data">
+
+    <input type="file" name="video" accept="video/*" required><br><br>
+
+    <h3>Select Platforms</h3>
+    <label><input type="checkbox" name="platforms[]" value="tiktok"> TikTok (9:16)</label><br>
+    <label><input type="checkbox" name="platforms[]" value="instagram"> Instagram Reels</label><br>
+    <label><input type="checkbox" name="platforms[]" value="youtube"> YouTube</label><br>
+    <label><input type="checkbox" name="platforms[]" value="facebook"> Facebook</label><br><br>
+
+    <div id="custom-fields"></div>
+
+    <button type="submit">Upload & Distribute</button>
+</form>
+
+<script>
+// Dynamic per-platform fields
+document.querySelectorAll('input[name="platforms[]"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+        // Simple JS to show/hide custom fields per platform (you can expand this)
+        console.log('Selected:', Array.from(document.querySelectorAll('input[name="platforms[]"]:checked')).map(c => c.value));
+    });
+});
+</script>

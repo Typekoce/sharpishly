@@ -1,192 +1,29 @@
-# TODO
+# 🚀 Sharpishly Master TODO
 
-```
-    Home Page: The landing page that provides an overview of the R&D website, highlights key features, recent projects, and calls-to-action for sign-up or login.
+## 📂 Phase 1: Infrastructure & MVC (Current)
+- [x] **DevOps:** Dockerize Nginx/PHP/MySQL with health checks and `.env`.
+- [x] **DevOps:** Automated `setup.sh` and browser-based `/migrate` route.
+- [x] **Database:** `Db.php` core with `find()`, `save()`, and `create()`.
+- [x] **Templates:** Regex-based `Smarty.php` for `{{{variable}}}` parsing.
+- [ ] **Database Expansion:** Add `delete()` and raw `query()` to `Db.php`.
+- [ ] **Logic:** Update `Smarty.php` to support `#each` loops for job lists.
+- [ ] **Security:** Token-protect `/home/migrate` via environment variables.
 
-    About Us Page: Details the mission, team, and background of the R&D organization or platform.
+## 🛠️ Phase 2: Functional Modules (Near Term)
+- [ ] **CSV Processing:** Finalize `CSVProcessor.php` for 50k+ row imports via `Db::save`.
+- [ ] **Background Jobs:** Update `worker-daemon.php` to process the job queue.
+- [ ] **Frontend Bridge:** Replace JS `localStorage` with `requestGet/Post` fetch helpers.
+- [ ] **Auth:** Move `isAuthenticated` from JS to PHP Session-based auth.
+- [ ] **Tracking:** Implement email open tracking (pixel + `email_opens` table).
 
-    Contact Us Page: Form for inquiries, support requests, and contact information.
+## 🖥️ Phase 3: UI/UX & Feature Pages
+- [ ] **Dashboard:** Dynamic job status polling (Pending -> Processing -> Completed).
+- [ ] **User Profile:** Multi-card forms with CV upload linked to `php/uploads`.
+- [ ] **Projects List:** Overview page with search/filter hitting the `jobs` table.
+- [ ] **CRM:** `ContactController` and `contacts` table for researcher tracking.
 
-    Login Page: Secure authentication page for existing users to access their accounts.
-
-    Sign Up/Registration Page: Form for new users to create accounts, including email verification and basic info collection.
-
-    Forgot Password Page: Allows users to reset their passwords via email or security questions.
-
-    User Profile/Personal Details Page: Editable section for users to manage personal information, such as name, bio, contact details, and preferences.
-
-    Dashboard Page: Personalized hub post-login, showing quick links to projects, notifications, and user-specific data.
-
-    Projects List Page: Overview of all ongoing and past R&D projects, with filters for search and sorting.
-
-    Project Details Page: In-depth view of a specific project, including timelines, milestones, team members, and progress updates.
-
-    Collaboration/Team Page: Tools for team communication, such as forums, chat, or shared workspaces.
-
-    Documents/Repository Page: Upload, share, and manage research papers, datasets, prototypes, and other files.
-
-    CRM Dashboard Page: Central interface for managing contacts, leads, partners, and stakeholder interactions.
-
-    Contacts List Page (within CRM): Directory of stakeholders, clients, or collaborators with search and export options.
-
-    Contact Details Page (within CRM): Detailed profiles for individual contacts, including history and notes.
-
-    Reports/Analytics Page: Generation and viewing of R&D metrics, such as project performance, resource allocation, and KPI dashboards.
-
-    Settings Page: User-specific configurations, like notification preferences, security settings, and account management.
-
-    Admin Panel Page (if applicable): For administrators to manage users, roles, permissions, and site-wide settings.
-
-    Privacy Policy Page: Legal information on data handling and user privacy.
-
-    Terms of Service Page: Outlines usage rules, responsibilities, and agreements for all users.
-
-    FAQ/Help Page: Answers to common questions and guides for using the platform.
-
-    Logout Confirmation Page: Simple page or modal to confirm user logout and redirect to home.
-    
-```
-- [x] Install and configure Docker on Ubuntu VM.
-- [x] Create Dockerfile and docker-compose.yml for Nginx.
-- [x] Verify host-to-VM networking (Port 8080).
-- [ ] Implement Docker container health checks.
-
-- [x] Unify HTML/JS naming conventions (kebab-case).
-- [ ] Create `requestGet(url, headers)` helper using Fetch API.
-- [ ] Create `requestPost(url, data, headers)` helper.
-- [ ] Add global error handling for API timeouts and 404s.
-- [ ] Update `submitProject` to use `requestPost` instead of just saving to LocalStorage.
-
-## ✅ Completed
-- [x] Create standalone `/docs` manual.
-- [x] Implement multi-card User Profile forms.
-- [x] Fix card clearance and CSS theme bugs.
-
-## 🟦 Next Up
-- [ ] Connect `app.data.roles` to the Expertise dropdown in Profile.
-- [ ] Implement `requestGet` / `requestPost` (Milestone #8).
-- [ ] Add "Export Profile to PDF" feature.
-
-# TODO
-
-## ✅ MVC & Bug Fixes
-- [x] Extract inline HTML to `View` layer.
-- [x] Fix `this.projects` scope error.
-- [x] Resolve `hideDashBoardForm` null pointer exception.
-
-## 🟦 Next Up (Logic & Data)
-- [ ] **Data Hydration:** Ensure `initProfile` saves all fields to `localStorage`.
-- [ ] **CRM Foundation:** Define `app.data.contacts` for researcher tracking.
-- [ ] **Dynamic Content:** Move `View` strings to `app.data.content` for CMS capability.
-
-# TODO
-
-## ✅ MVC & View Refactor
-- [x] Create centralized `View` object for HTML templates.
-- [x] Implement `HomeController` and `QuickStartController`.
-- [x] Fix `this.projects` undefined error in validation.
-
-## 🟦 Next Up: Component Expansion
-- [ ] **SettingsController:** Migrate theme toggling and localData management to MVC.
-- [ ] **UserProfileController:** Move personal details and CV upload logic to a controller.
-- [ ] **Error Handling:** Add null-checks to `hideDashBoardForm` to prevent init crashes.
-
-## 🟧 Future Modules (The Big Four)
-- [ ] **CRM:** Track researcher interactions via `ContactController`.
-- [ ] **CMS:** Abstract `View` strings into `app.data.content`.
-- [ ] **Social Suite:** Create unified social media upload helpers.
+## 🚀 Phase 4: Future Research & Scalability
+- [ ] **AI/Python:** Integrate `python/hello.py` for CSV data validation.
+- [ ] **Project Management:** Connect GitHub Issues/Projects to commits (Jira-style).
 - [ ] **3D Integration:** Add research visualization canvas.
-
-I have updated your local context mentally with the suggested roadmap item. To keep your project documentation in sync, you should add the following entry to the **"Near-term (next 1–3 months)"** section of your `ROADMAP.md`:
-
-* **MVC Migration:** Gradually transition all global `app` functions into dedicated Model and Controller classes (Home, Dashboard, UserProfile, Workspace) to improve maintainability and testability.
-
----
-
-### What's next on the task list?
-
-Looking at your `TODO.md` and the current state of your `script.js` (where you just added `UserProfileController`), here are the immediate next steps to maintain momentum:
-
-#### 1. Implement `DashboardController.render()` logic
-
-You have the class scaffolded, but it currently only calls `prettyBug(this)`.
-
-* **Task:** Move the project-card generation logic from the old `app.renderProjects()` into this method.
-* **Goal:** This will allow the Dashboard to update its view independently whenever a new project is added.
-
-#### 2. Connect `app.data.roles` to the Expertise Dropdown
-
-This is a specific "Next Up" item in your `TODO.md`.
-
-* **Task:** In your new `UserProfileController`, write a method that selects the "Expertise" dropdown in the HTML and populates it using the `app.data.roles` array.
-* **Goal:** Ensure that the user profile reflects the centralized data defined in your model.
-
-#### 3. Standardize the `WorkspaceController`
-
-Since you've done Home, Dashboard, and Profile, the **Workspace** is the last major "view" without a dedicated controller.
-
-* **Task:** Create the `WorkspaceController` to handle the employee list and the HR Admin Suite logic.
-* **Goal:** Complete the migration of the primary user-facing pages into the MVC pattern.
-
-#### 4. Begin Milestone #8: API Connectivity
-
-Once the Workspace logic is moved, you will be ready to move away from `localStorage`.
-
-* **Task:** Create the `requestGet` and `requestPost` helpers mentioned in your `TODO.md`.
-* **Goal:** Transition the `userModel` and `DashboardController` to fetch/save data to a (mock or real) backend instead of just local memory.
-
-**Which of these would you like to tackle first? I can provide the code for the Expertise dropdown population if you want to clear that TODO item.**
-
-- [x] Implement Docker container health checks and multi-container orchestration.
-- [x] Unify HTML/JS naming conventions (kebab-case).
-- [x] Set up PHP Front Controller and Autoloader.
-
-## 🟦 Next Up
-- [ ] **Bridge Frontend to PHP:** Update `requestGet` and `requestPost` in `script.js` to target `/php/` endpoints.
-- [ ] **Backend Persistence:** Integrate a database (SQLite or MySQL) into the PHP service to replace LocalStorage.
-- [ ] **Auth Logic:** Move `isAuthenticated` check from JS to a PHP Session-based check.
-- [ ] **Log Rotation:** Ensure `php/app.log` does not grow indefinitely in the Docker volume.
-
-[x] DevOps: Implement automated setup.sh with health checks.
-
-[x] Backend: Validate PHP-to-MySQL connectivity via .env.
-
-[ ] Backend: Map ProjectController to use CSVProcessor for 50k row upload.
-
-[ ] Frontend: Implement DashboardController polling for status() API.
-
-This looks solid! Your `Db.php` class is now genuinely functional for basic CRUD, and using `getenv()` is the right move for security.
-
-### Commit Message
-
-```text
-feat(core): implement CRUD methods in Db class and extend HomeController
-
-- Added save() method to Db class supporting both INSERT and UPDATE operations
-- Implemented identifier escaping to prevent SQL injection in save()
-- Updated HomeController to demonstrate database save, update, and find functionality
-- Switched database configuration to use environment variables (getenv)
-
-```
-
----
-
-### 📋 Updated TODO.md
-
-Here are the next tasks based on your scaffolding progress:
-
-1. **[ ] Backend:** Implement `delete()` method in `Db.php`.
-2. **[ ] Backend:** Finalize `CSVProcessor.php` to use the `Db::save` method for handling 50k rows.
-3. **[ ] Frontend:** Update dashboard UI to poll `ProjectController` for `status()` updates.
-4. **[ ] Project Management:** Set up GitHub Projects/Issues (similar to Jira/Asana) to track these remaining tasks.
-
----
-
-### 💡 Project Management Integration
-
-Since you want to move away from local files toward professional tools, here is the recommended approach:
-
-* **Jira/Asana:** If you are using these, I recommend installing the **GitHub App** for Jira/Asana. This allows you to reference issue IDs (e.g., `SHARP-123`) in your commit messages, automatically linking the commit to the task in Jira.
-* **GitHub Projects:** Given this is a repository, GitHub’s built-in **Projects** feature is the most seamless approach. It supports Kanban boards and links directly to Pull Requests.
-
-**Would you like me to create a `docs/workflow.md` file outlining how to link commits to project management tickets?**
+- [ ] **Performance:** Evaluate moving from custom Smarty to Twig/Plates.
