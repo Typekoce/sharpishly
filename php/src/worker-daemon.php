@@ -1,51 +1,58 @@
 <?php
-require_once __DIR__ . '/autoload.php';
+declare(strict_types=1);
 
+require_once __DIR__ . '/bootstrap.php';
+
+use App\Db;
 use App\Services\CSVProcessor;
-use App\Services\VideoOptimizerService;
-use App\Models\VideoUploadModel;
 
-echo "Worker daemon started at " . date('c') . "\n";
+// Prevent the script from timing out
+set_time_limit(0);
+
+$db = new Db();
+$processor = new CSVProcessor();
+
+Logger::info("Worker Daemon started. Monitoring for jobs...");
 
 while (true) {
     try {
-        $pdo = new PDO("mysql:host=db;dbname=sharpishly", "user", "pass");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        // 1. Look for the next pending job
+        $jobs = $db->find([
+            'tbl'   => 'jobs',
+            'where' => ['status' => 'pending'],
+            'order' => ['id' => 'ASC'],
+            'limit' => 1
+        ]);
 
-        // === CSV jobs ===
-        $stmt = $pdo->query("SELECT * FROM jobs WHERE status = 'pending' LIMIT 1");
-        $job = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!empty($jobs)) {
+            $job = $jobs[0];
+            $jobId = (int)$job['id'];
 
-        if ($job) {
-            $processor = new CSVProcessor($pdo);
-            $processor->run($job['id'], $job['file_path']);
+            Logger::info("Worker found Job #$jobId. Starting processing...");
+
+            // 2. Mark as processing immediately to prevent double-picks
+            $db->save([
+                'tbl'    => 'jobs', 
+                'id'     => $jobId, 
+                'status' => 'processing'
+            ]);
+
+            // 3. Hand off to the processor
+            $processor->process($jobId, $job['file_path']);
+
+        } else {
+            // No jobs? Sleep for a bit to save CPU
+            sleep(2); 
         }
 
-        // === Video social posts ===
-        $queueLines = file('php/queue.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
-        file_put_contents('php/queue.txt', ''); // clear queue
-
-        foreach ($queueLines as $line) {
-            $job = json_decode($line, true);
-            if (!$job || empty($job['post_id'])) continue;
-
-            $optimizer = new VideoOptimizerService();
-            $model = new VideoUploadModel();
-
-            $optimizedPath = $optimizer->optimizeForPlatform(
-                $job['original_path'],
-                $job['platform']
-            );
-
-            // TODO: Real posting logic here
-            // $postUrl = postToPlatform($job['platform'], $optimizedPath, $job);
-            $postUrl = "https://example.com/post/" . $job['post_id']; // placeholder
-
-            $model->updatePostStatus($job['post_id'], 'posted', $postUrl);
-        }
     } catch (Exception $e) {
-        error_log("Worker error: " . $e->getMessage());
+        Logger::error("Worker Loop Error: " . $e->getMessage());
+        sleep(5); // Wait a bit longer if there's a system/DB error
     }
 
-    sleep(5); // avoid busy loop
+    // Optional: check if a "stop" file exists to gracefully exit
+    if (file_exists(__DIR__ . '/../stop_worker.txt')) {
+        Logger::info("Worker stopping gracefully via stop file.");
+        break;
+    }
 }

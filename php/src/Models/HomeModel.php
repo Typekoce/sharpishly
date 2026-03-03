@@ -14,6 +14,22 @@ class HomeModel
         $this->db = new Db();
     }
 
+    public function csv(){
+
+        $conditions = [
+            'tbl'    => 'jobs',
+            'fields' => ['id', 'status', 'processed_rows', 'total_rows', 'updated_at'],
+            'order'  => ['id' => 'DESC'],
+            'limit'  => 5
+        ];
+
+        $result = $this->db->find($conditions);
+
+        echo "<pre>" . print_r($result) . "</pre>";
+
+        return $result;
+    }
+
     /**
      * Run migrations: create necessary tables if they don't exist + optional seeding
      *
