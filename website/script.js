@@ -1,3 +1,4 @@
+// Home Model & Controller
 class HomeModel {
   async getData() {
     try {
@@ -32,6 +33,7 @@ class HomeController {
   }
 }
 
+// About Model & Controller
 class AboutController {
   constructor(container) {
     this.container = container;
@@ -61,9 +63,7 @@ class WorkModel {
   }
 }
 
-/**
- * CONTROLLERS: The Logic
- */
+// Work Model & Controller
 class WorkController {
   constructor(container) {
     this.container = container;
@@ -113,6 +113,7 @@ this.container.innerHTML = `
   }
 }
 
+// Contact Model & Controller
 class ContactController {
   constructor(container) {
     this.container = container;
@@ -121,6 +122,20 @@ class ContactController {
   index() {
     this.container.innerHTML = `
       <h1>Contact Page</h1>
+      <p>This is a simple static route with no Model.</p>
+    `;
+  }
+}
+
+// Cyberdeck Model & Controller
+class CyberdeckController {
+  constructor(container) {
+    this.container = container;
+  }
+
+  index() {
+    this.container.innerHTML = `
+      <h1>Cyberdeck Page</h1>
       <p>This is a simple static route with no Model.</p>
     `;
   }
@@ -166,7 +181,8 @@ const routes = {
   "/": HomeController,
   "/about": AboutController,
   "/work": WorkController,
-  "/contact": ContactController
+  "/contact": ContactController,
+  "/cyberdeck": CyberdeckController
   
 };
 
