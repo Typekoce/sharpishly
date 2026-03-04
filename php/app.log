@@ -412,3 +412,39 @@
   → method = index
   → params = []
 
+[2026-03-04T14:26:38+00:00] REQUEST_URI = /work
+  → parsed path = work
+  → controller = Work
+  → method = index
+  → params = []
+
+[2026-03-04T14:27:06+00:00] REQUEST_URI = /favicon.ico
+  → parsed path = favicon.ico
+  → controller = Favicon.ico
+  → method = index
+  → params = []
+
+[2026-03-04T14:27:27+00:00] REQUEST_URI = /about
+  → parsed path = about
+  → controller = About
+  → method = index
+  → params = []
+
+[2026-03-04T14:30:11+00:00] REQUEST_URI = /work
+  → parsed path = work
+  → controller = Work
+  → method = index
+  → params = []
+
+[2026-03-04T14:30:11+00:00] REQUEST_URI = /work
+  → parsed path = work
+  → controller = Work
+  → method = index
+  → params = []
+
+[2026-03-04T14:31:05+00:00] REQUEST_URI = /work
+  → parsed path = work
+  → controller = Work
+  → method = index
+  → params = []
+
