@@ -71,8 +71,12 @@ class WorkController {
   }
 
   async index() {
-    this.container.innerHTML = "<h1>Loading Work Status...</h1>";
-
+this.container.innerHTML = `
+      <div class="loader-container">
+        <div class="spinner"></div>
+        <p class="loader-text">Fetching live data...</p>
+      </div>
+    `;
     try {
       const jobs = await this.model.getJobs();
 
