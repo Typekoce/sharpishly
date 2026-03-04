@@ -4,23 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minimal JS MVC SPA</title>
-    <script src="script.js" type="module"></script>
-    <style>
-        body { font-family: sans-serif; line-height: 1.6; padding: 20px; }
-        nav { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-        nav a { margin-right: 15px; text-decoration: none; color: blue; }
-        #app { padding: 20px; border: 1px solid #eee; border-radius: 8px; }
-    </style>
+
+    <!-- Your local styles -->
+    <link rel="stylesheet" href="styles.css">
+
 </head>
 <body>
 
-    <nav>
-        <a href="/" data-link>Home</a>
-        <a href="/about" data-link>About</a>
-        <a href="/work" data-link>Work</a>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="brand" data-link>Minimal SPA</a>
+
+            <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+
+            <div class="nav-links">
+                <a href="/" data-link>Home</a>
+                <a href="/about" data-link>About</a>
+                <a href="/work" data-link>Work</a>
+                <a href="/contact" data-link>Contact</a>
+            </div>
+        </div>
     </nav>
 
-    <div id="app"></div>
+    <main class="container">
+        <div id="app"></div>
+    </main>
+
+    <!-- Your app logic -->
+    <script src="script.js" type="module"></script>
 
 </body>
 </html>

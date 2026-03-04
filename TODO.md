@@ -41,3 +41,31 @@
 [ ] Logic: Implement #each loop in Smarty.php.
 
 [ ] Email Tracking: Implement trackEmailOpen in HomeModel using the new Db methods.
+
+Done! I've added "Implement `php console.php` to replace Bake/Unbake shell scripts" to your task list.
+
+### 📋 Updated TODO.md (Current State)
+
+* [x] **DevOps:** Finalized Hybrid Nginx config (SPA + PHP Front Controller).
+* [ ] **DevOps:** Run `docker restart sharpishly-app` to apply changes.
+* [ ] **Infrastructure:** **[NEW]** Implement `php console.php` to replace Bake/Unbake shell scripts.
+* [ ] **Cleanup:** Permanently delete all `*.sh` files.
+* [ ] **Frontend:** Connect `WorkController` to the `/php/home/status` endpoint to show real data.
+
+That wraps up the architectural shift for today. You now have a Single Page Application with clean deep-linking, a dedicated background worker, and a secure Nginx configuration.
+
+See you tomorrow to tackle the console tool and live data integration!
+
+Done! I've added "Implement `php console.php` to replace Bake/Unbake shell scripts" to your task list.
+
+### 📋 Updated TODO.md (Current State)
+
+* [x] **DevOps:** Finalized Hybrid Nginx config (SPA + PHP Front Controller).
+* [ ] **DevOps:** Run `docker restart sharpishly-app` to apply changes.
+* [ ] **Infrastructure:** **[NEW]** Implement `php console.php` to replace Bake/Unbake shell scripts.
+* [ ] **Cleanup:** Permanently delete all `*.sh` files.
+* [ ] **Frontend:** Connect `WorkController` to the `/php/home/status` endpoint to show real data.
+
+That wraps up the architectural shift for today. You now have a Single Page Application with clean deep-linking, a dedicated background worker, and a secure Nginx configuration.
+
+See you tomorrow to tackle the console tool and live data integration!

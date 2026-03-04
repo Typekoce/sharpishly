@@ -54,6 +54,19 @@ class WorkController {
   }
 }
 
+class ContactController {
+  constructor(container) {
+    this.container = container;
+  }
+
+  index() {
+    this.container.innerHTML = `
+      <h1>Contact Page</h1>
+      <p>This is a simple static route with no Model.</p>
+    `;
+  }
+}
+
 /**
  * ROUTER: The Engine
  */
@@ -93,8 +106,28 @@ class Router {
 const routes = {
   "/": HomeController,
   "/about": AboutController,
-  "/work": WorkController
+  "/work": WorkController,
+  "/contact": ContactController
   
 };
 
 new Router(routes);
+
+// Mobile menu toggle
+document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (toggle && navLinks) {
+        toggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Optional: close menu when clicking a link
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
+    }
+});
