@@ -19,7 +19,8 @@ class HomeController
 
     public function response(){
         $data = array(
-            "h1"=>"hello"
+            "h1"=>"hello",
+            "description"=>"Six Million Dollar Man"
         );
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($data);

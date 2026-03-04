@@ -1,29 +1,33 @@
-/**
- * MODEL: The Data
- */
 class HomeModel {
-  constructor() {
-    this.data = {
-      title: "Welcome Home",
-      description: "This data came from the HomeModel class."
-    };
+  async getData() {
+    try {
+      // Use the relative path since Nginx handles the routing
+      const response = await fetch('/php/home/response');
+      return await response.json();
+    } catch (error) {
+      console.error("Fetch error:", error);
+      return { h1: "Error", description: "Could not load data." };
+    }
   }
 }
 
-/**
- * CONTROLLERS: The Logic
- */
 class HomeController {
   constructor(container) {
     this.container = container;
-    this.model = new HomeModel(); // Controller initializes its Model
+    this.model = new HomeModel();
   }
 
-  index() {
-    const { title, description } = this.model.data;
+  async index() {
+    // Show a quick loading state
+    this.container.innerHTML = "<h1>Loading...</h1>";
+    
+    // Wait for the data
+    const data = await this.model.getData();
+    
+    // Render the real data
     this.container.innerHTML = `
-      <h1>${title}</h1>
-      <p>${description}</p>
+      <h1>${data.h1}</h1>
+      <p>${data.description}</p>
     `;
   }
 }
