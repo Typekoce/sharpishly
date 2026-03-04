@@ -45,35 +45,53 @@ class AboutController {
   }
 }
 
+/**
+ * MODEL: The Data
+ */
+class WorkModel {
+  async getJobs() {
+    try {
+      const response = await fetch('/php/home/csv');
+      if (!response.ok) throw new Error('Network response was not ok');
+      return await response.json();
+    } catch (error) {
+      console.error("WorkModel Error:", error);
+      throw error;
+    }
+  }
+}
+
+/**
+ * CONTROLLERS: The Logic
+ */
 class WorkController {
   constructor(container) {
     this.container = container;
+    this.model = new WorkModel(); // Controller initializes its Model
   }
 
   async index() {
     this.container.innerHTML = "<h1>Loading Work Status...</h1>";
-    
-    try {
-      // Fetching your live JSON data
-      const response = await fetch('/php/home/csv');
-      const jobs = await response.json();
 
-      let tableHtml = `
-        <h1>Live Work Status</h1>
-        <p>This data is fetched from MySQL via the WorkController.</p>
+    try {
+      const jobs = await this.model.getJobs();
+
+      this.container.innerHTML = `
+        <h1>Work Page</h1>
+        <p>Live status of CSV processing from MySQL.</p>
         <table class="status-table">
           <thead>
             <tr>
               <th>ID</th>
               <th>Status</th>
               <th>Progress</th>
-              <th>Last Updated</th>
+              <th>Updated</th>
             </tr>
           </thead>
           <tbody>
             ${jobs.map(job => `
               <tr>
-                <td>#${job.id}</td>
+                <td>${job.id}</td>
                 <td><span class="badge ${job.status}">${job.status}</span></td>
                 <td>${job.processed_rows.toLocaleString()} / ${job.total_rows.toLocaleString()}</td>
                 <td>${job.updated_at}</td>
@@ -82,10 +100,11 @@ class WorkController {
           </tbody>
         </table>
       `;
-
-      this.container.innerHTML = tableHtml;
-    } catch (e) {
-      this.container.innerHTML = `<h1>Error</h1><p>Could not connect to the job database.</p>`;
+    } catch (error) {
+      this.container.innerHTML = `
+        <h1>Error</h1>
+        <p>Could not load work data. Please ensure the PHP backend is running.</p>
+      `;
     }
   }
 }
