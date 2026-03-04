@@ -1,0 +1,1406 @@
+/***********************************************
+ * Sharpishly R&D – Application Logic
+ ***********************************************/
+  // Gemini: https://gemini.google.com/app/cccc1302ac7625c6
+
+  // ────────────────────────────────────────────────
+  // USER MODEL
+  // ────────────────────────────────────────────────
+  
+class userModel {
+  constructor() {
+    this.state = {
+      email:'foo'
+    };
+  };
+
+  // ────────────────────────────────────────────────
+  // GETTERS (Data Extraction)
+  // ────────────────────────────────────────────────
+  getEmail() {
+    return 'test@sharpishly.com';
+  }
+
+  getName() {
+    return 'Steve Austin';
+  }
+
+};
+
+class userController {
+  constructor() {
+    this.page = 'foo';
+  };
+
+  // ────────────────────────────────────────────────
+  // RENDER
+  // ────────────────────────────────────────────────
+  render() {
+    return 'foo';
+  }
+
+};
+
+  // ────────────────────────────────────────────────
+  // DASHBOARD CONTROLLER
+  // ────────────────────────────────────────────────
+  class DashboardController{
+    constructor(pageId){
+      this.templateId = pageId;
+    }
+
+    render(){
+      prettyBug(this);
+    }
+  };
+
+  // ────────────────────────────────────────────────
+  // USER PROFILE CONTROLLER
+  // ────────────────────────────────────────────────
+  class UserProfileController{
+    constructor(pageId){
+      this.templateId = pageId;
+      this.msg = "Under Construction";
+      this.UserProfile();
+      this.populateExpertise();
+      
+    }
+    // Add this inside class UserProfileController
+populateExpertise() {
+  const select = document.getElementById('profile-expertise'); // Ensure this ID exists in index.html
+  if (!select) return;
+
+  // Clear existing options
+  select.innerHTML = '<option value="">Select Expertise...</option>';
+
+  // Pull from the centralized data in the main app/model
+  app.data.roles.forEach(role => {
+    const opt = document.createElement('option');
+    opt.value = role.toLowerCase().replace(/\s+/g, '-');
+    opt.textContent = role;
+    select.appendChild(opt);
+  });
+};
+    UserProfile(pageId){
+      app.alert(this.msg);
+    };
+    render(){
+      prettyBug(this);
+    }
+  };
+
+
+  // ────────────────────────────────────────────────
+  // HOME CONTROLLER
+  // ────────────────────────────────────────────────
+class HomeController {
+  constructor() {
+    this.templateId = 'home';
+  }
+
+  render() {
+    const user = new userModel();
+    const email = user.getEmail();
+    const h1 = document.querySelector('#home h1');
+    const sub = document.getElementById('sub-header');
+
+    if (email && email !== 'foo' && h1) {
+      h1.textContent = "Welcome Back, Researcher";
+      if (sub) sub.innerHTML = `Session active for: <strong>${email}</strong>`;
+    } else if (h1) {
+      h1.textContent = "Sharpishly R&D©";
+      if (sub) sub.textContent = "R&D accessible to everyone";
+    }
+  }
+}
+
+  // ────────────────────────────────────────────────
+  // QUICK START CONTROLLER
+  // ────────────────────────────────────────────────
+  class QuickStartController {
+  constructor(projectFormFields) {
+    this.templateId = 'quick-start';
+    this.projectFormFields = projectFormFields;
+    this.user = new userModel();
+  }
+
+  // ────────────────────────────────────────────────
+  // PROJECT FORMS & DASHBOARD
+  // ────────────────────────────────────────────────
+  setFormField(f,form){
+
+    const div = document.createElement('div');
+    div.className = 'form-group';
+
+    const label = document.createElement('label');
+    label.setAttribute('for',f.id);
+    label.innerHTML = f.label;
+
+    const msg = 'hello';
+
+    const input = document.createElement('input');
+    if(f.id === 'title'){
+      const msg = 'title';
+    } else if(f.id ==='email'){
+      const msg = 'email';
+    }
+    input.value = msg;
+    input.setAttribute('id',f.id);
+
+
+    div.appendChild(label);
+    div.appendChild(input);
+    form.appendChild(div);
+
+    return form;
+  }
+
+  // ────────────────────────────────────────────────
+  // PREVENT DUPLICATE PROJECT
+  // ────────────────────────────────────────────────
+  preventDuplicateProject(title) {
+    // Returns true if a project with the same name already exists
+    return app.projects.some(p => p.title.toLowerCase() === title.toLowerCase());
+  }
+  
+  view(){
+      const container = document.getElementById('quick-start-form-container');
+      if (container && container.children.length === 0) {
+        container.appendChild(this.createProjectForm());
+      }
+  };
+  createProjectForm() {
+    const form = document.createElement('form');
+    this.projectFormFields.forEach(f => {
+      this.setFormField(f,form);
+
+    });
+    const submit = document.createElement('button');
+    submit.type = 'submit'; submit.className = 'btn-login'; submit.textContent = 'Add Project';
+    form.appendChild(submit);
+
+form.addEventListener('submit', e => {
+      e.preventDefault();
+      const emailValue = form.email.value.trim();
+      const projectTitle = form.title.value.trim();
+      
+      // 1. Check for duplicates first
+      if (this.preventDuplicateProject(projectTitle)) {
+        app.alert(`Error: A project named "${projectTitle}" already exists.`, "danger");
+        return; // Exit the function to prevent pushing to array
+      }
+
+      // 2. Proceed with update if unique
+      document.getElementById('welcome-message').textContent = `Researcher Portal: ${emailValue}`;
+      this.user.email = emailValue;
+      
+      app.projects.push({ 
+        id: Date.now(), 
+        title: projectTitle, 
+        status: "Active",
+        progress: '10%' 
+      });
+
+      this.saveToDisk();
+      this.renderProjects();
+      
+      app.alert(`Project "${projectTitle}" has been created successfully!`, "success");
+      app.showPage('dashboard-view');
+    });
+    return form;
+  }
+
+  // ────────────────────────────────────────────────
+  // SAVE TO DISK
+  // ────────────────────────────────────────────────
+  saveToDisk() {
+    const sessionData = {
+      email: this.user.email || this.getActiveEmail(),
+      projects: app.projects
+    };
+    localStorage.setItem('sharpishly_session', JSON.stringify(sessionData));
+    
+    console.log("--- LocalStorage Updated ---");
+    console.log(localStorage);
+  }
+  renderProjects() {
+    const grid = document.getElementById('project-grid');
+    if (!grid) return;
+    if (!document.getElementById('form-wrapper')) {
+      const wrapper = document.createElement('div');
+      wrapper.id = 'form-wrapper'; wrapper.className = 'login-card';
+      wrapper.innerHTML = '<h3>Register New Research Project</h3>';
+      wrapper.appendChild(this.createProjectForm());
+      document.querySelector('#dashboard-view .container').insertBefore(wrapper, grid);
+    }
+    grid.innerHTML = '';
+    app.projects.slice().reverse().forEach(p => grid.appendChild(app.createProjectCard(p)));
+    // Inside renderProjects() or where you build your header
+    const purgeBtn = document.createElement('button');
+    purgeBtn.className = 'btn-login';
+    purgeBtn.style.background = 'var(--danger-bg)';
+    purgeBtn.style.color = 'var(--danger-text)';
+    purgeBtn.textContent = 'Purge All Projects';
+    purgeBtn.onclick = () => {
+        if(confirm("Are you sure? This cannot be undone.")) {
+            this.purgeProjects();
+        }
+};
+  }
+  render() {
+    this.view();
+  }
+}
+
+
+const app = {
+  // ────────────────────────────────────────────────
+  // USER
+  // ────────────────────────────────────────────────
+  user: {
+    name: 'Human Resources Example',
+    email: 'guest@sharpishly.com', // Added default email
+  },
+  localData:{
+    local:localStorage
+  },
+layout: {
+  1: { title: 'Home',         template: 'home' },
+  2: { title: 'Login',        template: 'login-view' },
+  3: { title: 'Dashboard',    template: 'dashboard-view' },
+  4: { title: 'Quick Start',  template: 'quick-start' },
+  5: { title: 'Settings',     template: 'settings-view' },
+  6: { title: 'User Profile', template: 'user-profile-view' },
+  7: { title: 'Workspace',    template: 'workspace-view' }
+},
+  data:{
+    page: '',
+    employees:{
+      1:{id:1,firstname:'steve'},
+      2:{id:2,firstname:'Jamie'},
+    },
+    roles: ['Manager','Customer Service'],
+    tax: ['Paye','Self Employed','Fix Term Contract']
+  },
+  // ────────────────────────────────────────────────
+  // DATA: Navigation, Projects, and Forms
+  // ────────────────────────────────────────────────
+  menu: [
+    { name: "Home",        pageId: "home", active: true },
+    { name: "Dashboard",   pageId: "dashboard-view", hidden: true },
+    { name: "Quick Start", pageId: "quick-start" },
+    { name: "Settings",    pageId: "settings-view" },
+    { name: "User Profile",    pageId: "user-profile-view" },
+    //{ name: "Manual",       href: "/docs/index.html", external: true } // Link to your new docs
+  ],
+
+  projects: [
+    { id: 1, title: "Native Mobile Application Lifecycle", status: "Active",    progress: "75%" },
+  ],
+
+  projectFormFields: [
+    { id: "title",  label: "Project Title",  type: "text",  placeholder: "e.g. Quantum Logic", required: true },
+    // Current Status removed to reduce user confusion
+    { id: "email",  label: "Email",          type: "email", placeholder: "name@company.com",   required: true }
+  ],
+  // ────────────────────────────────────────────────
+  // SET PAGE
+  // ────────────────────────────────────────────────
+  setPage(name) {
+    this.data.page = name;
+    console.log(this.data.page);
+  },
+
+
+  // ────────────────────────────────────────────────
+  // AUTH STATE HELPERS
+  // ────────────────────────────────────────────────
+  isAuthenticated() {
+    const msg = document.getElementById('welcome-message')?.textContent.trim();
+    return msg !== '' && msg !== null && msg.includes(':');
+  },
+
+  getActiveEmail() {
+    const msg = document.getElementById('welcome-message')?.textContent;
+    return msg ? msg.split(': ')[1]?.trim() : null;
+  },
+
+  // ────────────────────────────────────────────────
+  // PAGE NAVIGATION
+  // ────────────────────────────────────────────────
+  showPage(pageId) {
+  // 1. Update the data block first
+  // Naming needs to be consistent: handleNavClick(), menu, showPage()
+    this.setPage(pageId);
+    const pages = this.pages;
+
+  // Loop through the layout object values
+  Object.values(this.layout).forEach(page => {
+    const el = document.getElementById(page.template);
+    if (el) {
+      // Show the element if its template matches the requested pageId
+      el.style.display = (page.template === pageId) ? 'block' : 'none';
+    }
+  });
+
+  if (pageId === 'home') {
+      const homeCtrl = new HomeController();
+      homeCtrl.render();
+  }
+
+    if (pageId === 'quick-start') {
+        const quickCtrl = new QuickStartController(this.projectFormFields);
+        quickCtrl.render();
+        this.refreshNavigation();
+
+    }
+
+  if (pageId === 'dashboard') {
+      const dashboardCtrl = new DashboardController(pageId);
+      dashboardCtrl.render();
+  }
+
+  if (pageId === 'user-profile-view') {
+      const userProfileCtrl = new UserProfileController(pageId);
+      userProfileCtrl.render();
+  }
+
+    this.selectPageSettings(pageId);
+
+  },
+selectPageSettings(pageId){
+      if (pageId === 'settings-view') {
+      app.alert('Theme settings are still under development');
+    }
+},
+
+  refreshNavigation() {
+    const desktop = document.querySelector('#navbarNav .navbar-nav');
+    const mobile  = document.querySelector('#mobileMenu .navbar-nav');
+    const hasEmail = this.isAuthenticated();
+
+    let menuToRender;
+    if (hasEmail) {
+      menuToRender = this.menu.filter(item => item.name === "Home" || item.name === "Dashboard");
+      const dash = menuToRender.find(i => i.name === "Dashboard");
+      if (dash) dash.hidden = false;
+    } else {
+      menuToRender = this.menu.filter(item => item.name !== "Dashboard");
+    }
+
+    if (desktop) { desktop.innerHTML = ''; this.buildNavItems(desktop, menuToRender, false); }
+    if (mobile) { mobile.innerHTML = ''; this.buildNavItems(mobile, menuToRender, true); }
+  },
+
+  buildNavItems(container, items, isMobile = false) {
+    items.forEach(item => {
+      if (item.hidden) return;
+      const li = document.createElement('li');
+      li.className = 'nav-item';
+      if (item.dropdown) li.classList.add('dropdown');
+
+      const link = document.createElement('a');
+      link.className = item.dropdown ? 'nav-link dropdown-toggle' : 'nav-link';
+      link.href = item.href || '#';
+      link.textContent = item.name;
+
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        this.handleNavClick(item, isMobile);
+      });
+
+      li.appendChild(link);
+
+      if (item.dropdown) {
+        const ul = document.createElement('ul');
+        ul.className = 'dropdown-menu';
+        if (isMobile) Object.assign(ul.style, { position: 'static', border: 'none', boxShadow: 'none', paddingLeft: '1.2rem' });
+        
+        item.dropdown.forEach(sub => {
+          const sli = document.createElement('li');
+          const a = document.createElement('a');
+          a.className = 'dropdown-item';
+          a.textContent = sub.name;
+          sli.appendChild(a);
+          ul.appendChild(sli);
+        });
+        li.appendChild(ul);
+      }
+      container.appendChild(li);
+    });
+  },
+
+handleNavClick(item, isMobile) {
+  // Find the layout entry where the title matches the clicked item name
+  const pageEntry = Object.values(this.layout).find(p => p.title === item.name);
+
+  if (pageEntry) {
+    app.showPage(pageEntry.template);
+  }
+
+  if (isMobile) {
+    document.querySelector('.btn-close')?.click();
+  }
+},
+
+// ────────────────────────────────────────────────
+// WORKSPACE & PROJECT COMPONENTS
+// ────────────────────────────────────────────────
+
+showWorkspace(project) {
+  app.showPage('workspace-view');
+  const container = document.getElementById('workspace-content');
+  if (!container) return;
+
+  container.innerHTML = ''; // clear
+
+  // Header
+  const header = document.createElement('div');
+  header.style.textAlign = 'left';
+  header.style.marginBottom = '2rem';
+
+  const h2 = document.createElement('h2');
+  h2.style.fontSize = '2rem';
+  h2.textContent = project.title;
+  header.appendChild(h2);
+
+  const subtitle = document.createElement('p');
+  subtitle.className = 'login-subtitle';
+  subtitle.textContent = 'Property Survey Management with Full HR Suite';
+  header.appendChild(subtitle);
+
+  // Grid layout
+  const grid = document.createElement('div');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
+  grid.style.gap = '20px';
+
+  const leftCol = document.createElement('div');
+  leftCol.append(
+    this.showEmployees(),
+    this.createPayrollStatus(),
+    this.createHRSupportPanel(),
+    this.createLeaveManager(), 
+  );
+
+  const rightCol = document.createElement('div');
+  rightCol.append(
+    this.createSurveyBrief(project),
+    this.createHRMilestoneTracker(),  
+    this.createDocumentVault(),   
+    this.createGenericComponent(),
+    this.createHRAIAssistant(),
+    this.createHRLog(),    
+  );
+
+  grid.append(leftCol, rightCol);
+  container.append(header, grid);
+},
+
+createHRMilestoneTracker() {
+  const card = document.createElement('div');
+  card.className = 'login-card';
+
+  const h3 = document.createElement('h3');
+  h3.style.marginBottom = '15px';
+  h3.textContent = 'HR Roadmap';
+  card.appendChild(h3);
+
+  const timeline = document.createElement('div');
+  timeline.style.borderLeft = '2px solid var(--border)';
+  timeline.style.paddingLeft = '20px';
+  timeline.style.marginLeft = '10px';
+
+  const phases = [
+    { status: 'done',    text: 'Phase 1: Onboarding & Training' },
+    { status: 'active',  text: 'Phase 2: Performance Management' },
+    { status: 'pending', text: 'Phase 3: Compliance & Reporting'   }
+  ];
+
+  phases.forEach(phase => {
+    const item = document.createElement('div');
+    item.style.marginBottom = '20px';
+    item.style.position = 'relative';
+
+    const marker = document.createElement('span');
+    if (phase.status === 'done') {
+      marker.style.color = 'green';
+      marker.textContent = '✔';
+    } else if (phase.status === 'active') {
+      marker.style.color = 'var(--primary)';
+      marker.textContent = '●';
+    } else {
+      marker.style.color = '#ccc';
+      marker.textContent = '○';
+    }
+
+    const strong = document.createElement('strong');
+    strong.textContent = phase.text;
+
+    item.append(marker, document.createTextNode(' '), strong);
+    timeline.appendChild(item);
+  });
+
+  card.appendChild(timeline);
+  return card;
+},
+
+createHRAIAssistant() {
+  const div = document.createElement('div');
+  div.className = 'login-card';
+  div.style.border = '1px dashed var(--primary)';
+
+  const h3 = document.createElement('h3');
+  h3.style.color = 'var(--primary)';
+  h3.textContent = '✨ AI HR Insight';
+  div.appendChild(h3);
+
+  const p = document.createElement('p');
+  p.style.fontStyle = 'italic';
+  p.style.fontSize = '0.9rem';
+  p.style.marginTop = '10px';
+  p.textContent = 'Optimizing employee performance metrics for survey teams.';
+  div.appendChild(p);
+
+  return div;
+},
+
+createHRLog() {
+  const log = document.createElement('div');
+  log.className = 'login-card';
+  log.style.backgroundColor = '#1e1e1e';
+  log.style.color = '#4ade80';
+
+  const h3 = document.createElement('h3');
+  h3.style.color = 'white';
+  h3.style.fontFamily = 'monospace';
+  h3.textContent = '> HR_SYSTEM_LOG';
+  log.appendChild(h3);
+
+  const logContainer = document.createElement('div');
+  logContainer.style.fontFamily = 'monospace';
+  logContainer.style.fontSize = '0.75rem';
+  logContainer.style.height = '100px';
+  logContainer.style.overflowY = 'auto';
+
+  const entry = document.createElement('div');
+  entry.textContent = `[${new Date().toLocaleTimeString()}] HR database sync active...`;
+  logContainer.appendChild(entry);
+
+  log.appendChild(logContainer);
+  return log;
+},
+
+createSurveyBrief(project) {
+  const section = document.createElement('div');
+  section.className = 'login-card';
+
+  const h3 = document.createElement('h3');
+  h3.textContent = 'Survey Specifications';
+  section.appendChild(h3);
+
+  const p1 = document.createElement('p');
+  const strong1 = document.createElement('strong');
+  strong1.textContent = 'Focus:';
+  p1.appendChild(strong1);
+  p1.appendChild(document.createTextNode(' Property Evaluation & Reporting'));
+  section.appendChild(p1);
+
+  const p2 = document.createElement('p');
+  const strong2 = document.createElement('strong');
+  strong2.textContent = 'Progress:';
+  p2.appendChild(strong2);
+  p2.appendChild(document.createTextNode(` ${project.progress}`));
+  section.appendChild(p2);
+
+  return section;
+},
+
+createHRSupportPanel() {
+  const panel = document.createElement('div');
+  panel.className = 'login-card';
+  panel.style.borderLeft = '5px solid var(--primary)';
+
+  const h3 = document.createElement('h3');
+  h3.textContent = 'HR Support';
+  panel.appendChild(h3);
+
+  const button = document.createElement('button');
+  button.className = 'btn-login';
+  //button.style.background = 'var(--dark)';
+  button.textContent = 'Open HR Ticket';
+
+  button.onclick = () => {
+    const ticketForm = document.createElement('div');
+
+    // Issue Type Group
+    const typeGroup = document.createElement('div');
+    typeGroup.className = 'form-group';
+    
+    const labelType = document.createElement('label');
+    labelType.textContent = 'Issue Type';
+    
+    const select = document.createElement('select');
+    select.id = 'ticket-type';
+    Object.assign(select.style, { width: '100%', marginBottom: '10px' });
+    
+    ['Payroll Query', 'Technical Issue', 'Contract Change', 'Other'].forEach(optText => {
+      const opt = document.createElement('option');
+      opt.value = optText;
+      opt.textContent = optText;
+      select.appendChild(opt);
+    });
+    
+    typeGroup.append(labelType, select);
+
+    // Description Group
+    const descGroup = document.createElement('div');
+    descGroup.className = 'form-group';
+    
+    const labelDesc = document.createElement('label');
+    labelDesc.textContent = 'Description';
+    
+    const textarea = document.createElement('textarea');
+    textarea.id = 'ticket-desc';
+    textarea.placeholder = 'Describe the issue...';
+    Object.assign(textarea.style, { width: '100%', height: '80px' });
+    
+    descGroup.append(labelDesc, textarea);
+
+    // Submit Button
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'btn-login';
+    submitBtn.textContent = 'Submit Ticket';
+    submitBtn.onclick = () => {
+      const type = select.value;
+      app.alert(`Ticket Created: ${type}. HR will review this shortly.`, "success");
+      const backdrop = document.getElementById('modal-backdrop');
+      if (backdrop) backdrop.remove();
+    };
+
+    ticketForm.append(typeGroup, descGroup, submitBtn);
+
+    // Launch Modal
+    this.createModal('Open HR Support Ticket', ticketForm);
+  };
+
+  panel.appendChild(button);
+  return panel;
+},
+
+// ────────────────────────────────────────────────
+  // HR ADD-ON COMPONENTS (PROGRAMMATIC)
+  // ────────────────────────────────────────────────
+
+  createComplianceTracker() {
+    const card = document.createElement('div');
+    card.className = 'login-card';
+
+    const h3 = document.createElement('h3');
+    h3.style.marginBottom = '15px';
+    h3.textContent = 'Compliance & Certifications';
+    card.appendChild(h3);
+
+    const list = document.createElement('div');
+
+    const certs = [
+      { name: 'RICS Certification', status: '✔', color: 'green' },
+      { name: 'Asbestos Awareness', status: '●', color: 'orange' },
+      { name: 'CSCS Gold Card',    status: '○', color: '#ccc' }
+    ];
+
+    certs.forEach(cert => {
+      const item = document.createElement('div');
+      item.style.marginBottom = '10px';
+      
+      const icon = document.createElement('span');
+      icon.style.color = cert.color;
+      icon.style.marginRight = '10px';
+      icon.textContent = cert.status;
+
+      const text = document.createElement('span');
+      text.style.fontWeight = 'bold';
+      text.textContent = cert.name;
+
+      item.append(icon, text);
+      list.appendChild(item);
+    });
+
+    card.appendChild(list);
+    return card;
+  },
+
+  createLeaveManager() {
+    const div = document.createElement('div');
+    div.className = 'login-card';
+    div.style.border = '1px dashed var(--primary)';
+
+    const h3 = document.createElement('h3');
+    h3.style.color = 'var(--primary)';
+    h3.textContent = '📅 Absence Management';
+    div.appendChild(h3);
+
+    const p = document.createElement('p');
+    p.style.fontSize = '0.9rem';
+    p.style.margin = '10px 0';
+    p.textContent = 'Remaining Annual Leave: 14 Days';
+    div.appendChild(p);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-login';
+    btn.style.padding = '5px 15px';
+    btn.textContent = 'Request Time Off';
+    div.appendChild(btn);
+
+    return div;
+  },
+
+  createDocumentVault() {
+    const log = document.createElement('div');
+    log.className = 'login-card';
+    log.style.backgroundColor = '#f8f9fa';
+    log.style.color = '#333';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = '📂 Digital Personnel Folder';
+    log.appendChild(h3);
+
+    const container = document.createElement('div');
+    container.style.fontSize = '0.8rem';
+    container.style.marginTop = '10px';
+
+    ['employment_contract.pdf', 'id_verification.jpg', 'training_cert_2025.pdf'].forEach(file => {
+      const row = document.createElement('div');
+      row.style.padding = '8px';
+      row.style.borderBottom = '1px solid #ddd';
+      row.textContent = `📄 ${file}`;
+      container.appendChild(row);
+    });
+
+    log.appendChild(container);
+    return log;
+  },
+// ────────────────────────────────────────────────
+  // MODAL SYSTEM (Bootstrap Style)
+  // ────────────────────────────────────────────────
+  createModal(titleText = 'System Message', contentNode = null) {
+    // 1. Create Overlay/Backdrop
+    const backdrop = document.createElement('div');
+    backdrop.id = 'modal-backdrop';
+    Object.assign(backdrop.style, {
+      position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+      backgroundColor: 'rgba(0,0,0,0.7)', zIndex: '1050',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      backdropFilter: 'blur(4px)', transition: 'opacity 0.3s ease'
+    });
+
+    // 2. Create Modal Container
+    const modal = document.createElement('div');
+    modal.className = 'login-card'; // Reusing your existing card styles
+    Object.assign(modal.style, {
+      width: '90%', maxWidth: '500px', position: 'relative',
+      padding: '2rem', boxShadow: '0 1rem 3rem rgba(0,0,0,0.5)',
+      transform: 'translateY(0)', animation: 'modalSlideIn 0.3s ease-out'
+    });
+
+    // 3. Header Area
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    header.style.marginBottom = '1.5rem';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = titleText;
+    h3.style.margin = '0';
+
+    const closeX = document.createElement('button');
+    closeX.innerHTML = '&times;';
+    closeX.style.cssText = 'background:none; border:none; font-size:1.5rem; color:var(--primary); cursor:pointer;';
+    closeX.onclick = () => backdrop.remove();
+
+    header.append(h3, closeX);
+
+    // 4. Content Area
+    const body = document.createElement('div');
+    body.style.marginBottom = '1.5rem';
+    
+    if (typeof contentNode === 'string') {
+      const p = document.createElement('p');
+      p.textContent = contentNode;
+      body.appendChild(p);
+    } else if (contentNode) {
+      body.appendChild(contentNode);
+    }
+
+    // 5. Footer / Close Button
+    const footer = document.createElement('div');
+    footer.style.textAlign = 'right';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'btn-login';
+    closeBtn.textContent = 'Close';
+    closeBtn.onclick = () => backdrop.remove();
+    footer.appendChild(closeBtn);
+
+    // Assembly
+    modal.append(header, body, footer);
+    backdrop.appendChild(modal);
+    document.body.appendChild(backdrop);
+
+    // Close on backdrop click (optional UX feature)
+    backdrop.onclick = (e) => { if (e.target === backdrop) backdrop.remove(); };
+  },
+  createPayrollStatus() {
+    const panel = document.createElement('div');
+    panel.className = 'login-card';
+    panel.style.borderLeft = '5px solid #28a745';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = 'Payroll & Expenses';
+    panel.appendChild(h3);
+
+    const p = document.createElement('p');
+    p.textContent = 'Last Payslip: Jan 2026';
+    panel.appendChild(p);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-login';
+    //btn.style.background = 'var(--dark)';
+    btn.textContent = 'Upload Expense Receipt';
+    // Inside createPayrollStatus
+// UPDATED: Use arrow function (=>) so 'this' refers to the 'app' object
+    btn.onclick = () => {
+      const content = document.createElement('p');
+      content.textContent = "Please select your expense receipt (.jpg, .pdf) for upload to the R&D vault.";
+      this.createModal('Expense Upload', content); 
+    };
+    panel.appendChild(btn);
+
+    return panel;
+  },
+
+/**
+   * Component Template: [Name of Component]
+   * Usage: this.[methodName]()
+   */
+  createGenericComponent() {
+    // 1. Create Main Card Container
+    const card = document.createElement('div');
+    card.className = 'login-card'; // Reuses your existing CSS
+    // Optional: add unique styling here
+    // card.style.borderTop = '4px solid var(--primary)';
+
+    // 2. Create Header
+    const h3 = document.createElement('h3');
+    h3.textContent = 'Component Title';
+    card.appendChild(h3);
+
+    // 3. Create Content Body
+    const body = document.createElement('div');
+    body.style.marginTop = '15px';
+    
+    // Example content: Simple text or data
+    const info = document.createElement('p');
+    info.style.fontSize = '0.85rem';
+    info.textContent = 'Descriptive text or data goes here.';
+    body.appendChild(info);
+
+    card.appendChild(body);
+
+    // 4. Create Action Area (Optional)
+    const actionBtn = document.createElement('button');
+    actionBtn.className = 'btn-login';
+    actionBtn.textContent = 'Action Label';
+    actionBtn.onclick = () => prettyBug(actionBtn);
+    card.appendChild(actionBtn);
+
+    return card;
+  },
+// ────────────────────────────────────────────────
+  // SHOW EMPLOYEES (Updated with Search)
+  // ────────────────────────────────────────────────
+  showEmployees() {
+    const card = document.createElement('div');
+    card.className = 'login-card';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = 'Employees';
+    card.appendChild(h3);
+
+    // Create Search Input programmatically
+    const searchWrapper = document.createElement('div');
+    searchWrapper.style.marginBottom = '15px';
+    
+    const searchInput = document.createElement('input');
+    searchInput.setAttribute('type', 'text');
+    searchInput.setAttribute('placeholder', 'Search staff name...');
+    searchInput.className = 'form-group'; // Reusing your existing CSS class
+    searchInput.style.width = '100%';
+    
+    // Trigger filter on every keystroke
+    searchInput.onkeyup = () => this.filterForEmployee(searchInput.value);
+    
+    searchWrapper.appendChild(searchInput);
+    card.appendChild(searchWrapper);
+
+    const body = document.createElement('div');
+    body.id = 'employee-list-container'; // ID for targeting during filter
+    
+    const info = document.createElement('p');
+    info.style.fontSize = '0.85rem';
+    info.textContent = 'Please select employee from the list below';
+    body.appendChild(info);
+
+    this.getEmployees(body);
+    card.appendChild(body);
+
+    return card;
+  },
+
+// ────────────────────────────────────────────────
+  // FILTER FOR EMPLOYEE (Updated for Error Handling)
+  // ────────────────────────────────────────────────
+  filterForEmployee(term) {
+    const container = document.getElementById('employee-list-container');
+    if (!container) return;
+
+    const rows = container.querySelectorAll('div[id^="emp-"]');
+    const query = term.toLowerCase();
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const match = row.textContent.toLowerCase().includes(query);
+      row.style.display = match ? 'block' : 'none';
+      if (match) visibleCount++;
+    });
+
+    // If zero matches, show the message
+    this.toggleNoResultsMessage(container, visibleCount === 0);
+  },
+
+  // ────────────────────────────────────────────────
+  // TOGGLE NO RESULTS MESSAGE
+  // ────────────────────────────────────────────────
+  toggleNoResultsMessage(container, isEmpty) {
+    let msgEl = document.getElementById('search-no-results');
+
+    if (!msgEl) {
+      msgEl = document.createElement('div');
+      msgEl.setAttribute('id', 'search-no-results');
+      msgEl.style.padding = '10px';
+      msgEl.style.color = 'var(--primary)'; // Using your theme color
+      msgEl.style.fontStyle = 'italic';
+      msgEl.style.fontSize = '0.8rem';
+      msgEl.style.textAlign = 'center';
+      msgEl.textContent = 'No matching employees found.';
+      container.appendChild(msgEl);
+    }
+
+    msgEl.style.display = isEmpty ? 'block' : 'none';
+  },
+// ────────────────────────────────────────────────
+  // GET EMPLOYEES
+  // ────────────────────────────────────────────────
+  getEmployees(body) {
+    const employees = this.data.employees;
+    // Store 'this' context for use inside the click handler
+    const self = this;
+
+    for (let i in employees) {
+      const employee = employees[i];
+      const row = document.createElement('div');
+      
+      row.setAttribute('id', `emp-${employee.id}`);
+      row.textContent = employee.firstname; // Safe text assignment
+      row.style.border = '1px dashed #ccc';
+      row.style.padding = '5px';
+      row.style.cursor = 'pointer';
+
+      // Attach click event using the naming convention
+// Inside getEmployees loop
+row.onclick = function() {
+  self.updateWorkspaceHeader(employee.firstname);
+  self.mountHRAdminSuite(employee); // The new entry point
+};
+
+      body.appendChild(row);
+    }
+  },
+mountHRAdminSuite(employee) {
+  const rightCol = document.getElementById('workspace-content').children[1].children[1];
+  rightCol.innerHTML = ''; 
+
+  const adminCard = document.createElement('div');
+  adminCard.className = 'login-card';
+  
+  const h3 = document.createElement('h3');
+  h3.textContent = `HR Administration: ${employee.firstname}`;
+  adminCard.appendChild(h3);
+
+  const nav = document.createElement('div');
+  nav.style.display = 'flex';
+  nav.style.gap = '10px';
+  nav.style.marginBottom = '15px';
+
+  // UPDATED: Replaced 'Pension' with 'Assignment' to match your latest logic
+  ['Personal', 'Role', 'Tax', 'Assignment'].forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-login';
+    btn.style.padding = '5px 10px';
+    btn.style.fontSize = '0.7rem';
+    btn.textContent = cat;
+    btn.onclick = () => this.renderHRCategory(employee, cat, formArea);
+    nav.appendChild(btn);
+  });
+
+  const formArea = document.createElement('div');
+  formArea.id = 'hr-form-area';
+  
+  adminCard.append(nav, formArea);
+  rightCol.appendChild(adminCard);
+  
+  this.renderHRCategory(employee, 'Personal', formArea);
+},
+renderHRCategory(employee, category, container) {
+  container.innerHTML = ''; 
+
+  // 1. Render the fields based on category
+  if (category === 'Assignment') {
+    const h4 = document.createElement('h4');
+    h4.textContent = "Assign to Research Project";
+    container.appendChild(h4);
+    this.createSelectField({id: 'projSelect', label: 'Select Active Project'}, container, app.projects);
+  } 
+  else if (category === 'Role') {
+    this.createSelectField({id: 'dept', label: 'Department'}, container, ['Operations', 'Surveying', 'HQ']);
+    this.createSelectField({id: 'role', label: 'Job Title'}, container, this.data.roles);
+  } 
+  else if (category === 'Tax') {
+    this.createSelectField({id: 'tin', label: 'Tax ID'}, container, ['T-800', 'T-1000']);
+    this.createSelectField({id: 'code', label: 'Contract Type'}, container, this.data.tax);
+  }
+  else {
+    const fields = { 'Personal': [{id: 'dob', label: 'Date of Birth', type: 'date'}] };
+    const currentFields = fields[category] || [];
+    currentFields.forEach(f => this.setFormField(f, container));
+  }
+
+  // 2. Add the Action Button
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn-login';
+  saveBtn.style.marginTop = '15px';
+  saveBtn.textContent = `Update ${category} Records`;
+
+  // 3. Conditional Save Logic
+  saveBtn.onclick = () => {
+    if (category === 'Assignment') {
+      const pId = document.getElementById('projSelect').value;
+      const project = app.projects.find(p => p.id == pId);
+      employee.currentProject = project.title;
+      this.updateWorkspaceHeader(employee);
+      this.saveToDisk(); // Crucial for persistence
+      app.alert(`${employee.firstname} assigned to ${project.title}`, "success");
+    } else {
+      // Handles Personal, Role, Tax via the existing save method
+      this.saveHREntry(employee.id, category);
+    }
+  };
+  
+  container.appendChild(saveBtn);
+},
+  // ────────────────────────────────────────────────
+  // UPDATE WORKSPACE HEADER
+  // ────────────────────────────────────────────────
+  updateWorkspaceHeader(staffName) {
+    const container = document.getElementById('workspace-content');
+    if (!container) return;
+
+    // Find or create the assignment badge
+    let badge = document.getElementById('assignment-badge');
+    
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'assignment-badge';
+      badge.className = 'status'; // Reusing your project-card status style
+      badge.style.marginLeft = '15px';
+      badge.style.fontSize = '0.9rem';
+      
+      // Append to the H2 inside the header
+      const h2 = container.querySelector('h2');
+      if (h2) h2.appendChild(badge);
+    }
+
+    badge.textContent = ` (Assigned to: ${staffName})`;
+  },
+// ────────────────────────────────────────────────
+  // SYSTEM ALERTS (Bootstrap Style)
+  // ────────────────────────────────────────────────
+  alert(message, type = 'success') {
+    const container = document.getElementById('alert-container');
+    if (!container) return;
+
+    // 1. Create Alert Div
+    const alertDiv = document.createElement('div');
+    
+    // Map types to Bootstrap classes
+    // Types: primary, secondary, success, danger, warning, info, light, dark
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.style.boxShadow = '0 0.5rem 1rem rgba(0, 0, 0, 0.15)';
+    alertDiv.style.marginBottom = '10px';
+    alertDiv.style.display = 'block';
+
+    // 2. Add Message Text
+    const textNode = document.createTextNode(message);
+    alertDiv.appendChild(textNode);
+
+    // 3. Create Close Button (Standard Bootstrap Close)
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-close';
+    btn.setAttribute('aria-label', 'Close');
+    btn.onclick = () => {
+        alertDiv.classList.remove('show');
+        setTimeout(() => alertDiv.remove(), 150);
+    };
+    
+    alertDiv.appendChild(btn);
+
+    // 4. Add to Stack
+    container.appendChild(alertDiv);
+
+    // 5. Lifecycle Management (Auto-remove after 4s)
+    setTimeout(() => {
+      if (alertDiv.parentNode) {
+        alertDiv.classList.remove('show');
+        setTimeout(() => alertDiv.remove(), 150);
+      }
+    }, 4000);
+  },
+
+  // ────────────────────────────────────────────────
+  // PURGE ALL PROJECTS
+  // ────────────────────────────────────────────────
+  purgeProjects() {
+    // 1. Empty the array (preserves the reference)
+    app.projects.length = 0;
+
+    // 2. Sync to localStorage so they don't return on refresh
+    this.saveToDisk();
+
+    // 3. Refresh the UI
+    this.renderProjects();
+
+    // 4. Notify the user
+    app.alert("All projects have been removed.", "warning");
+  },
+  createProjectCard(project) {
+    const card = document.createElement('div');
+    card.className = 'project-card';
+    card.style.cursor = 'pointer';
+    card.onclick = () => this.showWorkspace(project);
+    card.innerHTML = `<h3>${project.title}</h3><p class="status">Status: <strong>${project.status}</strong></p>
+      <div class="progress-track"><div class="progress-fill" style="width: ${project.progress}"></div></div>
+      <p class="progress-label">${project.progress}</p>`;
+    return card;
+  },
+
+
+
+  loadFromDisk() {
+    const rawData = localStorage.getItem('sharpishly_session');
+    if (rawData) {
+      const data = JSON.parse(rawData);
+      this.localData = data;
+      app.projects = data.projects || this.projects;
+      if (data.email) {
+        this.user.email = data.email;
+        document.getElementById('welcome-message').textContent = `Researcher Portal: ${data.email}`;
+      }
+      return true;
+    }
+    return false;
+  },
+
+  // ────────────────────────────────────────────────
+  // INITIALIZATION
+  // ────────────────────────────────────────────────
+  initAuth() {
+    const form = document.getElementById('loginForm');
+    if (form) {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const email = form.email.value.trim();
+        document.getElementById('welcome-message').textContent = `Researcher Portal: ${email}`;
+        this.user.email = email;
+        this.saveToDisk();
+        this.renderProjects();
+        this.refreshNavigation();
+        app.showPage('dashboard-view');
+      });
+    }
+
+    document.getElementById('logoutBtn')?.addEventListener('click', () => {
+      localStorage.removeItem('sharpishly_session'); // Clear storage on logout
+      this.user.email = 'guest@sharpishly.com'; // Reset to default on logout
+      document.getElementById('welcome-message').textContent = '';
+      // Trigger the centralized alert before switching pages
+      app.alert("You have been signed out successfully.", "info");
+      app.showPage('home');
+      this.refreshNavigation();
+    });
+  },
+// Line 1205 in your current script.js
+hideDashBoardForm() {
+  const form = document.getElementById('project-form'); // Ensure this ID exists in index.html
+  if (form) {
+    form.style.display = 'none';
+  } else {
+    console.warn("hideDashBoardForm: Element with ID 'project-form' not found.");
+  }
+},
+  initMobileMenu() {
+    const toggler = document.querySelector('.navbar-toggler');
+    const menu = document.getElementById('mobileMenu');
+    const backdrop = document.getElementById('backdrop');
+    const close = document.querySelector('.btn-close');
+    const hide = () => { menu.classList.remove('show'); backdrop.classList.remove('show'); };
+    toggler?.addEventListener('click', () => { menu.classList.add('show'); backdrop.classList.add('show'); });
+    [close, backdrop].forEach(el => el?.addEventListener('click', hide));
+  },
+// ────────────────────────────────────────────────
+  // CREATE SELECT FIELD (Dynamic Dropdowns)
+  // ────────────────────────────────────────────────
+  createSelectField(f, container, optionsArray) {
+    const div = document.createElement('div');
+    div.className = 'form-group';
+
+    const label = document.createElement('label');
+    label.setAttribute('for', f.id);
+    label.textContent = f.label;
+
+    const select = document.createElement('select');
+    select.setAttribute('id', f.id);
+    select.className = 'form-group'; // Reusing your input styling
+    select.style.width = '100%';
+    select.style.padding = '0.75rem';
+
+    // Build options from the data array
+    optionsArray.forEach(opt => {
+      const o = document.createElement('option');
+      
+      // Check if opt is a Project Object or a simple String
+      if (typeof opt === 'object' && opt !== null) {
+        o.value = opt.id;        // The "ID" goes to the logic
+        o.textContent = opt.title; // The "Title" goes to the user
+      } else {
+        o.value = opt;
+        o.textContent = opt;
+      }
+      select.appendChild(o);
+    });
+
+
+    div.appendChild(label);
+    div.appendChild(select);
+    container.appendChild(div);
+  },
+  
+  // ────────────────────────────────────────────────
+  // UPDATED: WORKSPACE HEADER (Project Linkage)
+  // ────────────────────────────────────────────────
+  updateWorkspaceHeader(employee) {
+    const container = document.getElementById('workspace-content');
+    if (!container) return;
+
+    let badge = document.getElementById('assignment-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'assignment-badge';
+      badge.className = 'status'; 
+      badge.style.marginLeft = '15px';
+      badge.style.fontSize = '0.8rem';
+      badge.style.background = 'var(--secondary-bg)'; // Distinct color
+      const h2 = container.querySelector('h2');
+      if (h2) h2.appendChild(badge);
+    }
+
+    // Display Staff Name + Assigned Project (if it exists)
+    const projectInfo = employee.currentProject ? ` | Project: ${employee.currentProject}` : ' | Unassigned';
+    badge.textContent = `(Staff: ${employee.firstname}${projectInfo})`;
+  },
+  // Add this inside the app object
+initSettings() {
+  const btn = document.getElementById('theme-toggle-btn');
+  if (!btn) return;
+
+  // Check current theme on load
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  this.applyTheme(currentTheme);
+
+  btn.onclick = () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const newTheme = isDark ? 'light' : 'dark';
+    this.applyTheme(newTheme);
+  };
+},
+
+applyTheme(theme) {
+  const btn = document.getElementById('theme-toggle-btn');
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  
+  if (btn) {
+    btn.textContent = theme === 'dark' ? 'Disable' : 'Enable';
+    btn.style.background = theme === 'dark' ? 'var(--gray)' : 'var(--primary)';
+  }
+},
+initProfile() {
+    const personalForm = document.getElementById('profile-personal-form');
+    const cvForm = document.getElementById('profile-cv-form');
+
+    // Load existing data from app.user (which is hydrated from disk)
+    if (document.getElementById('profile-name')) {
+        document.getElementById('profile-name').value = this.user.name || '';
+        document.getElementById('profile-email').value = this.user.email || '';
+    }
+
+    personalForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.user.name = document.getElementById('profile-name').value;
+        this.user.address = document.getElementById('profile-address').value;
+        // ... save other fields to this.user ...
+        
+        this.saveToDisk(); // Save to localStorage
+        app.alert("Profile saved to disk", "success");
+        this.refreshNavigation();
+    });
+},
+// Don't forget to call this.initSettings() in your init() function!
+  init() {
+    this.loadFromDisk(); // Hydrate data from disk before rendering
+    this.refreshNavigation();
+    this.initMobileMenu();
+    this.initAuth();
+    this.initSettings();
+    this.initProfile();
+    
+    // Auto-route to dashboard if a session exists
+    if (this.isAuthenticated()) {
+      app.alert("Session access granted", "success");
+      //this.renderProjects();
+      app.showPage('dashboard-view');
+      this.setPage('dashboard');
+      this.hideDashBoardForm();
+    } else {
+      app.showPage('home');
+      this.setPage('home')
+    }
+
+    // Debug
+    prettyBug(this);
+  }
+};
+
+window.addEventListener('DOMContentLoaded', () => app.init());
