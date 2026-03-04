@@ -111,7 +111,6 @@ const routes = {
   
 };
 
-new Router(routes);
 
 // Mobile menu toggle
 document.addEventListener('DOMContentLoaded', () => {
@@ -130,4 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+    new Router(routes);
+
 });
