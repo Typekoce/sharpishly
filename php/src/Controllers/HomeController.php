@@ -17,6 +17,15 @@ class HomeController
         $this->home = new HomeModel();
     }
 
+    public function response(){
+        $data = array(
+            "h1"=>"hello"
+        );
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data);
+        die();
+    }
+
     public function render()
     {
         $data = [

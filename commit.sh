@@ -1,5 +1,5 @@
 #!/bin/bash
-
+clear
 # 1. Get current branch name
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
