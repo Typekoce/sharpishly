@@ -25,7 +25,7 @@ class HomeModel
 
         $result = $this->db->find($conditions);
 
-        echo "<pre>" . print_r($result) . "</pre>";
+        // echo "<pre>" . print_r($result) . "</pre>";
 
         return $result;
     }

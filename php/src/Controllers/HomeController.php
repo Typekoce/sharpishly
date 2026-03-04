@@ -58,10 +58,10 @@ class HomeController
     public function csv(): void
     {
 
-        $result = $this->home->csv();
-        var_dump($result);
-        $this->render();
-
+        $data = $this->home->csv();
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data);
+        die();
     }
 
     public function migrate(): void

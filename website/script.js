@@ -50,11 +50,43 @@ class WorkController {
     this.container = container;
   }
 
-  index() {
-    this.container.innerHTML = `
-      <h1>Work Page</h1>
-      <p>This is a simple static route with no Model.</p>
-    `;
+  async index() {
+    this.container.innerHTML = "<h1>Loading Work Status...</h1>";
+    
+    try {
+      // Fetching your live JSON data
+      const response = await fetch('/php/home/csv');
+      const jobs = await response.json();
+
+      let tableHtml = `
+        <h1>Live Work Status</h1>
+        <p>This data is fetched from MySQL via the WorkController.</p>
+        <table class="status-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Status</th>
+              <th>Progress</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${jobs.map(job => `
+              <tr>
+                <td>#${job.id}</td>
+                <td><span class="badge ${job.status}">${job.status}</span></td>
+                <td>${job.processed_rows.toLocaleString()} / ${job.total_rows.toLocaleString()}</td>
+                <td>${job.updated_at}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      this.container.innerHTML = tableHtml;
+    } catch (e) {
+      this.container.innerHTML = `<h1>Error</h1><p>Could not connect to the job database.</p>`;
+    }
   }
 }
 
