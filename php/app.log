@@ -700,3 +700,15 @@
   → method = csv
   → params = []
 
+[2026-03-05T15:16:42+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-05T15:17:16+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
