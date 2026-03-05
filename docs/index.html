@@ -7,15 +7,17 @@
     <style>
         :root {
             --sidebar-width: 280px;
-            --primary: #0d6efd;
-            --dark: #212529;
-            --light-bg: #f8f9fa;
-            --border: #dee2e6;
-            --code-bg: #272822;
+            --primary: #58a6ff;
+            --accent: #3fb950;
+            --dark: #0d1117;
+            --light-bg: #161b22;
+            --border: #30363d;
+            --code-bg: #010409;
+            --text: #c9d1d9;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.6; color: var(--dark); display: flex; }
+        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.6; color: var(--text); display: flex; background: var(--dark); }
 
         /* Sidebar Navigation */
         #sidebar {
@@ -30,10 +32,10 @@
 
         .logo { font-weight: bold; font-size: 1.2rem; color: var(--primary); margin-bottom: 2rem; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
         .nav-group { margin-bottom: 1.5rem; }
-        .nav-group h4 { font-size: 0.8rem; text-transform: uppercase; color: #6c757d; margin-bottom: 10px; letter-spacing: 1px; }
-        .nav-item { display: block; padding: 8px 12px; text-decoration: none; color: var(--dark); border-radius: 4px; font-size: 0.95rem; cursor: pointer; }
-        .nav-item:hover { background: #e9ecef; }
-        .nav-item.active { background: var(--primary); color: white; }
+        .nav-group h4 { font-size: 0.8rem; text-transform: uppercase; color: #8b949e; margin-bottom: 10px; letter-spacing: 1px; }
+        .nav-item { display: block; padding: 8px 12px; text-decoration: none; color: var(--text); border-radius: 4px; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+        .nav-item:hover { background: #21262d; }
+        .nav-item.active { background: var(--primary); color: #fff; }
 
         /* Main Content Area */
         #content {
@@ -47,28 +49,30 @@
         section.active { display: block; animation: fadeIn 0.3s ease; }
 
         h1 { font-size: 2.5rem; margin-bottom: 1rem; color: var(--primary); }
-        h2 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin: 2rem 0 1rem; }
-        p { margin-bottom: 1rem; color: #444; }
+        h2 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin: 2rem 0 1rem; color: var(--accent); }
+        p { margin-bottom: 1rem; color: #8b949e; }
+        li { margin-left: 20px; margin-bottom: 10px; color: #8b949e; }
 
-        /* Doxygen-style Code Blocks */
+        /* Code Blocks */
         pre {
             background: var(--code-bg);
-            color: #f8f8f2;
+            color: #d1d5da;
             padding: 15px;
             border-radius: 6px;
             overflow-x: auto;
-            font-family: 'Courier New', monospace;
+            font-family: 'Consolas', monospace;
             font-size: 0.9rem;
             margin: 1.5rem 0;
-            border-left: 5px solid var(--primary);
+            border: 1px solid var(--border);
         }
 
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; background: #eee; font-size: 0.75rem; font-weight: bold; margin-left: 10px; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; background: #30363d; font-size: 0.75rem; font-weight: bold; margin-left: 10px; }
+        .badge-agent { background: #238636; color: white; }
+        .badge-vault { background: #d29922; color: black; }
         .badge-async { background: #ffd33d; color: #000; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Mobile Adjustments */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             #sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border); }
@@ -79,68 +83,93 @@
 <body>
 
 <nav id="sidebar">
-    <div class="logo">Sharpishly R&D <br><small>v1.0.0 Manual</small></div>
+    <div class="logo">OpenClaw R&D <br><small>v2.0.0 Manual</small></div>
     
     <div class="nav-group">
         <h4>Architecture</h4>
         <a class="nav-item active" onclick="showSection('intro')">Introduction</a>
         <a class="nav-item" onclick="showSection('layout-system')">Layout System</a>
-        <a class="nav-item" onclick="showSection('routing')">Routing & Navigation</a>
+        <a class="nav-item" onclick="showSection('agent-system')">Agentic Ecosystem</a>
+        <a class="nav-item" onclick="showSection('nervous-system')">Nervous System (SSE)</a>
     </div>
 
     <div class="nav-group">
-        <h4>API Reference</h4>
+        <h4>JS API Reference</h4>
         <a class="nav-item" onclick="showSection('api-helpers')">Fetch Helpers</a>
-        <a class="nav-item" onclick="showSection('auth-logic')">Authentication</a>
+        <a class="nav-item" onclick="showSection('auth-logic')">Authentication Logic</a>
     </div>
 
     <div class="nav-group">
-        <h4>Deployment</h4>
-        <a class="nav-item" onclick="showSection('docker-setup')">Docker & Nginx</a>
-    </div>
-
-    <div class="nav-group">
-        <h4>Backend Architecture</h4>
-        <a class="nav-item" onclick="showSection('docker-lemp')">Docker & LEMP Stack</a>
-        <a class="nav-item" onclick="showSection('php-front-controller')">PHP Front Controller</a>
+        <h4>Security & Backend</h4>
+        <a class="nav-item" onclick="showSection('vault-logic')">AES-256 Vault</a>
+        <a class="nav-item" onclick="showSection('php-mvc')">PHP MVC Controller</a>
+        <a class="nav-item" onclick="showSection('docker-orchestration')">Docker Orchestration</a>
     </div>
 </nav>
 
 <main id="content">
     <section id="intro" class="active">
         <h1>Developer Manual</h1>
-        <p>This manual provides technical documentation for the Sharpishly R&D client-side application. The app is built using a "Data-Driven" Vanilla JavaScript architecture designed for high performance and zero-dependency deployments.</p>
+        <p>This manual provides technical documentation for the Sharpishly R&D ecosystem. The application has evolved from a Vanilla JS frontend into a <strong>God Mode</strong> Agentic Ecosystem supporting autonomous reasoning and secure data management.</p>
         <h2>Core Principles</h2>
         <ul>
             <li><strong>No Frameworks:</strong> Direct DOM manipulation for maximum speed.</li>
-            <li><strong>Single Source of Truth:</strong> All UI state is derived from the <code>app.layout</code> and <code>app.data</code> objects.</li>
-            <li><strong>Persistence:</strong> Utilization of <code>localStorage</code> for session and project data.</li>
+            <li><strong>Single Source of Truth:</strong> UI state is derived from <code>app.layout</code> and <code>app.data</code>.</li>
+            <li><strong>Agentic Automation:</strong> Background workers for high-stakes tasks.</li>
+            <li><strong>Security First:</strong> Master-key encrypted credentials.</li>
         </ul>
     </section>
 
     <section id="layout-system">
         <h1>Layout System</h1>
-        <p>The application uses a centralized layout object to manage section visibility and titles.</p>
+        <p>The application uses a centralized layout object to manage section visibility and titles across the SPA.</p>
         <pre>
 layout: {
   1: { title: 'Home', template: 'home' },
   5: { title: 'Settings', template: 'settings-view' },
   6: { title: 'User Profile', template: 'user-profile-view' }
 }</pre>
-        <p>By mapping titles to template IDs, the system ensures that navigation clicks and page rendering remain perfectly synchronized.</p>
+        <p>By mapping titles to template IDs, the system ensures navigation clicks and rendering remain synchronized.</p>
+    </section>
+
+    <section id="agent-system">
+        <h1>Agentic Ecosystem <span class="badge badge-agent">Autonomous</span></h1>
+        <p>Agents reside in <code>php/src/Agents/</code> and operate as independent loops. They communicate via a file-based job queue.</p>
+        <h2>The Scout Agent</h2>
+        <p>Responsible for competitor analysis and trend scraping. It reports progress via <code>storage/queue/progress.json</code>.</p>
+        <pre>
+// php/src/Agents/worker.php
+while (true) {
+    $jobs = glob(STORAGE_PATH . '/queue/*.job');
+    foreach ($jobs as $file) {
+        $task = json_decode(file_get_contents($file));
+        // Process autonomous reasoning...
+    }
+    sleep(1);
+}</pre>
+    </section>
+
+    <section id="nervous-system">
+        <h1>Nervous System (SSE)</h1>
+        <p>The bridge (<code>php/nervous_system.php</code>) facilitates real-time communication between the Worker and the UI using Server-Sent Events.</p>
+        <pre>
+// EventSource Connection in script.js
+const sse = new EventSource('/php/nervous_system.php?action=stream');
+sse.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    updateThoughtStream(data.msg);
+};</pre>
     </section>
 
     <section id="api-helpers">
         <h1>API Helpers <span class="badge badge-async">Asynchronous</span></h1>
-        <p>The application abstracts the <code>Fetch API</code> into two primary helpers to handle global error logging and data parsing.</p>
-        <h2>requestGet(url)</h2>
+        <p>The frontend abstracts the <code>Fetch API</code> into primary helpers to handle global parsing.</p>
         <pre>
 async requestGet(url) {
   const response = await fetch(url);
   return await response.json();
-}</pre>
-        <h2>requestPost(url, payload)</h2>
-        <pre>
+}
+
 async requestPost(url, payload) {
   return await fetch(url, {
     method: 'POST',
@@ -149,61 +178,42 @@ async requestPost(url, payload) {
 }</pre>
     </section>
 
-    <section id="docker-setup">
-        <h1>Docker Setup</h1>
-        <p>The application is containerized using Nginx to ensure consistent serving across different environments (Windows/Ubuntu).</p>
+    <section id="vault-logic">
+        <h1>Secure Vault <span class="badge badge-vault">Encryption</span></h1>
+        <p>API tokens and sensitive credentials utilize a 256-bit Master Key generated during setup.</p>
         <pre>
-# docker-compose.yml
-services:
-  web:
-    image: nginx:alpine
-    ports:
-      - "8080:80"
-    volumes:
-      - .:/usr/share/nginx/html</pre>
-    <p>To deploy, run: <code>docker-compose up -d</code></p>
+public static function encrypt($data) {
+    $key = self::getKey(); 
+    $iv = openssl_random_pseudo_bytes(16);
+    $enc = openssl_encrypt($data, 'aes-256-cbc', $key, 0, $iv);
+    return base64_encode($enc . '::' . $iv);
+}</pre>
+        <p>Encryption keys are stored outside the public web root in <code>storage/vault/</code>.</p>
     </section>
-<section id="docker-lemp">
-    <h1>Docker & LEMP Stack</h1>
-    <p>The application has transitioned from a static frontend to a containerized <strong>LEMP</strong> (Linux, Nginx, MySQL/MariaDB, PHP) stack. This ensures environment parity between development and production.</p>
-    
-    <h2>Service Orchestration</h2>
-    <pre>
-# docker-compose.yml summary
-services:
-  php: # PHP 8.2-FPM Processor
-    image: php:8.2-fpm
-    volumes: ['./php:/var/www/html/php']
-    
-  web: # Nginx Web Server & Proxy
-    image: nginx:alpine
-    ports: ["8080:80"]
-    depends_on: [php]</pre>
 
-    <h2>Deployment</h2>
-    <p>To start the environment, use the provided shell scripts:</p>
-    <ul>
-        <li><code>./docker.sh</code>: Builds and starts containers.</li>
-        <li><code>./docker_down.sh</code>: Stops and removes containers.</li>
-    </ul>
-</section>
-
-<section id="php-front-controller">
-    <h1>PHP Front Controller</h1>
-    <p>Backend routing is handled by a centralized <strong>Front Controller</strong> pattern located at <code>php/index.php</code>. This captures all requests to the <code>/php/</code> URI and dispatches them to specialized controllers.</p>
-    
-    
-    
-    <h2>Routing Logic</h2>
-    <p>The <code>FrontController</code> class parses the request URI into three segments:</p>
-    <pre>
+    <section id="php-mvc">
+        <h1>PHP MVC & Controllers</h1>
+        <p>Backend routing is handled by a centralized <strong>Front Controller</strong> pattern located at <code>php/index.php</code>.</p>
+        <pre>
 1. Controller (e.g., App\Controllers\UserController)
 2. Method     (e.g., login)
 3. Parameters (e.g., [id])</pre>
+        <p>Every backend request is logged to <code>php/app.log</code> for auditing Milestone #8 API calls.</p>
+    </section>
 
-    <h2>Logging & Debugging</h2>
-    <p>Every backend request is logged to <code>php/app.log</code>. This includes the timestamp, the exact parsed path, and the JSON-encoded parameters, which is essential for debugging Milestone #8 API calls.</p>
-</section>
+    <section id="docker-orchestration">
+        <h1>Docker Orchestration</h1>
+        <p>The environment is split into four primary containers for isolation.</p>
+        <ul>
+            <li><strong>sharpishly-app:</strong> Nginx Web Server.</li>
+            <li><strong>sharpishly-php:</strong> Main MVC API Processor.</li>
+            <li><strong>sharpishly-worker:</strong> Background Agent Daemon.</li>
+            <li><strong>sharpishly-db:</strong> MySQL 8.0 Persistence Layer.</li>
+        </ul>
+        <pre>
+# Launch the ecosystem
+docker-compose up -d</pre>
+    </section>
 </main>
 
 <script>
@@ -215,7 +225,7 @@ services:
         // Update Nav Link Styles
         document.querySelectorAll('.nav-item').forEach(nav => {
             nav.classList.remove('active');
-            if(nav.getAttribute('onclick').includes(sectionId)) {
+            if(nav.getAttribute('onclick') && nav.getAttribute('onclick').includes(sectionId)) {
                 nav.classList.add('active');
             }
         });

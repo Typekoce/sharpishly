@@ -105,4 +105,23 @@ With today's changes, your template is now robust. You have a scalable pattern w
 * [ ] **Infrastructure:** **(Next Step)** Replace `bake.sh` and `unbake.sh` with a native `php console.php` CLI tool.
 * [ ] **Cleanup:** Remove all legacy shell scripts from the project root.
 
-Rest up! We'll start tomorrow by killing off those last few shell scripts and making this a purely PHP/JS/Docker-driven machine. Would you like to start with the **`Console.php`** logic when you're back?
+# Sharpishly R&D Roadmap
+
+## ✅ Completed (v2.0.0 Architecture)
+- [x] Consolidate shell scripts into `/shells`.
+- [x] Standardize Docker volumes to root-level mapping.
+- [x] Implement AES-256 Vault for encrypted secrets.
+- [x] Build Cyberpunk Dashboard with SSE "Thought Stream."
+
+## 🛠️ Immediate Next Steps (Milestone #9)
+- [ ] **Log Consolidation:** Unify all PHP logging into a single stream.
+    - Remove `php/app.log` and `php/logs/app.log`.
+    - Redirect all output to the project root `/logs/app.log`.
+    - Update `App\Services\Logger` to use the unified path.
+- [ ] **Environment Hardening:** Move `.env` variables into a Docker-secrets inspired flow.
+- [ ] **Worker Health Check:** Add a heartbeat timestamp to `storage/queue/progress.json`.
+
+## 🤖 AI & Agent Expansion (Milestone #10)
+- [ ] **Scout Agent V2:** Integrate LLM reasoning to categorize competitor data.
+- [ ] **Social Dispatcher:** Automated posting logic for the `SocialUploadController`.
+- [ ] **Telegram Integration:** Real-time mobile alerts for background job completions.
