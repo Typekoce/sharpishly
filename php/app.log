@@ -1,0 +1,18 @@
+[2026-03-05T16:02:39+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-05T16:02:42+00:00] REQUEST_URI = /php/home/csv
+  → parsed path = php/home/csv
+  → controller = Home
+  → method = csv
+  → params = []
+
+[2026-03-05T16:08:39+00:00] REQUEST_URI = /php/home/csv
+  → parsed path = php/home/csv
+  → controller = Home
+  → method = csv
+  → params = []
+
