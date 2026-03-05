@@ -1,0 +1,26 @@
+<!DOCTYPE html><html><head><link rel="stylesheet" href="css/style.css"></head>
+<body><div id="progress-bar"></div>
+<div id="app">
+    <aside>
+        <h3>Agents</h3>
+        <div class="card">
+            <div class="agent-status"><div class="dot online"></div> Social Agent</div>
+            <div class="agent-status"><div class="dot online"></div> Scout Agent</div>
+            <div class="agent-status"><div class="dot"></div> Video Agent</div>
+        </div>
+        <h3>Control</h3>
+        <button class="btn-stop" onclick="App.toggleSafety('stop')">HALT ALL</button>
+        <button class="btn-run" onclick="App.toggleSafety('run')">RESUME</button>
+    </aside>
+    <main>
+        <h2>Command Center</h2>
+        <div class="card">
+            <h4>Intelligence</h4>
+            <button class="btn-scout" onclick="App.triggerTask('SCOUT_TRENDS')">Scrape Competitors</button>
+            <button class="btn-run" onclick="App.triggerTask('SOCIAL_SYNC')">Sync Social Media</button>
+            <button class="btn-run" onclick="App.triggerTask('CSV_PROCESS')">Process CSV Queue</button>
+        </div>
+    </main>
+    <aside id="log-stream"><strong>THOUGHT_STREAM</strong><hr></aside>
+</div>
+<script src="js/script.js"></script></body></html>

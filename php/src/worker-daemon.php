@@ -1,58 +1,36 @@
 <?php
-declare(strict_types=1);
-
-require_once __DIR__ . '/bootstrap.php';
-
+require_once __DIR__ . '/autoload.php';
 use App\Db;
-use App\Services\CSVProcessor;
 
-// Prevent the script from timing out
-set_time_limit(0);
+echo "🤖 OpenClaw Worker Daemon Online...\n";
 
-$db = new Db();
-$processor = new CSVProcessor();
-
-Logger::info("Worker Daemon started. Monitoring for jobs...");
+// Handle DB Connection with retry logic for Docker
+$db = null;
+while ($db === null) {
+    try {
+        $db = new Db();
+    } catch (\Exception $e) {
+        echo "⏳ Waiting for Database... \n";
+        sleep(5);
+    }
+}
 
 while (true) {
-    try {
-        // 1. Look for the next pending job
-        $jobs = $db->find([
-            'tbl'   => 'jobs',
-            'where' => ['status' => 'pending'],
-            'order' => ['id' => 'ASC'],
-            'limit' => 1
-        ]);
-
-        if (!empty($jobs)) {
-            $job = $jobs[0];
-            $jobId = (int)$job['id'];
-
-            Logger::info("Worker found Job #$jobId. Starting processing...");
-
-            // 2. Mark as processing immediately to prevent double-picks
-            $db->save([
-                'tbl'    => 'jobs', 
-                'id'     => $jobId, 
-                'status' => 'processing'
-            ]);
-
-            // 3. Hand off to the processor
-            $processor->process($jobId, $job['file_path']);
-
-        } else {
-            // No jobs? Sleep for a bit to save CPU
-            sleep(2); 
-        }
-
-    } catch (Exception $e) {
-        Logger::error("Worker Loop Error: " . $e->getMessage());
-        sleep(5); // Wait a bit longer if there's a system/DB error
+    if (file_exists(__DIR__ . '/../../storage/queue/STOP')) { sleep(2); continue; }
+    
+    $jobs = glob(__DIR__ . '/../../storage/queue/*.job');
+    foreach ($jobs as $f) {
+        $job = json_decode(file_get_contents($f), true);
+        $task = $job['task'];
+        
+        file_put_contents(__DIR__ . '/../../storage/queue/progress.json', json_encode(["event"=>"PROGRESS", "val"=>50, "msg"=>"Executing $task..."]));
+        
+        // ADD YOUR CUSTOM TASK LOGIC HERE
+        sleep(2); 
+        
+        file_put_contents(__DIR__ . '/../../storage/queue/progress.json', json_encode(["event"=>"PROGRESS", "val"=>100, "msg"=>"Success: $task"]));
+        unlink($f);
+        @unlink(__DIR__ . '/../../storage/queue/progress.json');
     }
-
-    // Optional: check if a "stop" file exists to gracefully exit
-    if (file_exists(__DIR__ . '/../stop_worker.txt')) {
-        Logger::info("Worker stopping gracefully via stop file.");
-        break;
-    }
+    sleep(1);
 }

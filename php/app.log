@@ -652,3 +652,51 @@
   → method = csv
   → params = []
 
+[2026-03-05T15:09:47+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-05T15:09:50+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-05T15:09:53+00:00] REQUEST_URI = /php/home/csv
+  → parsed path = php/home/csv
+  → controller = Home
+  → method = csv
+  → params = []
+
+[2026-03-05T15:12:47+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-05T15:14:16+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-05T15:14:22+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-05T15:14:25+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-05T15:14:28+00:00] REQUEST_URI = /php/home/csv
+  → parsed path = php/home/csv
+  → controller = Home
+  → method = csv
+  → params = []
+
