@@ -205,7 +205,7 @@ class ContactController {
 }
 
 // Landlord Model & Controller
-class LandController {
+class LandlordController {
   constructor(container) {
     this.container = container;
     this.viewPath = './view/landlord.htm'; // Path relative to script.js
@@ -213,15 +213,36 @@ class LandController {
 
   async index() {
     try {
-      // 1. Fetch the external HTML file
       const response = await fetch(this.viewPath);
       const html = await response.text();
 
-      // 2. Inject it into the app container
       this.container.innerHTML = html;
+      this.loadDynamicData();
 
-      // 3. Dynamic content placeholder
-      // After injecting the HTML, you can now target specific IDs
+    } catch (error) {
+      this.container.innerHTML = `<p class="alert">Error loading view: ${error.message}</p>`;
+    }
+  }
+
+  loadDynamicData() {
+    // This is where you'll update your table rows or stats later
+    console.log("View loaded. Ready to populate dynamic data.");
+  }
+}
+
+// Broadcaster Model & Controller
+class BroadcasterController {
+  constructor(container) {
+    this.container = container;
+    this.viewPath = './view/broadcaster.htm'; // Path relative to script.js
+  }
+
+  async index() {
+    try {
+      const response = await fetch(this.viewPath);
+      const html = await response.text();
+
+      this.container.innerHTML = html;
       this.loadDynamicData();
 
     } catch (error) {
@@ -259,29 +280,21 @@ class Router {
     this.loadRoute(); // Initial load
   }
 
-  // loadRoute() {
-  //   const path = window.location.pathname;
-  //   const ControllerClass = this.routes[path] || HomeController;
-    
-  //   // Create new instance and run the index method
-  //   const controller = new ControllerClass(this.container);
-  //   controller.index();
-  // }
 
-loadRoute() {
-    if (this.activeInterval) clearInterval(this.activeInterval); // Stop old heartbeats
+  loadRoute() {
+      if (this.activeInterval) clearInterval(this.activeInterval); // Stop old heartbeats
 
-    const path = window.location.pathname;
-    const ControllerClass = this.routes[path] || HomeController;
-    
-    const controller = new ControllerClass(this.container);
-    controller.index();
+      const path = window.location.pathname;
+      const ControllerClass = this.routes[path] || HomeController;
+      
+      const controller = new ControllerClass(this.container);
+      controller.index();
 
-    // If we are on a data-heavy page, start the Heartbeat
-    if (path === '/csv' || path === '/work') {
-      this.activeInterval = setInterval(() => controller.index(), 2000);
+      // If we are on a data-heavy page, start the Heartbeat
+      if (path === '/csv' || path === '/work') {
+        this.activeInterval = setInterval(() => controller.index(), 2000);
+      }
     }
-  }
 }
 
 /**
@@ -294,7 +307,8 @@ const routes = {
   "/contact": ContactController,
   "/cyberdeck": CyberdeckController,
   "/csv": CsvController,
-  "/landlord": LandController,
+  "/landlord": LandlordController,
+  "/broadcaster": BroadcasterController,
 
   
 };
