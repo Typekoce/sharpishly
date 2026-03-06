@@ -237,13 +237,65 @@ class BroadcasterController {
     this.viewPath = './view/broadcaster.htm'; // Path relative to script.js
   }
 
+  populate(){
+   // --- Broadcaster Logic ---
+    const broadcastForm = document.getElementById('broadcast-form');
+    const socialQueue = document.getElementById('social-queue');
+
+    if (broadcastForm) {
+        broadcastForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Stop the page from reloading
+
+            // 1. Extract the data
+            const content = document.getElementById('post-content').value;
+            const selectedPlatforms = Array.from(
+                broadcastForm.querySelectorAll('input[name="p"]:checked')
+            ).map(cb => cb.parentElement.textContent.trim());
+
+            if (selectedPlatforms.length === 0) {
+                alert("Please select at least one platform, Commander.");
+                return;
+            }
+
+            // 2. Remove the "Empty" message if it exists
+            const emptyMsg = socialQueue.querySelector('.empty-msg');
+            if (emptyMsg) emptyMsg.remove();
+
+            // 3. Create the Queue Item Component
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const queueItem = document.createElement('div');
+            queueItem.className = 'queue-item fade-in'; // Added animation class
+            
+            queueItem.innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <strong>${selectedPlatforms.join(' + ')}</strong>
+                    <span style="font-size: 0.75rem; color: #9ca3af;">Scheduled: ${timestamp}</span>
+                </div>
+                <p style="font-size: 0.9rem; color: #4b5563;">${content}</p>
+                <div style="margin-top: 0.8rem;">
+                    <span class="badge success">Pending Sync</span>
+                </div>
+            `;
+
+            // 4. Inject into the DOM
+            socialQueue.prepend(queueItem);
+
+            // 5. Reset the form
+            broadcastForm.reset();
+        });
+    } 
+  }// end populate()
+
   async index() {
     try {
       const response = await fetch(this.viewPath);
       const html = await response.text();
 
       this.container.innerHTML = html;
+
       this.loadDynamicData();
+
+      this.populate();
 
     } catch (error) {
       this.container.innerHTML = `<p class="alert">Error loading view: ${error.message}</p>`;
