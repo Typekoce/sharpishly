@@ -61,3 +61,22 @@
 ## 🟢 Advanced (Future)
 - [ ] Switch Heartbeat polling to Server-Sent Events (SSE).
 - [ ] Implement user authentication for the Cyberdeck neural link.
+
+# 🛠️ Cyberdeck Project Roadmap
+
+## 🔴 Immediate Phase: Data & UI
+- [x] Implement __call proxy in Db.php.
+- [x] Build background worker.
+- [x] Create SPA Router with Heartbeat.
+- [x] Integrate Composer into Dockerfile.
+- [x] Move Landlord Portal to external `view/landlord.htm`.
+- [ ] **Refactor:** Remove all remaining inline HTML from `script.js` and migrate to `view/` directory.
+
+## 🟠 Stability & Quality Gates
+- [x] Setup GitHub Actions for CI (Linting & PHPStan).
+- [ ] **Run First Analysis:** Execute `phpstan` via Docker locally to verify logic.
+- [ ] **Contract Mapping:** Document core service methods for manual safety checks.
+
+## 🟢 Advanced (Future)
+- [ ] "Scout" Agent: Automated Nike CSV insight extraction.
+- [ ] Auto-Form PDF Generation: Create tenancy agreements from the Landlord Portal.

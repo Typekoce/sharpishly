@@ -170,3 +170,123 @@ main {
     color: #666;
     font-size: 0.9rem;
 }
+
+/* --- Portal Layout --- */
+.portal-container {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.portal-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+}
+
+.portal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* --- Stats Cards --- */
+.stats-grid {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    flex: 1;
+}
+
+.stat-card.warning { border-left-color: #e74c3c; }
+.stat-card.success { border-left-color: #2ecc71; }
+
+.stat-card .label {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 0.25rem;
+}
+
+.stat-card .value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* --- Cyber Form Styling --- */
+.cyber-form .form-group {
+    margin-bottom: 1.2rem;
+}
+
+.cyber-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.cyber-form input, 
+.cyber-form select {
+    width: 100%;
+    padding: 0.8rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: #fff;
+    transition: border-color 0.3s;
+}
+
+.cyber-form input:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+}
+
+/* --- Maintenance Log --- */
+.worker-log {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.log-entry {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.log-entry .timestamp {
+    font-family: monospace;
+    color: #3498db;
+    margin-right: 1rem;
+    font-size: 0.85rem;
+}
+
+.log-entry .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: auto;
+}
+
+.status-dot.high { background: #e74c3c; box-shadow: 0 0 5px #e74c3c; }
+.status-dot.low { background: #2ecc71; }
+
+/* --- Utility --- */
+.mt-20 { margin-top: 20px; }
+.mb-20 { margin-bottom: 20px; }
+.ml-10 { margin-left: 10px; }
+.w-100 { width: 100%; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

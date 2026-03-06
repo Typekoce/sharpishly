@@ -1,0 +1,89 @@
+<div class="portal-container">
+    <header class="portal-header">
+        <h1>Estate Command Center</h1>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="label">Total Assets</span>
+                <span class="value">12 Properties</span>
+            </div>
+            <div class="stat-card warning">
+                <span class="label">Overdue Rent</span>
+                <span class="value">£1,450</span>
+            </div>
+            <div class="stat-card success">
+                <span class="label">Occupancy</span>
+                <span class="value">92%</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="portal-grid">
+        <section class="glass-card">
+            <h3>Active Properties</h3>
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Address</th>
+                        <th>Tenant</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="property-list">
+                    <tr>
+                        <td>21B Baker St.</td>
+                        <td>S. Holmes</td>
+                        <td><span class="badge success">Paid</span></td>
+                        <td><button class="btn-small">Inspect</button></td>
+                    </tr>
+                    <tr>
+                        <td>742 Evergreen Ter.</td>
+                        <td>H. Simpson</td>
+                        <td><span class="badge alert">Overdue</span></td>
+                        <td><button class="btn-small">Notice</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="glass-card">
+            <h3>Tenant Onboarding</h3>
+            <p class="muted">Auto-generate lease agreements and registration forms.</p>
+            <form id="onboarding-form" class="cyber-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="Enter tenant name..." required>
+                </div>
+                <div class="form-group">
+                    <label>Property Selection</label>
+                    <select>
+                        <option>101 Cyber Way</option>
+                        <option>404 Cloud Lane</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Move-in Date</label>
+                    <input type="date">
+                </div>
+                <button type="submit" class="btn-primary w-100">🚀 Initialize Registration</button>
+            </form>
+        </section>
+    </div>
+
+    <section class="glass-card mt-20">
+        <h3>Maintenance Queue</h3>
+        <div class="worker-log">
+            <div class="log-entry">
+                <span class="timestamp">09:15 AM</span>
+                <span class="message">Broken boiler reported - <strong>Unit 4</strong></span>
+                <span class="status-dot high"></span>
+            </div>
+            <div class="log-entry">
+                <span class="timestamp">Yesterday</span>
+                <span class="message">Lease renewal processed - <strong>Unit 12</strong></span>
+                <span class="status-dot low"></span>
+            </div>
+        </div>
+    </section>
+</div>
+ 

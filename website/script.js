@@ -204,6 +204,37 @@ class ContactController {
   }
 }
 
+// Landlord Model & Controller
+class LandController {
+  constructor(container) {
+    this.container = container;
+    this.viewPath = './view/landlord.htm'; // Path relative to script.js
+  }
+
+  async index() {
+    try {
+      // 1. Fetch the external HTML file
+      const response = await fetch(this.viewPath);
+      const html = await response.text();
+
+      // 2. Inject it into the app container
+      this.container.innerHTML = html;
+
+      // 3. Dynamic content placeholder
+      // After injecting the HTML, you can now target specific IDs
+      this.loadDynamicData();
+
+    } catch (error) {
+      this.container.innerHTML = `<p class="alert">Error loading view: ${error.message}</p>`;
+    }
+  }
+
+  loadDynamicData() {
+    // This is where you'll update your table rows or stats later
+    console.log("View loaded. Ready to populate dynamic data.");
+  }
+}
+
 /**
  * ROUTER: The Engine
  */
@@ -262,7 +293,8 @@ const routes = {
   "/work": WorkController,
   "/contact": ContactController,
   "/cyberdeck": CyberdeckController,
-  "/csv": CsvController
+  "/csv": CsvController,
+  "/landlord": LandController,
 
   
 };
