@@ -20,4 +20,4 @@ php/uploads/*
 
 # --- OS Artifacts ---
 .DS_Store
-Thumbs.db
+Thumbs.dbphp/app.log
