@@ -13,7 +13,7 @@ class CSVProcessor
 
     public function __construct()
     {
-        $this->db = Db::getInstance(); // Using your Singleton pattern
+        $this->db = New Db();
     }
 
     /**
@@ -101,7 +101,7 @@ class CSVProcessor
             $params[] = $row['column_3'];
         }
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db->pdo->prepare($sql);
         $stmt->execute($params);
     }
 

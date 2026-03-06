@@ -25,3 +25,39 @@
 ## 🧹 Phase 5: Cleanup
 - [ ] Delete all remaining `*.sh` scripts from the project root.
 - [ ] Refactor `CSVProcessor.php` to use the unified `Logger` service.
+
+# 🛠️ Cyberdeck Project Roadmap
+
+## 🔴 Immediate Phase: Data & UI
+- [x] Implement __call proxy in Db.php for native PDO access.
+- [x] Build background worker with binary line counting.
+- [x] Create SPA Router with Heartbeat polling.
+- [ ] **Add CSV Upload form to /csv page with progress indicators.**
+- [ ] **Refactor Controllers to use a 'Silent Update' to prevent UI flicker.**
+
+## 🟠 Maintenance & Scaling
+- [ ] **Implement Dependency Linting:** Add a script to check for broken method calls across JS/PHP files.
+- [ ] **BaseController Inheritance:** Move shared HTML table logic to a parent class.
+- [ ] **Scout Agent:** Initial pattern recognition for imported data.
+
+## 🟢 Advanced (Future)
+- [ ] Switch Heartbeat polling to Server-Sent Events (SSE) for lower latency.
+- [ ] Implement user authentication for the Cyberdeck neural link.
+
+# 🛠️ Cyberdeck Project Roadmap
+
+## 🔴 Immediate Phase: Data & UI
+- [x] Implement __call proxy in Db.php for native PDO access.
+- [x] Build background worker with binary line counting.
+- [x] Create SPA Router with Heartbeat polling.
+- [ ] Add CSV Upload form to /csv page with progress indicators.
+- [ ] Refactor Controllers to use a 'Silent Update' to prevent UI flicker.
+
+## 🟠 Stability & Quality Gates (New Standard)
+- [ ] **Install PHPStan:** Set up static analysis to catch "Undefined Method" errors automatically.
+- [ ] **Setup Pre-commit Hooks:** Automate health checks so broken code can't be committed.
+- [ ] **Unit Tests:** Create a test suite for the `Db` and `CSVProcessor` classes.
+
+## 🟢 Advanced (Future)
+- [ ] Switch Heartbeat polling to Server-Sent Events (SSE).
+- [ ] Implement user authentication for the Cyberdeck neural link.

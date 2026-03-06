@@ -29,51 +29,36 @@ class HomeModel
 
         return $result;
     }
-
-    /**
+/**
      * Run migrations: create necessary tables if they don't exist + optional seeding
-     *
-     * @return string HTML-formatted report
+     * * @return string HTML-formatted report
      */
     public function migrate(): string
     {
         $report = "<h2>Migration Report</h2><pre>\n";
 
         try {
-
-            // Table: social (example – add more tables as needed)
+            // --- Table: social ---
             $this->createTable('social', [
                 'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
-                //'file_path'      => 'VARCHAR(255) NOT NULL',
                 'status'         => "ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending'",
-                //'total_rows'     => 'INT DEFAULT 0',
                 'processed_rows' => 'INT DEFAULT 0',
                 'created_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
                 'updated_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
-            ], [
-                'engine'  => 'InnoDB',
-                'charset' => 'utf8mb4',
-                'collate' => 'utf8mb4_unicode_ci',
             ]);
-            $report .= "[OK] Table 'social' created or already exists\n";
+            $report .= "[OK] Table 'social' processed\n";
 
-            // Table: users (example – add more tables as needed)
+            // --- Table: users ---
             $this->createTable('users', [
                 'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
-                //'file_path'      => 'VARCHAR(255) NOT NULL',
                 'status'         => "ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending'",
-                //'total_rows'     => 'INT DEFAULT 0',
                 'processed_rows' => 'INT DEFAULT 0',
                 'created_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
                 'updated_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
-            ], [
-                'engine'  => 'InnoDB',
-                'charset' => 'utf8mb4',
-                'collate' => 'utf8mb4_unicode_ci',
             ]);
-            $report .= "[OK] Table 'users' created or already exists\n";
+            $report .= "[OK] Table 'users' processed\n";
 
-            // Table: jobs (example – add more tables as needed)
+            // --- Table: jobs ---
             $this->createTable('jobs', [
                 'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
                 'file_path'      => 'VARCHAR(255) NOT NULL',
@@ -82,23 +67,18 @@ class HomeModel
                 'processed_rows' => 'INT DEFAULT 0',
                 'created_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
                 'updated_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
-            ], [
-                'engine'  => 'InnoDB',
-                'charset' => 'utf8mb4',
-                'collate' => 'utf8mb4_unicode_ci',
             ]);
-            $report .= "[OK] Table 'jobs' created or already exists\n";
+            $report .= "[OK] Table 'jobs' processed\n";
 
+            // PATCH: Add 'title' column if missing
             try {
-                // Attempt to patch the existing table
                 $this->db->alter('jobs', 'ADD COLUMN', 'title', 'VARCHAR(255) AFTER id');
-                $report .= "[PATCH] Added 'title' column to 'jobs' table\n";
+                $report .= "[PATCH] Added 'title' column to 'jobs'\n";
             } catch (Exception $e) {
-                // If it fails (e.g., column exists), just skip it
-                $report .= "[SKIP] 'title' column might already exist\n";
+                $report .= "[SKIP] 'title' column already exists\n";
             }
 
-            // Table: csv_records (example)
+            // --- Table: csv_records ---
             $this->createTable('csv_records', [
                 'id'         => 'INT AUTO_INCREMENT PRIMARY KEY',
                 'job_id'     => 'INT',
@@ -106,25 +86,31 @@ class HomeModel
                 'column_2'   => 'VARCHAR(255)',
                 'column_3'   => 'TEXT',
                 'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
-            ], [
-                'engine'  => 'InnoDB',
-                'charset' => 'utf8mb4',
-                'collate' => 'utf8mb4_unicode_ci',
             ]);
+            $report .= "[OK] Table 'csv_records' processed\n";
 
-            // Add Index for performance
-            $this->db->alter('csv_records', 'ADD INDEX', 'idx_job_id', '(job_id)');
+            // PATCH: Add Index for performance
+            try {
+                $this->db->alter('csv_records', 'ADD INDEX', 'idx_job_id', '(job_id)');
+                $report .= "[PATCH] Index 'idx_job_id' added to 'csv_records'\n";
+            } catch (Exception $e) {
+                $report .= "[SKIP] Index 'idx_job_id' already exists\n";
+            }
 
-            // Add Foreign Key for data integrity
-            $this->db->alter('csv_records', 'ADD FOREIGN KEY', 'fk_job_id', '(job_id) REFERENCES jobs(id) ON DELETE CASCADE ON UPDATE CASCADE');
+            // PATCH: Add Foreign Key for data integrity
+            try {
+                $this->db->alter('csv_records', 'ADD FOREIGN KEY', 'fk_job_id', '(job_id) REFERENCES jobs(id) ON DELETE CASCADE ON UPDATE CASCADE');
+                $report .= "[PATCH] Foreign key 'fk_job_id' added to 'csv_records'\n";
+            } catch (Exception $e) {
+                $report .= "[SKIP] Foreign key 'fk_job_id' already exists\n";
+            }
 
-            $report .= "[OK] Indexes & foreign key processed for csv_records\n";
-
-            // Simple seeding example – only if table is empty
+            // --- Seeding ---
             $count = $this->db->find(['tbl' => 'jobs', 'limit' => 1]);
             if (empty($count)) {
                 $this->db->save([
                     'tbl'           => 'jobs',
+                    'title'         => 'Initial Seed Job',
                     'file_path'     => 'php/uploads/initial-' . date('YmdHis') . '.csv',
                     'status'        => 'pending',
                     'total_rows'    => 50000,
@@ -132,7 +118,7 @@ class HomeModel
                 ]);
                 $report .= "[SEED] Added 1 initial job record\n";
             } else {
-                $report .= "[SKIP] jobs table already has data → no seeding\n";
+                $report .= "[SKIP] jobs table already has data\n";
             }
 
             $report .= "\nMigration completed successfully.\n";
@@ -143,7 +129,7 @@ class HomeModel
         $report .= "</pre>";
         return $report;
     }
-
+    
     private function createTable(string $table, array $columns, array $options = []): void
     {
         if (empty($columns)) {

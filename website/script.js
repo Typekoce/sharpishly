@@ -42,6 +42,19 @@ class WorkModel extends BaseModel { // Added inheritance here
   }
 }
 
+class CsvModel extends BaseModel { // Added inheritance here
+  async getJobs() {
+    try {
+      const response = await fetch('/php/csv/status');
+      if (!response.ok) throw new Error('Network response was not ok');
+      return await response.json();
+    } catch (error) {
+      console.error("CsvModel Error:", error);
+      throw error;
+    }
+  }
+}
+
 /**
  * CONTROLLERS
  */
@@ -55,6 +68,62 @@ class HomeController {
     this.model.loading();
     const data = await this.model.getData();
     this.container.innerHTML = `<h1>${data.h1}</h1><p>${data.description}</p>`;
+  }
+}
+
+class CsvController {
+  constructor(container) {
+    this.container = container;
+    this.model = new CsvModel(container);
+  }
+
+  async index() {
+    this.model.loading();
+    try {
+      const jobs = await this.model.getJobs();
+this.container.innerHTML = `
+        <h1>Csv Interrogation</h1>
+        <p>Real-time telemetry from the background worker.</p>
+        <table class="status-table">
+          <thead>
+            <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th class="hide-mobile">Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${jobs.map(job => {
+                // Calculate percentage safely
+                const percent = job.total_rows > 0 
+                    ? Math.round((job.processed_rows / job.total_rows) * 100) 
+                    : 0;
+                
+                // Determine if we show a pulse animation
+                const pulseClass = job.status === 'processing' ? 'pulse' : '';
+
+                return `
+                  <tr data-job-id="${job.id}">
+                    <td>#${job.id}</td>
+                    <td><span class="badge ${job.status} ${pulseClass}">${job.status.toUpperCase()}</span></td>
+                    <td>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${percent}%"></div>
+                            <span class="progress-text">
+                                ${job.processed_rows.toLocaleString()} / ${job.total_rows.toLocaleString()} (${percent}%)
+                            </span>
+                        </div>
+                    </td>
+                    <td class="hide-mobile muted">${job.updated_at}</td>
+                  </tr>
+                `;
+            }).join('')}
+          </tbody>
+        </table>`;
+    } catch (error) {
+      this.container.innerHTML = `<h1>Error</h1><p>Check Dozzle for backend logs.</p>`;
+    }
   }
 }
 
@@ -142,6 +211,7 @@ class Router {
   constructor(routes) {
     this.routes = routes;
     this.container = document.getElementById("app");
+    this.activeInterval = null; // Track the heartbeat
 
     // Handle browser Back/Forward buttons
     window.addEventListener("popstate", () => this.loadRoute());
@@ -158,13 +228,28 @@ class Router {
     this.loadRoute(); // Initial load
   }
 
-  loadRoute() {
+  // loadRoute() {
+  //   const path = window.location.pathname;
+  //   const ControllerClass = this.routes[path] || HomeController;
+    
+  //   // Create new instance and run the index method
+  //   const controller = new ControllerClass(this.container);
+  //   controller.index();
+  // }
+
+loadRoute() {
+    if (this.activeInterval) clearInterval(this.activeInterval); // Stop old heartbeats
+
     const path = window.location.pathname;
     const ControllerClass = this.routes[path] || HomeController;
     
-    // Create new instance and run the index method
     const controller = new ControllerClass(this.container);
     controller.index();
+
+    // If we are on a data-heavy page, start the Heartbeat
+    if (path === '/csv' || path === '/work') {
+      this.activeInterval = setInterval(() => controller.index(), 2000);
+    }
   }
 }
 
@@ -176,7 +261,9 @@ const routes = {
   "/about": AboutController,
   "/work": WorkController,
   "/contact": ContactController,
-  "/cyberdeck": CyberdeckController
+  "/cyberdeck": CyberdeckController,
+  "/csv": CsvController
+
   
 };
 

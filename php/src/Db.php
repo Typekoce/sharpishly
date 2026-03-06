@@ -13,6 +13,17 @@ class Db
 {
     public ?PDO $pdo = null;
 
+    /**
+     * Pass-through for PDO methods not explicitly defined in this class
+     */
+    public function __call(string $name, array $arguments)
+    {
+        if (method_exists($this->pdo, $name)) {
+            return call_user_func_array([$this->pdo, $name], $arguments);
+        }
+        throw new \BadMethodCallException("Method $name does not exist on Db or PDO.");
+    }
+
     public function __construct()
     {
 
