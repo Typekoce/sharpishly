@@ -69,6 +69,7 @@ class CsvController extends BaseController {
                 $jobId = $this->db->save([
                     'tbl' => 'jobs',
                     'title' => 'Import: ' . $file['name'],
+                    'file_path'      => $relativeStoragePath, // <--- ADD THIS LINE
                     'status' => 'pending',
                     'processed_rows' => 0
                 ]);

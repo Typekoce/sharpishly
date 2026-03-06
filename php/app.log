@@ -628,3 +628,81 @@
   → method = upload
   → params = []
 
+[2026-03-06T13:01:51+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-06T13:01:58+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-06T13:02:02+00:00] REQUEST_URI = /php/home/csv
+  → parsed path = php/home/csv
+  → controller = Home
+  → method = csv
+  → params = []
+
+[2026-03-06T13:02:17+00:00] REQUEST_URI = /php/home/csv
+  → parsed path = php/home/csv
+  → controller = Home
+  → method = csv
+  → params = []
+
+[2026-03-06T13:04:30+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-06T13:04:35+00:00] REQUEST_URI = /php/home/migrate
+  → parsed path = php/home/migrate
+  → controller = Home
+  → method = migrate
+  → params = []
+
+[2026-03-06T13:04:56+00:00] REQUEST_URI = /php/home/index
+  → parsed path = php/home/index
+  → controller = Home
+  → method = index
+  → params = []
+
+[2026-03-06T13:05:11+00:00] REQUEST_URI = /php/csv
+  → parsed path = php/csv
+  → controller = Csv
+  → method = index
+  → params = []
+
+[2026-03-06T13:07:46+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-06T13:08:00+00:00] REQUEST_URI = /php/csv/
+  → parsed path = php/csv
+  → controller = Csv
+  → method = index
+  → params = []
+
+[2026-03-06T13:08:21+00:00] REQUEST_URI = /php/csv/upload
+  → parsed path = php/csv/upload
+  → controller = Csv
+  → method = upload
+  → params = []
+
+[2026-03-06T13:12:27+00:00] REQUEST_URI = /php/csv
+  → parsed path = php/csv
+  → controller = Csv
+  → method = index
+  → params = []
+
+[2026-03-06T13:12:39+00:00] REQUEST_URI = /php/csv/upload
+  → parsed path = php/csv/upload
+  → controller = Csv
+  → method = upload
+  → params = []
+
