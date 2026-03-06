@@ -17,22 +17,46 @@
         handleFile();
     });
 
-    function handleFile() {
-        if (fileInput.files.length > 0) {
-            progressContainer.style.display = 'block';
-            let width = 0;
-            let interval = setInterval(() => {
-                if (width >= 100) {
-                    clearInterval(interval);
-                    progressBar.innerHTML = 'Complete!';
-                } else {
-                    width += 5;
-                    progressBar.style.width = width + '%';
-                    progressBar.innerHTML = width + '%';
-                }
-            }, 300); // Simulated speed
+function handleFile() {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    // Show UI progress container
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+    progressBar.innerHTML = 'Uploading...';
+
+    const formData = new FormData();
+    formData.append('csv_file', file); // 'csv_file' must match the key in CsvController::upload()
+
+    // Send to your PHP endpoint
+    fetch('/php/csv/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Upload failed');
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            progressBar.style.width = '100%';
+            progressBar.classList.remove('bg-primary');
+            progressBar.classList.add('bg-success');
+            progressBar.innerHTML = 'Queued: Job #' + data.job_id;
+            
+            // Optional: Refresh the page after 2 seconds to show the job in the table
+            setTimeout(() => window.location.reload(), 2000);
+        } else {
+            throw new Error(data.error || 'Unknown error');
         }
-    }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        progressBar.classList.add('bg-danger');
+        progressBar.innerHTML = 'Error: ' + error.message;
+    });
+}
 </script>
 
 </body>

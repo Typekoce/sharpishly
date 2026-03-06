@@ -89,6 +89,15 @@ class HomeModel
             ]);
             $report .= "[OK] Table 'jobs' created or already exists\n";
 
+            try {
+                // Attempt to patch the existing table
+                $this->db->alter('jobs', 'ADD COLUMN', 'title', 'VARCHAR(255) AFTER id');
+                $report .= "[PATCH] Added 'title' column to 'jobs' table\n";
+            } catch (Exception $e) {
+                // If it fails (e.g., column exists), just skip it
+                $report .= "[SKIP] 'title' column might already exist\n";
+            }
+
             // Table: csv_records (example)
             $this->createTable('csv_records', [
                 'id'         => 'INT AUTO_INCREMENT PRIMARY KEY',
