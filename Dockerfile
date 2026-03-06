@@ -11,5 +11,5 @@ RUN apt-get update && apt-get install -y python3
 WORKDIR /var/www/html
 
 # --- ADD THIS LINE TO INSTALL COMPOSER ---
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+#COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 # ----------------------------------------
