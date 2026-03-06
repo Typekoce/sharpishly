@@ -16,3 +16,33 @@
   → method = csv
   → params = []
 
+[2026-03-06T09:46:04+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-06T09:47:23+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-06T09:50:47+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-06T09:51:27+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
+[2026-03-06T09:51:41+00:00] REQUEST_URI = /php/home/response
+  → parsed path = php/home/response
+  → controller = Home
+  → method = response
+  → params = []
+
