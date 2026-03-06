@@ -1,17 +1,23 @@
-# Logs
-php/app.log
-php/logs/*.log
-
-# Environment & Sensitive
+# --- Environment & Sensitive ---
 .env
-
-# OS Files
-.DS_Store
-Thumbs.db
-
-# Docker Data
+.env.local
 mysql_data/
 
-# Temporary Uploads
+# --- Dependencies (Keep the repo light) ---
+php/vendor/
+
+# --- Logs & Debug ---
+php/app.log
+php/logs/*.log
+*.log
+
+# --- Application Storage ---
+# Ignore all jobs and uploads, but keep the folders
+storage/queue/*.job
+!storage/queue/.gitkeep
 php/uploads/*
 !php/uploads/.gitkeep
+
+# --- OS Artifacts ---
+.DS_Store
+Thumbs.db
