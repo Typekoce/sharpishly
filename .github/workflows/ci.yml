@@ -1,0 +1,86 @@
+name: CI – Lint, Static Analysis & Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 4 * * 1'  # Every Monday at 4 AM UTC (weekly health check)
+
+jobs:
+  php-ci:
+    runs-on: ubuntu-latest
+    name: PHP ${{ matrix.php-version }} – Lint & Test
+
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']   # Test on current & next PHP version
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, pdo_mysql, opcache
+          coverage: none   # enable later when you add tests
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: php/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('php/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        working-directory: php
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      # ────────────────────────────────────────────────
+      # Syntax check – very fast, catches basic errors
+      # ────────────────────────────────────────────────
+      - name: Check PHP syntax
+        working-directory: php
+        run: |
+          find src -type f -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      # ────────────────────────────────────────────────
+      # Code style (PHP-CS-Fixer) – adjust rules as needed
+      # ────────────────────────────────────────────────
+      - name: Run PHP-CS-Fixer (lint mode)
+        working-directory: php
+        run: |
+          if [ -f vendor/bin/php-cs-fixer ]; then
+            vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no
+          else
+            echo "PHP-CS-Fixer not found – skipping"
+          fi
+
+      # ────────────────────────────────────────────────
+      # Static analysis (PHPStan) – level 5–7 is realistic
+      # ────────────────────────────────────────────────
+      - name: Run PHPStan
+        working-directory: php
+        run: |
+          if [ -f vendor/bin/phpstan ]; then
+            vendor/bin/phpstan analyse src --level=7 --no-progress --error-format=github
+          else
+            echo "PHPStan not found – skipping"
+          fi
+
+      # ────────────────────────────────────────────────
+      # PHPUnit (only runs if you have tests)
+      # ────────────────────────────────────────────────
+      - name: Run PHPUnit (if tests exist)
+        working-directory: php
+        run: |
+          if [ -f vendor/bin/phpunit ] && [ -d tests ]; then
+            vendor/bin/phpunit --colors=always
+          else
+            echo "No PHPUnit tests found – skipping"
+          fi
