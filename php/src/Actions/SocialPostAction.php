@@ -2,8 +2,18 @@
 namespace App\Actions;
 
 class SocialPostAction {
-    public function handle(array $payload): void {
-        // Logic for LinkedIn/Twitter API calls using $payload['text']
-        echo "📡 Broadcasting to: " . implode(', ', $payload['platforms']) . "\n";
+    public function execute(array $payload): array {
+        $content = $payload['content'];
+        $platforms = $payload['platforms'] ?? [];
+
+        // Here you would call your API wrappers (LinkedIn, X, etc.)
+        foreach ($platforms as $platform) {
+            // simulate api_call($platform, $content);
+        }
+
+        return [
+            'success' => true, 
+            'platforms_synced' => count($platforms)
+        ];
     }
 }
