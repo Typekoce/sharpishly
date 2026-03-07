@@ -78,6 +78,21 @@ class HomeModel
                 $report .= "[SKIP] 'title' column already exists\n";
             }
 
+            // --- Table: tasks ---
+            $this->createTable('tasks', [
+                'id'          => 'BIGINT AUTO_INCREMENT PRIMARY KEY',
+                'name'        => 'VARCHAR(255) NOT NULL',
+                'type'        => "ENUM('cron', 'webhook', 'manual', 'file_drop') NOT NULL",
+                'schedule'    => 'VARCHAR(100) NULL',
+                'payload'     => 'JSON NOT NULL',
+                'action_type' => 'VARCHAR(50) NOT NULL',
+                'status'      => "ENUM('active', 'paused', 'failed') DEFAULT 'active'",
+                'last_run'    => 'TIMESTAMP NULL',
+                'next_run'    => 'TIMESTAMP NULL',
+                'created_at'  => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
+            ]);
+            $report .= "[OK] Table 'tasks' processed\n";
+
             // --- Table: csv_records ---
             $this->createTable('csv_records', [
                 'id'         => 'INT AUTO_INCREMENT PRIMARY KEY',
