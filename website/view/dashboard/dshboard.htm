@@ -1,0 +1,40 @@
+<section id="task-orchestrator" class="mt-20">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3>Task Orchestrator</h3>
+        <button class="btn-primary" onclick="TaskUI.refresh()">🔄 Refresh Sync</button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="label">Active Crons</span>
+            <div class="value" id="count-active">0</div>
+        </div>
+        <div class="stat-card warning">
+            <span class="label">Failed Tasks</span>
+            <div class="value" id="count-failed">0</div>
+        </div>
+    </div>
+
+    <table class="status-table">
+        <thead>
+            <tr>
+                <th>Task Name</th>
+                <th>Type</th>
+                <th>Schedule</th>
+                <th>Last Run</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="task-list">
+            </tbody>
+    </table>
+</section>
+
+<div id="log-modal" style="display:none; position:fixed; top:10%; left:10%; width:80%; height:80%; background:white; border:1px solid #ddd; z-index:2000; padding:20px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
+    <div style="display:flex; justify-content:space-between;">
+        <h4>Task Execution Logs</h4>
+        <button onclick="document.getElementById('log-modal').style.display='none'">Close</button>
+    </div>
+    <pre id="log-content" style="background:#111; color:#0f0; padding:15px; height:90%; overflow-y:auto; margin-top:10px; font-family:monospace;"></pre>
+</div>
