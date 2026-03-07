@@ -80,3 +80,22 @@
 ## 🟢 Advanced (Future)
 - [ ] "Scout" Agent: Automated Nike CSV insight extraction.
 - [ ] Auto-Form PDF Generation: Create tenancy agreements from the Landlord Portal.
+
+# Sharpishly Project - TODO
+
+## Core Infrastructure
+- [x] Create TaskModel, Scheduler, and Action classes
+- [x] Refactor Frontend to MVC with BaseModel inheritance
+- [x] Install and verify Ollama (llama3.2 + nomic-embed)
+- [ ] Remove legacy `website/trigger.php` (Logic now in TaskController)
+
+## AI & RAG Integration
+- [ ] Implement `App\Services\OllamaService` to bridge Docker -> Host Ollama
+- [ ] Configure `host.docker.internal` in `docker-compose.yml`
+- [ ] Build `OllamaRagAction.php` logic to process local documents/CSVs
+- [ ] Integrate embedding logic using `nomic-embed-text` for vector search
+
+## Dashboard & UI
+- [ ] Wire up `LandlordController` dynamic data fetching from PHP
+- [ ] Implement "Real-time" log viewer modal for background worker tasks
+- [ ] Connect `BroadcasterController` to the `SocialPostAction` backend
