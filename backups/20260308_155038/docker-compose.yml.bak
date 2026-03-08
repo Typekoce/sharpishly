@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: sharpishly-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  php:
+    build: .
+    container_name: sharpishly-php
+    user: "1000:1000"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    volumes:
+      - .:/var/www/html
+      - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    command: >
+      sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php-fpm || tail -f /dev/null"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  worker:
+    build: .
+    container_name: sharpishly-worker
+    user: "1000:1000"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    volumes:
+      - .:/var/www/html
+    command: >
+      sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php /var/www/html/php/src/Agents/worker.php || tail -f /dev/null"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  mail-agent:
+    build: .
+    container_name: sharpishly-mail-agent
+    user: "1000:1000"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    volumes:
+      - .:/var/www/html
+    command: >
+      sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php /var/www/html/php/src/Agents/mail_agent.php || tail -f /dev/null"
+    restart: always
+
+  web:
+    image: nginx:alpine
+    container_name: sharpishly-app
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+    restart: always
+
+  adminer:
+    image: adminer
+    container_name: sharpishly-adminer
+    restart: always
+    ports:
+      - "8081:8080"
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: sharpishly-logs
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8082:8080"
+
+volumes:
+  mysql_data:

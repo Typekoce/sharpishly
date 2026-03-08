@@ -24,15 +24,7 @@ class HardwareModel
             'memory_info'  => json_encode($data['memory'] ?? []),
             'network_info' => json_encode($data['network'] ?? []),
             'raw_data'     => json_encode($data),
-        ]);
-    }
-
-    public function getRecentScans(int $limit = 10): array
-    {
-        return $this->db->find([
-            'tbl'   => 'hardware_scans',
-            'order' => ['id' => 'desc'],
-            'limit' => $limit,
+            'created_at'   => date('Y-m-d H:i:s'),
         ]);
     }
 }

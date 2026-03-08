@@ -103,3 +103,20 @@
 - [ ] DEBUG: Containers are currently entering 'tail -f' fallback mode locally because `vendor/autoload.php` is generated exclusively via GitHub Actions.
 - [ ] TASK: Ensure local hardware scanning (`shells/devices.sh`) is performed while containers are in this fallback state to verify USB/PCI pass-through.
 - [ ] CI: Verify GitHub Actions successfully generates the production `vendor/` artifact and passes integrity tests.
+
+- [ ] SPA Task: Implement `OllamaGuard`. 
+    - Function: Automatically run `ollama ps` before starting a B2B Mug Print.
+    - Logic: If an LLM is hogging > 50% RAM, pause the Print or stop the LLM.
+
+    - [ ] SPA Task: Configure `ModelIntelligenceGate`
+    - Logic: Default to `llama3.2:1b` for general tasks.
+    - Logic: Switch to `phi3.5` only for complex PHP debugging.
+    - Constraint: Block `llama3:8b` or larger to prevent Swap-memory death.
+
+- [ ] PERFORMANCE: Enable `OLLAMA_FLASH_ATTENTION=1`.
+- [ ] OS: Test `renice` to prioritize the AI process on the AMD A6.
+- [ ] PHP: Update `OllamaService.php` to default to `stream: false` for faster internal processing.
+
+- [ ] PERFORMANCE: Swap file-based queue for **Redis** (The lightweight champion).
+- [ ] CONFIG: Optimize Nginx `worker_processes` to match the 2-core AMD hardware.
+- [ ] ARCHITECTURE: Explicitly avoid RabbitMQ/NATS to preserve RAM for Ollama.
