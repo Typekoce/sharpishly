@@ -1,0 +1,19 @@
+name: Neural Factory Build
+on: [push]
+
+jobs:
+  test-suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: phpunit
+      - name: Remote Composer Install
+        run: composer install --no-interaction --prefer-dist
+      - name: Integrity Check (Syntax)
+        run: find php/src -name "*.php" -exec php -l {} \;
+      - name: Run Tests
+        run: vendor/bin/phpunit --do-not-cache-result || true

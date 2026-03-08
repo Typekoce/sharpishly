@@ -29,8 +29,6 @@ services:
     volumes:
       - .:/var/www/html
       - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
-    command: >
-      sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php-fpm"
     depends_on:
       db:
         condition: service_healthy
@@ -47,8 +45,7 @@ services:
       DB_PASS: ${DB_PASS}
     volumes:
       - .:/var/www/html
-    command: >
-      sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php /var/www/html/php/src/Agents/worker.php"
+    command: ["php", "/var/www/html/php/src/Agents/worker.php"]
     depends_on:
       db:
         condition: service_healthy
@@ -61,8 +58,7 @@ services:
     user: "1000:1000"
     volumes:
       - .:/var/www/html
-    command: >
-      sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php /var/www/html/php/src/Agents/mail_agent.php"
+    command: ["php", "/var/www/html/php/src/Agents/mail_agent.php"]
     restart: always
 
   web:

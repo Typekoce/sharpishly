@@ -37,7 +37,59 @@ class HomeModel
     {
         $report = "<h2>Migration Report</h2><pre>\n";
 
-        try {
+    try {
+        // --- Table: merchandise_inventory (The Warehouse) ---
+        $this->createTable('merchandise_inventory', [
+            'id'           => 'INT AUTO_INCREMENT PRIMARY KEY',
+            'item_name'    => 'VARCHAR(255) NOT NULL',
+            'stock_count'  => 'INT DEFAULT 0',
+            'unit_price'   => 'DECIMAL(10,2)',
+            'updated_at'   => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+        ]);
+        $report .= "[OK] Table 'merchandise_inventory' ready\n";
+
+        // --- Table: orders (B2B/B2C Transactions) ---
+        $this->createTable('orders', [
+            'id'           => 'INT AUTO_INCREMENT PRIMARY KEY',
+            'order_type'   => "ENUM('B2C', 'B2B') DEFAULT 'B2C'",
+            'club_logo'    => 'VARCHAR(100)',
+            'quantity'     => 'INT DEFAULT 1',
+            'total_price'  => 'DECIMAL(10,2)',
+            'status'       => "ENUM('pending', 'paid', 'shipped') DEFAULT 'pending'",
+            'created_at'   => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+        ]);
+        $report .= "[OK] Table 'orders' ready\n";
+
+        // --- Seed Initial Stock ---
+        $stock = $this->db->find(['tbl' => 'merchandise_inventory', 'limit' => 1]);
+        if (empty($stock)) {
+            $this->db->save([
+                'tbl' => 'merchandise_inventory',
+                'item_name' => 'Premium White Mug Blank',
+                'stock_count' => 1000,
+                'unit_price' => 4.50
+            ]);
+            $report .= "[SEED] Initial mug stock added\n";
+        }
+
+    // [Your existing Hardware, Jobs, and Tasks tables follow here...]
+
+            $this->createTable('hardware_scans', [
+                'id'           => 'BIGINT AUTO_INCREMENT PRIMARY KEY',
+                'scan_type'    => 'VARCHAR(50) DEFAULT "full"',
+                'usb_count'    => 'INT DEFAULT 0',
+                'cpu_info'     => 'VARCHAR(255)',
+                'memory_info'  => 'JSON',
+                'network_info' => 'JSON',
+                'raw_data'     => 'JSON',
+                'created_at'   => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+            ], [
+                'engine'  => 'InnoDB',
+                'charset' => 'utf8mb4',
+                'collate' => 'utf8mb4_unicode_ci',
+            ]);
+            $report .= "[OK] Table 'hardware_scans' created or already exists\n";
+
             // --- Table: social ---
             $this->createTable('social', [
                 'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
