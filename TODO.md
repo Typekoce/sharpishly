@@ -99,3 +99,7 @@
 - [ ] Wire up `LandlordController` dynamic data fetching from PHP
 - [ ] Implement "Real-time" log viewer modal for background worker tasks
 - [ ] Connect `BroadcasterController` to the `SocialPostAction` backend
+
+- [ ] DEBUG: Containers are currently entering 'tail -f' fallback mode locally because `vendor/autoload.php` is generated exclusively via GitHub Actions.
+- [ ] TASK: Ensure local hardware scanning (`shells/devices.sh`) is performed while containers are in this fallback state to verify USB/PCI pass-through.
+- [ ] CI: Verify GitHub Actions successfully generates the production `vendor/` artifact and passes integrity tests.
