@@ -196,6 +196,13 @@ class BroadcasterController {
   }
 }
 
+class CsvUploadController {
+  constructor(container) { this.container = document.querySelector(container); }
+  index() {
+    this.container.innerHTML = `<h1>Csv Upload</h1><div class="glass-card"><div id="thought-stream">...</div></div>`;
+  }
+}
+
 class CyberdeckController {
   constructor(container) { this.container = document.querySelector(container); }
   index() {
@@ -245,6 +252,7 @@ const routes = {
   "/contact": ContactController,
   "/cyberdeck": CyberdeckController,
   "/csv": CsvController,
+  "/csv-upload": CsvUploadController,
   "/landlord": LandlordController,
   "/broadcaster": BroadcasterController,
 };
