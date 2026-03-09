@@ -90,11 +90,73 @@ class LandlordModel extends BaseModel {
   }
 }
 
+/**
+ * Use this model as a template
+ */
 class BroadcasterModel extends BaseModel {
   constructor(container) {
     super(container);
     this.viewPath = '/view/broadcaster/broadcaster.htm';
   }
+}
+
+class UploadModel extends BaseModel {
+  constructor(container) {
+    super(container);
+    this.viewPath = '/view/csv/upload.htm';
+  }
+
+  //
+attachCsvUploadListener() {
+  const form = document.getElementById('csv-upload-form');
+  if (!form) return; // page doesn't have the form
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+alert(e);
+    const btn = document.getElementById('upload-btn');
+    const statusDiv = document.getElementById('upload-status');
+    const statusText = document.getElementById('status-text');
+    const resultPre = document.getElementById('upload-result');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Uploading...';
+    statusDiv.style.display = 'block';
+    statusText.textContent = 'Uploading CSV...';
+    resultPre.textContent = '';
+
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('/php/csv/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      console.log(data);
+
+      if (response.ok && data.success) {
+        statusText.textContent = 'Success! CSV uploaded and queued.';
+        statusDiv.className = 'alert alert-success';
+        resultPre.textContent = data.message || 'Job queued successfully. Processing will start shortly.';
+        resultPre.style.color = '#10b981';
+      } else {
+        throw new Error(data.error || 'Upload failed');
+      }
+    } catch (error) {
+      statusText.textContent = 'Error during upload';
+      statusDiv.className = 'alert alert-danger';
+      resultPre.textContent = error.message;
+      resultPre.style.color = '#dc2626';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Submit to Engine';
+    }
+  });
+}
+  //
 }
 
 /**
@@ -165,6 +227,16 @@ class LandlordController {
   }
 }
 
+class UploadController {
+  constructor(container) {
+    this.model = new UploadModel(container);
+  }
+  async index() {
+    await this.model.render();
+    this.model.attachCsvUploadListener();
+  }
+}
+
 class BroadcasterController {
   constructor(container) {
     this.model = new BroadcasterModel(container);
@@ -193,13 +265,6 @@ class BroadcasterController {
         socialQueue.prepend(queueItem);
         broadcastForm.reset();
     });
-  }
-}
-
-class CsvUploadController {
-  constructor(container) { this.container = document.querySelector(container); }
-  index() {
-    this.container.innerHTML = `<h1>Csv Upload</h1><div class="glass-card"><div id="thought-stream">...</div></div>`;
   }
 }
 
@@ -252,7 +317,7 @@ const routes = {
   "/contact": ContactController,
   "/cyberdeck": CyberdeckController,
   "/csv": CsvController,
-  "/csv-upload": CsvUploadController,
+  "/csv-upload": UploadController,
   "/landlord": LandlordController,
   "/broadcaster": BroadcasterController,
 };

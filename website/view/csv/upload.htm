@@ -1,7 +1,16 @@
-<form action="/php/csv/upload" enctype="multipart/form-data" method="POST">
-    <fieldset>
-        <legend class="h5">Select Interrogation Source</legend>
-        <input type="file" name="csv_file" class="form-control mb-2" accept=".csv">
-        <button type="submit" class="btn btn-primary">Submit to Engine</button>
-    </fieldset>
+<form id="csv-upload-form" enctype="multipart/form-data">
+  <fieldset>
+    <legend class="h5">Select Interrogation Source</legend>
+    <input type="file" name="csv_file" class="form-control mb-2" accept=".csv" required>
+    <button type="submit" class="btn btn-primary" id="upload-btn">Submit to Engine</button>
+  </fieldset>
 </form>
+
+<!-- Status area (appears after submit) -->
+<div id="upload-status" style="margin-top: 1.5rem; display: none;">
+  <div class="alert alert-info" role="alert">
+    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+    <span id="status-text">Uploading and processing CSV...</span>
+  </div>
+  <pre id="upload-result" style="margin-top: 1rem; white-space: pre-wrap;"></pre>
+</div>
