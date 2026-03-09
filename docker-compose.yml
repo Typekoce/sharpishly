@@ -30,7 +30,7 @@ services:
       - .:/var/www/html
       - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
     command: >
-      sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php-fpm || tail -f /dev/null"
+      php-fpm
     depends_on:
       db:
         condition: service_healthy

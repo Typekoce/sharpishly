@@ -18,3 +18,5 @@ WORKDIR /var/www/html
 RUN apt-get update && apt-get install -y \
     usbutils iproute2 util-linux pciutils \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php-fpm || tail -f /dev/null"    
