@@ -17,68 +17,53 @@ class BaseModel {
       `;
   }
 
-  activateSubMenu(){
-  // Minimal toggle logic (no dependencies)
-  document.addEventListener('DOMContentLoaded', () => {
+activateSubMenu() {
+    // Look for elements specifically within the current container or the global HUD
     const toggle = document.querySelector('.sub-menu-toggle');
     const menu = document.getElementById('quick-tools-menu');
 
     if (!toggle || !menu) return;
 
-    toggle.addEventListener('click', () => {
+    // Reset state
+    toggle.setAttribute('aria-expanded', 'false');
+    menu.hidden = true;
+
+    // Use a named function so we can clean up if needed
+    const handleToggle = (e) => {
       const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
       toggle.setAttribute('aria-expanded', !isExpanded);
       menu.hidden = isExpanded;
+    };
 
-      // Close when clicking outside
-      if (!isExpanded) {
-        const closeListener = (e) => {
-          if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-            toggle.setAttribute('aria-expanded', 'false');
-            menu.hidden = true;
-            document.removeEventListener('click', closeListener);
-          }
-        };
-        document.addEventListener('click', closeListener);
-      }
-    });
+    toggle.addEventListener('click', handleToggle);
 
-    // Keyboard accessibility: Esc to close
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !menu.hidden) {
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!toggle.contains(e.target) && !menu.contains(e.target)) {
         toggle.setAttribute('aria-expanded', 'false');
         menu.hidden = true;
       }
     });
-});    
   }
 
   async renderSubmenu() {
-    if (!this.viewPathSubMenu) {
-      console.error("View path not defined for", this.constructor.name);
-      return;
-    }
+      if (!this.viewPathSubMenu) return;
 
-    this.loading();
+      // Target the specific sub-nav container
+      const subContainer = document.querySelector('#sub-nav');
+      if (!subContainer) return;
 
-    try {
-      const response = await fetch(this.viewPathSubMenu);
-      if (!response.ok) throw new Error(`Failed to load view: ${response.statusText}`);
+      try {
+          const response = await fetch(this.viewPathSubMenu);
+          if (!response.ok) throw new Error(`Failed to load: ${response.statusText}`);
 
-      const html = await response.text();
-      this.container.innerHTML = html;
-      
-      if (typeof this.onAfterRender === 'function') {
-        this.onAfterRender();
+          const html = await response.text();
+          subContainer.innerHTML = html; // Injects into #sub-nav
+          
+      } catch (error) {
+          console.error("Submenu Error:", error);
       }
-    } catch (error) {
-      this.container.innerHTML = `
-        <div class="error-container">
-          <p class="error-text">⚠️ Error loading view: ${error.message}</p>
-        </div>
-      `;
-    }
-  } 
+  }
 
   async render() {
     if (!this.viewPath) {
