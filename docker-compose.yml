@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # --- Database Service ---
   db:
     image: mysql:8.0
     container_name: sharpishly-db
@@ -17,10 +18,14 @@ services:
       timeout: 20s
       retries: 10
 
+  # --- Main PHP Application Service ---
   php:
     build: .
     container_name: sharpishly-php
-    user: "1000:1000"
+    # Privileged + root user is required for the start.sh script to run apt-get 
+    # and for Python to access the raw USB bus in /dev.
+    privileged: true
+    user: "0:0" 
     environment:
       DB_HOST: ${DB_HOST}
       DB_NAME: ${DB_NAME}
@@ -29,13 +34,17 @@ services:
     volumes:
       - .:/var/www/html
       - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
-    command: >
-      php-fpm
+      - /dev:/dev # Maps host hardware nodes into the container
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb" # Specific mapping for USB communication
+    # Run the shell script to provision dependencies and start FPM/Python
+    command: /var/www/html/shells/start.sh
     depends_on:
       db:
         condition: service_healthy
     restart: always
 
+  # --- Background Task Worker ---
   worker:
     build: .
     container_name: sharpishly-worker
@@ -47,6 +56,7 @@ services:
       DB_PASS: ${DB_PASS}
     volumes:
       - .:/var/www/html
+    # Keep using inline shell for now; transition to shells/start.sh if hardware access is needed here
     command: >
       sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php /var/www/html/php/src/Agents/worker.php || tail -f /dev/null"
     depends_on:
@@ -54,6 +64,7 @@ services:
         condition: service_healthy
     restart: always
 
+  # --- Automated Email Handler ---
   mail-agent:
     build: .
     container_name: sharpishly-mail-agent
@@ -69,6 +80,7 @@ services:
       sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php /var/www/html/php/src/Agents/mail_agent.php || tail -f /dev/null"
     restart: always
 
+  # --- Nginx Web Server ---
   web:
     image: nginx:alpine
     container_name: sharpishly-app
@@ -81,6 +93,7 @@ services:
       - php
     restart: always
 
+  # --- Database Management GUI ---
   adminer:
     image: adminer
     container_name: sharpishly-adminer
@@ -88,6 +101,7 @@ services:
     ports:
       - "8081:8080"
 
+  # --- Real-time Log Monitoring ---
   dozzle:
     image: amir20/dozzle:latest
     container_name: sharpishly-logs
