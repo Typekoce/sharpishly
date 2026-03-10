@@ -10,7 +10,14 @@ class TasksModel {
         $this->db = new Db();
     }
 
-    public function getPendingTasks(): array {
+    public function getAllTasks(){
+        return $this->db->find([
+            'tbl'   => 'tasks',
+            'order' => ['id' => 'DESC']
+        ]);
+    }
+
+    public function getPendingTasks(){
         return $this->db->find([
             'tbl'   => 'tasks',
             'where' => ['status' => 'active']

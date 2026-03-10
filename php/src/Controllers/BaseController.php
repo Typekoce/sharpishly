@@ -27,14 +27,11 @@ class BaseController {
         return "";
     }
 
-    public function render($data, $views)
-    {
+    public function render($data, $views) {
         $render = "";
         foreach($views as $name => $template){
             $render .= $this->getViewContent($template);
         }
-
-        // Now accessible because it's protected in this class
         echo $this->smarty->render($render, $data);
         die();
     }

@@ -11,19 +11,33 @@ class TaskController extends BaseController {
     }
     
     // This handles: /php/tasks/index
+    public function response() {
+        $model = new TasksModel();
+        $tasks = $model->getPendingTasks();    
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'data' => $tasks]);
+        exit;
+    }
+
+    // This handles: /php/tasks/index
     public function index() {
         $model = new TasksModel();
-        $tasks = $model->getPendingTasks();
-        
-        // If it's an AJAX request, return JSON
-        if ($this->isAjax()) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'data' => $tasks]);
-            exit;
-        }
+        $tasks = $model->getAllTasks();
 
-        // Otherwise, render the Smarty view
-        return $this->render('dashboard/tasks.html', ['tasks' => $tasks]);
+        $data = [
+            'title'     => 'All Tasks',
+            'dashboard' => 'Data Engine',
+            'jobs'      => $tasks,
+        ];
+
+        $views = [
+           'header' => 'layouts/header',
+           'main'   => 'csv/upload', 
+           'footer' => 'layouts/footer'
+        ];
+
+        $this->render($data, $views);
+
     }
 
     // This handles: /php/tasks/trigger
