@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\Models\TasksModel;
+use App\dBug;
 
 class TaskController extends BaseController {
 
@@ -29,7 +30,7 @@ class TaskController extends BaseController {
             'dashboard' => 'Data Engine',
             'jobs'      => $tasks,
         ];
-
+        new dBug($data);
         $views = [
            'header' => 'layouts/header',
            'main'   => 'csv/upload', 
