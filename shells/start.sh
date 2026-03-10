@@ -1,28 +1,23 @@
 #!/bin/bash
-clear
-# Use a real newline in the variable
-line=$'\n-----------------\n'
+# Save as: shells/start.sh
 
-docker compose up -d --build
+echo "📦 Provisioning Container Environment..."
 
-# Run Python test
-docker exec sharpishly-php python3 /var/www/html/python/hello.py
+# 1. Update and install system-level USB libraries
+apt-get update && apt-get install -y \
+    usbutils \
+    libusb-1.0-0-dev \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Ollama check
-echo "${line}Ollama Server Response"
-curl -s http://localhost:11434/api/tags | grep -q "models" && echo "✅ Ollama is Responding" || echo "❌ Ollama Connection Failed"
+# 2. Install Python hardware communication library
+pip3 install pyusb --break-system-packages
 
-# Worker Debug Flow
-echo "${line}Worker Management"
-echo "🛑 Stopping background worker container..."
-docker stop sharpishly-worker
+# 3. Start PHP-FPM in the background
+echo "🐘 Starting PHP-FPM..."
+php-fpm -D
 
-echo "🤖 Starting Manual Worker Debug (CTRL+C to exit)..."
-# Note: Added path check
-docker exec -it sharpishly-php php /var/www/html/php/src/Agents/worker.php
-
-echo "🚀 Restarting background worker..."
-docker start sharpishly-worker
-
-echo "${line}Current Container Status"
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+# 4. Keep container alive and start the USB Scanner
+echo "🐍 Starting Sensory Layer: USB Scanner..."
+# We use 'exec' here so Python becomes PID 1 and receives shutdown signals
+exec python3 /var/www/html/python/usb_scanner.py
