@@ -38,7 +38,8 @@ services:
     devices:
       - "/dev/bus/usb:/dev/bus/usb" # Specific mapping for USB communication
     # Run the shell script to provision dependencies and start FPM/Python
-    command: /var/www/html/shells/start.sh
+    #command: /var/www/html/shells/start.sh
+    command: php-fpm
     depends_on:
       db:
         condition: service_healthy
