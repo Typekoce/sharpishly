@@ -43,4 +43,4 @@ if (getenv('APP_DEBUG') === 'true') {
     echo "Bootstrap loaded at " . date('c') . "\n";
 }
 
-Logger::info("Bootstrap loaded successfully", ['env' => getenv('APP_ENV') ?: 'unknown']);
+Logger::info("Bootstrap loaded successfully", ['env' => getenv('APP_ENV') ?: 'unknown ' . date('Y-m-d h:m:s')]);

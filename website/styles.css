@@ -309,3 +309,35 @@ input:focus, select:focus, textarea:focus {
         margin: 1rem 0;
     }
 }
+
+/* --- Ollama --- */
+
+
+.ollama-card {
+    background: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 1.5rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.status-badge.online { color: #4af626; }
+.status-badge.offline { color: #ff5f56; }
+
+.border-error { border-color: #ff5f56 !important; box-shadow: 0 0 10px rgba(255, 95, 86, 0.2); }
+
+.code-block {
+    background: #000;
+    color: #ccc;
+    font-family: 'Courier New', monospace;
+    padding: 1rem;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    margin: 10px 0;
+    border-left: 3px solid #444;
+}
+
+.label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+/* --- Ollama --- */

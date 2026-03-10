@@ -139,6 +139,64 @@ class LandlordModel extends BaseModel {
   }
 }
 
+class OllamaModel {
+    constructor(container) {
+        this.container = document.querySelector(container);
+        this.endpoint = '/php/ollama/index';
+    }
+
+    /**
+     * Converts Terminal ANSI escape codes (like [1;32m) into 
+     * colored HTML spans for browser rendering.
+     */
+    ansiToHtml(text) {
+        if (typeof text !== 'string') return text;
+        return text
+            .replace(/\[1;32m/g, '<span style="color: #4af626; font-weight: bold;">') // God Mode Green
+            .replace(/\[0m/g, '</span>'); // Reset
+    }
+
+    async render() {
+        this.container.innerHTML = '<div class="loading">🧠 Syncing with Brain...</div>';
+
+        try {
+            const response = await fetch(this.endpoint);
+            const data = await response.json();
+
+            // Check if the response indicates a connection failure
+            const isHardwareError = data.response.includes('Could not reach Ollama');
+            const formattedResponse = this.ansiToHtml(data.response);
+
+            this.container.innerHTML = `
+                <div class="ollama-card ${isHardwareError ? 'border-error' : ''}">
+                    <div class="card-header">
+                        <h3>Ollama Status: <span class="status-badge ${data.status}">${data.status}</span></h3>
+                        <small>Node: ${data.client_host}</small>
+                    </div>
+
+                    <div class="terminal-body">
+                        <p class="label">Latest Output:</p>
+                        <blockquote class="code-block">${formattedResponse}</blockquote>
+                    </div>
+
+                    <div class="card-footer">
+                        <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            this.container.innerHTML = `
+                <div class="ollama-card border-error">
+                    <div class="terminal-body">
+                        <p class="label">❌ UI FETCH ERROR</p>
+                        <blockquote class="code-block">${error.message}</blockquote>
+                    </div>
+                </div>
+            `;
+        }
+    }
+}
+
 /**
  * Use this model as a template
  */
@@ -277,6 +335,19 @@ class LandlordController {
   }
 }
 
+class OllamaController {
+  constructor(container) {
+    this.model = new OllamaModel(container);
+  }
+  async index() {
+    await this.model.render();
+    this.loadDynamicData();
+  }
+  loadDynamicData() {
+    console.log("Landlord UI dynamic markers initialized.");
+  }
+}
+
 class UploadController {
   constructor(container) {
     this.model = new UploadModel(container);
@@ -375,6 +446,7 @@ const routes = {
   "/csv-upload": UploadController,
   "/landlord": LandlordController,
   "/broadcaster": BroadcasterController,
+  "/ollama": OllamaController,
 };
 
 // Mobile menu toggle

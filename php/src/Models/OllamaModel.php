@@ -1,8 +1,12 @@
-<?php
-// Simple Ollama client with basic RAG
+<?php declare(strict_types=1);
 
-class OllamaClient {
-    private string $host = 'http://127.0.0.1:11434';
+namespace App\Models;
+
+use App\Services\Logger;
+
+class OllamaModel {
+    // 1. Changed to the host-gateway alias defined in your docker-compose.yml
+    private string $host = 'http://host.docker.internal:11434';
     private string $chatModel = 'llama3.2:3b';
     private string $embedModel = 'nomic-embed-text';
 
@@ -18,13 +22,21 @@ class OllamaClient {
             CURLOPT_POST       => true,
             CURLOPT_POSTFIELDS => json_encode($payload),
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 5, // Timeout if server is down
             CURLOPT_HTTPHEADER => ['Content-Type: application/json']
         ]);
 
         $resp = curl_exec($ch);
-        curl_close($ch);
+        
+        // 2. Added Error Check: Stop the crash if cURL fails
+        if ($resp === false) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            return "Error: Could not reach Ollama at {$this->host} ($error)";
+        }
 
-        $data = json_decode($resp, true);
+        curl_close($ch);
+        $data = json_decode((string)$resp, true);
         return trim($data['response'] ?? 'No answer');
     }
 
@@ -39,21 +51,33 @@ class OllamaClient {
         ]);
 
         $resp = curl_exec($ch);
-        curl_close($ch);
+        
+        if ($resp === false) {
+            curl_close($ch);
+            return [];
+        }
 
-        $data = json_decode($resp, true);
+        curl_close($ch);
+        $data = json_decode((string)$resp, true);
         return $data['embedding'] ?? [];
     }
 
     public function ragAsk(string $question): string {
-        // Very basic in-memory RAG — replace with real vector DB later
-        $docs = glob(__DIR__ . '/documents/*.txt');
+        // 3. Ensure this directory exists relative to the Model file
+        $docsDir = __DIR__ . '/documents/';
+        if (!is_dir($docsDir)) {
+            mkdir($docsDir, 0777, true);
+        }
+
+        $docs = glob($docsDir . '*.txt');
         $context = "";
 
-        foreach ($docs as $doc) {
-            $content = file_get_contents($doc);
-            if (stripos($content, $question) !== false) {
-                $context .= "\n\nFrom " . basename($doc) . ":\n" . substr($content, 0, 800);
+        if ($docs) {
+            foreach ($docs as $doc) {
+                $content = file_get_contents($doc);
+                if ($content && stripos($content, $question) !== false) {
+                    $context .= "\n\nFrom " . basename($doc) . ":\n" . substr($content, 0, 800);
+                }
             }
         }
 

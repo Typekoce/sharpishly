@@ -22,8 +22,6 @@ services:
   php:
     build: .
     container_name: sharpishly-php
-    # Privileged + root user is required for the start.sh script to run apt-get 
-    # and for Python to access the raw USB bus in /dev.
     privileged: true
     user: "0:0" 
     environment:
@@ -34,11 +32,13 @@ services:
     volumes:
       - .:/var/www/html
       - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
-      - /dev:/dev # Maps host hardware nodes into the container
+      - /dev:/dev
     devices:
-      - "/dev/bus/usb:/dev/bus/usb" # Specific mapping for USB communication
-    # Run the shell script to provision dependencies and start FPM/Python
-    #command: /var/www/html/shells/start.sh
+      - "/dev/bus/usb:/dev/bus/usb"
+    # Maps host IP to a usable hostname inside the container for Ollama
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # Reverted to direct command as requested
     command: php-fpm
     depends_on:
       db:
@@ -57,7 +57,6 @@ services:
       DB_PASS: ${DB_PASS}
     volumes:
       - .:/var/www/html
-    # Keep using inline shell for now; transition to shells/start.sh if hardware access is needed here
     command: >
       sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php /var/www/html/php/src/Agents/worker.php || tail -f /dev/null"
     depends_on:
