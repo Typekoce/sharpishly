@@ -352,6 +352,9 @@ class Router {
 
   loadRoute() {
       if (this.activeInterval) clearInterval(this.activeInterval);
+      // CLEAR SUB-NAV ON EVERY ROUTE CHANGE
+      const subNav = document.querySelector('#sub-nav');
+      if (subNav) subNav.innerHTML = '';
       const path = window.location.pathname;
       const ControllerClass = this.routes[path] || HomeController;
       const controller = new ControllerClass(this.container);
