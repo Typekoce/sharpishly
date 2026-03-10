@@ -3,7 +3,7 @@ namespace App\Models;
 
 use App\Db;
 
-class TaskModel {
+class TasksModel {
     private $db;
 
     public function __construct() {

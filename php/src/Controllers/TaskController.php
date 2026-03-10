@@ -4,6 +4,11 @@ namespace App\Controllers;
 use App\Models\TasksModel;
 
 class TaskController extends BaseController {
+
+    public function isAjax(){
+        // Temp fix
+        return true;
+    }
     
     // This handles: /php/tasks/index
     public function index() {
