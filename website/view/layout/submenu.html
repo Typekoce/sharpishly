@@ -1,0 +1,116 @@
+<!-- =============== SUB-MENU (Quick Tools) =============== -->
+<div class="sub-menu-container">
+  <button class="sub-menu-toggle" aria-expanded="false" aria-controls="quick-tools-menu">
+    Quick Tools
+    <span class="toggle-icon">▼</span>
+  </button>
+
+  <ul class="quick-tools-menu" id="quick-tools-menu" hidden>
+    <li><a href="/php/hardware">Hardware Scanner</a></li>
+    <li><a href="/php/shared-folders">Shared Folders</a></li>
+    <li><a href="/php/usb">USB Controls</a></li>
+    <li><a href="/php/status">System Status</a></li>
+    <li><a href="/php/logs">View Logs</a></li>
+    <li class="separator"></li>
+    <li><a href="/php/agent/run-job" class="action-link">Run Job Agent Now</a></li>
+    <li><a href="/php/reconnect">Reconnect & Resume</a></li>
+  </ul>
+</div>
+
+<style>
+  /* =============== SUB-MENU STYLES (matches your cyber/portal theme) =============== */
+  .sub-menu-container {
+    margin: 1.5rem 0;
+    position: relative;
+  }
+
+  .sub-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #1f2937;
+    color: #e5e7eb;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .sub-menu-toggle:hover {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .toggle-icon {
+    font-size: 0.9rem;
+    transition: transform 0.2s ease;
+  }
+
+  .sub-menu-toggle[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  .quick-tools-menu {
+    list-style: none;
+    margin: 0.5rem 0 0 0;
+    padding: 0;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    overflow: hidden;
+  }
+
+  .quick-tools-menu[hidden] {
+    display: none;
+  }
+
+  .quick-tools-menu li {
+    margin: 0;
+  }
+
+  .quick-tools-menu a {
+    display: block;
+    padding: 0.9rem 1.25rem;
+    color: #d1d5db;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.15s ease;
+  }
+
+  .quick-tools-menu a:hover {
+    background: #374151;
+    color: #60a5fa;
+  }
+
+  .action-link {
+    color: #60a5fa;
+    font-weight: 600;
+  }
+
+  .action-link:hover {
+    background: #1e40af;
+    color: white;
+  }
+
+  .separator {
+    height: 1px;
+    background: #374151;
+    margin: 0.4rem 0;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 768px) {
+    .sub-menu-toggle {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<script>
+
+</script>

@@ -4,7 +4,8 @@
 class BaseModel {
   constructor(container) {
     this.container = typeof container === 'string' ? document.querySelector(container) : container;
-    this.viewPath = ''; 
+    this.viewPath = '';
+    this.viewPathSubMenu = '';  
   }
   
   loading() {
@@ -15,6 +16,69 @@ class BaseModel {
         </div>
       `;
   }
+
+  activateSubMenu(){
+  // Minimal toggle logic (no dependencies)
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.querySelector('.sub-menu-toggle');
+    const menu = document.getElementById('quick-tools-menu');
+
+    if (!toggle || !menu) return;
+
+    toggle.addEventListener('click', () => {
+      const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', !isExpanded);
+      menu.hidden = isExpanded;
+
+      // Close when clicking outside
+      if (!isExpanded) {
+        const closeListener = (e) => {
+          if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+            toggle.setAttribute('aria-expanded', 'false');
+            menu.hidden = true;
+            document.removeEventListener('click', closeListener);
+          }
+        };
+        document.addEventListener('click', closeListener);
+      }
+    });
+
+    // Keyboard accessibility: Esc to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) {
+        toggle.setAttribute('aria-expanded', 'false');
+        menu.hidden = true;
+      }
+    });
+});    
+  }
+
+  async renderSubmenu() {
+    if (!this.viewPathSubMenu) {
+      console.error("View path not defined for", this.constructor.name);
+      return;
+    }
+
+    this.loading();
+
+    try {
+      const response = await fetch(this.viewPathSubMenu);
+      if (!response.ok) throw new Error(`Failed to load view: ${response.statusText}`);
+
+      const html = await response.text();
+      this.container.innerHTML = html;
+      
+      if (typeof this.onAfterRender === 'function') {
+        this.onAfterRender();
+      }
+    } catch (error) {
+      this.container.innerHTML = `
+        <div class="error-container">
+          <p class="error-text">⚠️ Error loading view: ${error.message}</p>
+        </div>
+      `;
+    }
+  } 
 
   async render() {
     if (!this.viewPath) {
@@ -97,6 +161,7 @@ class BroadcasterModel extends BaseModel {
   constructor(container) {
     super(container);
     this.viewPath = '/view/broadcaster/broadcaster.htm';
+    this.viewPathSubMenu = '/view/layout/submenu.htm';
   }
 }
 
@@ -242,6 +307,8 @@ class BroadcasterController {
     this.model = new BroadcasterModel(container);
   }
   async index() {
+    await this.model.renderSubmenu();
+    await this.model.activateSubMenu();
     await this.model.render();
     this.initBroadcasterLogic();
   }

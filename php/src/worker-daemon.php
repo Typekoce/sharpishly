@@ -1,7 +1,12 @@
 <?php
-// php/worker-daemon.php  ← Full recommended version
+// Location: /var/www/html/php/worker-daemon.php
 
-require_once __DIR__ . '/autoload.php';
+// 1. Correct relative path to the autoloader
+require_once __DIR__ . '/src/autoload.php';
+
+// 2. Import using the 'App' namespace defined in your autoload.php
+use App\Services\Logger;
+use App\Db; // Per tree: php/src/Db.php maps to App\Db
 
 Logger::info("Scheduler Worker started", ['pid' => getmypid()], 'scheduler');
 
