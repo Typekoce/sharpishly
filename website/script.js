@@ -91,6 +91,34 @@ activateSubMenu() {
       `;
     }
   }
+
+  // Add to BaseModel class
+  updateBreadcrumbs() {
+      const breadcrumbContainer = document.querySelector('#breadcrumbs');
+      if (!breadcrumbContainer) return;
+
+      const path = window.location.pathname;
+      const segments = path.split('/').filter(s => s);
+      
+      let html = '<a href="/" data-link>Home</a>';
+      let currentPath = '';
+
+      segments.forEach((segment, index) => {
+          currentPath += `/${segment}`;
+          const label = segment.charAt(0).toUpperCase() + segment.slice(1);
+          html += ` <span class="separator">/</span> <a href="${currentPath}" data-link>${label}</a>`;
+      });
+
+      breadcrumbContainer.innerHTML = html;
+  }
+
+  async render() {
+      // Existing render logic...
+      this.updateBreadcrumbs(); // Trigger on every render
+  }
+
+  // New method here
+
 }
 
 /**
@@ -276,6 +304,7 @@ class HomeController {
   }
   async index() {
     this.model.loading();
+    this.updateBreadcrumbs(); // Trigger on every render
     const data = await this.model.getData();
     this.model.container.innerHTML = `<h1>${data.h1}</h1><p>${data.description}</p>`;
   }
