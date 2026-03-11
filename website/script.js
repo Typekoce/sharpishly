@@ -295,6 +295,43 @@ alert(e);
   //
 }
 
+class ScannerModel extends BaseModel {
+    constructor(container) {
+        super(container);
+        this.endpoint = '/php/scanner/index';
+    }
+
+    async render() {
+        this.loading();
+        try {
+            const response = await fetch(this.endpoint);
+            const data = await response.json();
+
+            this.container.innerHTML = `
+                <div class="scanner-card">
+                    <div class="card-header">
+                        <h2>🔍 Hardware Scan Results</h2>
+                        <span class="badge ${data.status}">${data.status.toUpperCase()}</span>
+                    </div>
+                    <div class="device-list">
+                        ${data.devices.map(dev => `
+                            <div class="device-item">
+                                <span class="icon">🔌</span>
+                                <code class="device-text">${dev}</code>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="card-footer">
+                        <small>Last Scan: ${data.timestamp} | Devices: ${data.device_count}</small>
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            this.container.innerHTML = `<div class="error">Failed to poll hardware: ${error.message}</div>`;
+        }
+    }
+}
+
 /**
  * 3. CONTROLLERS
  */
@@ -532,7 +569,7 @@ const routes = {
   "/dashboard": DashboardController,
   "/operations": OperationsController,
   "/intelligence": IntelligenceController,
-
+  "/scanner": ScannerController, // Pointing to JS ScannerController
 
 };
 
