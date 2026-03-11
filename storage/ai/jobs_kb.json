@@ -1,0 +1,8 @@
+$jobs = [
+    ['title' => 'Software Developer', 'company' => 'Konrad', 'tech' => 'Web, Mobile, SSL', 'location' => 'Remote'],
+    ['title' => 'Backend Engineer', 'company' => 'Hootsuite', 'tech' => 'Scala, Java, SaaS', 'location' => 'Remote'],
+    ['title' => 'Python Engineer', 'company' => 'Revolut', 'tech' => 'Python, AI, GCP', 'location' => 'Global'],
+];
+
+$rag = new \App\Services\JobRagService();
+$rag->ingestJobs($jobs);
