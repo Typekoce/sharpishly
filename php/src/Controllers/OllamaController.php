@@ -12,8 +12,9 @@ class OllamaController extends BaseController {
 
     private $ollama_url = "http://host.docker.internal:11434/api/tags";
 
-    public function __construct(){
-
+    public function __construct() {
+        parent::__construct();
+        die();
         $this->ollama = new OllamaModel;
 
     }

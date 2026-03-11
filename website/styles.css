@@ -1,4 +1,4 @@
-/* --- Global Reset & Base --- */
+/* --- 1. Global Reset & Base --- */
 * {
     margin: 0;
     padding: 0;
@@ -22,12 +22,15 @@ body {
     padding: 0 1.5rem;
 }
 
-/* --- Navbar --- */
+/* --- 2. Navbar & Navigation --- */
 .navbar {
     background-color: #111827;
     color: white;
     padding: 1rem 0;
     border-bottom: 1px solid #1f2937;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .navbar .container {
@@ -60,19 +63,16 @@ body {
     color: white;
 }
 
-/* ADDED: Base Burger Styling (Hidden by default) */
 .menu-toggle {
-    display: none; /* Hidden on desktop */
+    display: none;
     background: none;
     border: none;
     color: white;
     font-size: 1.8rem;
     cursor: pointer;
-    padding: 0.5rem;
-    line-height: 1;
 }
 
-/* --- Main Application Shell --- */
+/* --- 3. Main Shell & App Container --- */
 main {
     flex: 1;
 }
@@ -81,138 +81,89 @@ main {
     padding: 2.5rem;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     margin: 2rem 0;
     border: 1px solid #e5e7eb;
 }
 
-/* --- Form Elements --- */
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #4b5563;
-}
-
-input[type="text"],
-input[type="date"],
-input[type="datetime-local"],
-select,
-textarea {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: #f9fafb;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    color: #111827;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-textarea {
-    height: 120px;
-    resize: vertical;
-}
-
-input:focus, select:focus, textarea:focus {
-    background-color: #ffffff;
-    border-color: #3498db;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-/* --- Buttons --- */
-.send-btn, .btn-primary {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.send-btn:hover, .btn-primary:hover {
-    background-color: #2980b9;
-}
-
-/* --- Broadcaster / Social Hub --- */
-.social-wrapper {
-    display: flex;
-    gap: 2.5rem;
-    align-items: start;
-}
-
-.composer-side, .queue-side {
-    flex: 1;
-}
-
-.platform-chips {
-    display: flex;
-    gap: 0.75rem;
-    margin: 1rem 0 1.5rem 0;
-}
-
-.platform-chips label {
+/* --- 4. Breadcrumbs (Contrast Optimized) --- */
+#breadcrumbs {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 0.5rem 1rem;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 500;
-    color: #4b5563;
+    padding: 10px 15px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    color: #64748b;
 }
 
-.platform-chips input[type="checkbox"] {
-    width: auto;
+#breadcrumbs a {
+    color: #3b82f6;
+    text-decoration: none;
 }
 
-/* --- Queue & Portal Lists --- */
-.queue-item, .log-entry {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-left: 4px solid #3498db;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
+#breadcrumbs a:hover {
+    text-decoration: underline;
 }
 
-.empty-msg {
-    color: #9ca3af;
-    font-style: italic;
-    text-align: center;
-    padding: 2rem;
+#breadcrumbs .separator {
+    margin: 0 8px;
+    color: #cbd5e1;
 }
 
-/* --- Portal / Dashboard Components --- */
-.stats-grid {
+/* --- 5. Sub-navigation --- */
+#sub-nav {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    gap: 12px;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.stat-card {
-    flex: 1;
-    padding: 1.25rem;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    border-top: 3px solid #3498db;
+#sub-nav a {
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: 16px;
+    background: #eff6ff;
+    color: #2563eb;
+    text-decoration: none;
+    border: 1px solid #dbeafe;
 }
 
-.stat-card.warning { border-top-color: #ef4444; }
-.stat-card.success { border-top-color: #10b981; }
+#sub-nav a:hover {
+    background: #dbeafe;
+}
 
-.stat-card .label { color: #6b7280; text-transform: uppercase; font-size: 0.75rem; }
-.stat-card .value { font-size: 1.5rem; font-weight: 700; color: #111827; }
+/* --- 6. The "God Mode" Terminal --- */
+.ollama-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 20px;
+    color: #f1f5f9;
+}
 
-/* --- Table Styles --- */
+.code-block {
+    background: #000000;
+    color: #e2e8f0;
+    padding: 15px;
+    border-radius: 6px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    line-height: 1.6;
+    border-left: 4px solid #4af626;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+
+.god-green {
+    color: #4af626;
+    text-shadow: 0 0 5px rgba(74, 246, 38, 0.3);
+    font-weight: bold;
+}
+
+/* --- 7. Status Tables & Data --- */
 .status-table {
     width: 100%;
     border-collapse: collapse;
@@ -227,117 +178,53 @@ input:focus, select:focus, textarea:focus {
 .status-table th {
     background-color: #f9fafb;
     color: #4b5563;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
 }
 
-/* --- Utilities --- */
-.badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 700;
-}
-.badge.success { background: #d1fae5; color: #065f46; }
-.badge.alert { background: #fee2e2; color: #991b1b; }
-
-.w-100 { width: 100%; }
-.mt-20 { margin-top: 1.25rem; }
-
-/* --- Spinner --- */
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #f3f4f6;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+/* --- 8. Form Elements --- */
+input[type="text"], select, textarea {
+    width: 100%;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin-bottom: 1rem;
 }
 
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-
-.fade-in {
-    animation: slideDown 0.3s ease-out forwards;
+input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-/* --- Responsive Logic --- */
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+/* --- 9. Responsive Logic --- */
 @media (max-width: 768px) {
-    .menu-toggle {
-        display: block; /* Show on mobile */
-    }
-
+    .menu-toggle { display: block; }
     .nav-links {
-        display: none; 
+        display: none;
         flex-direction: column;
         width: 100%;
-        background-color: #1f2937;
+        background: #111827;
         position: absolute;
-        top: 64px;
+        top: 60px;
         left: 0;
         padding: 1rem;
-        border-bottom: 2px solid #3498db;
-        z-index: 1000;
     }
-
-    .nav-links.active {
-        display: flex;
-    }
-
-    .nav-links a {
-        padding: 1rem 0;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
-        width: 100%;
-    }
-
-    .social-wrapper, .portal-grid, .stats-grid {
-        flex-direction: column;
-        display: flex;
-        gap: 1.5rem;
-    }
-
-    .composer-side, .queue-side {
-        width: 100%;
-    }
-
-    #app {
-        padding: 1.5rem 1rem;
-        margin: 1rem 0;
-    }
+    .nav-links.active { display: flex; }
+    .stats-grid, .social-wrapper { flex-direction: column; }
 }
-
-/* --- Ollama --- */
-
-
-.ollama-card {
-    background: #1a1a1a;
-    color: #e0e0e0;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 1.5rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.status-badge.online { color: #4af626; }
-.status-badge.offline { color: #ff5f56; }
-
-.border-error { border-color: #ff5f56 !important; box-shadow: 0 0 10px rgba(255, 95, 86, 0.2); }
-
-.code-block {
-    background: #000;
-    color: #ccc;
-    font-family: 'Courier New', monospace;
-    padding: 1rem;
-    border-radius: 4px;
-    white-space: pre-wrap;
-    margin: 10px 0;
-    border-left: 3px solid #444;
-}
-
-.label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-
-/* --- Ollama --- */
