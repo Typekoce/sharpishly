@@ -234,6 +234,26 @@ class HomeController {
     }
 }
 
+class VisionController {
+    constructor(container) {
+        this.container = container;
+    }
+
+    index() {
+        this.container.innerHTML = `
+            <div class="vision-card">
+                <h3><span class="god-green">[LIVE]</span> External Sensory Node 01</h3>
+                <div class="stream-container">
+                    <img src="http://localhost:5001/video_feed" style="width: 100%; border: 2px solid #00ff00;">
+                </div>
+                <div class="controls">
+                    <button onclick="alert('Snapshot Saved to /storage/uploads')">CAPTURE</button>
+                </div>
+            </div>
+        `;
+    }
+}
+
 class TenantController {
   constructor(container) {
     this.container = document.querySelector(container);
