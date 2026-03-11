@@ -110,6 +110,29 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8082:8080"
-
+  # --- VPN Service ---
+  services:
+  vpn:
+    image: linuxserver/wireguard:latest
+    container_name: sharpishly-vpn
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SERVERURL=sharpishly.vm # Or your public IP
+      - SERVERPORT=51820
+      - PEERS=myphone,mylaptop
+      - INTERNAL_CONTROL_PORT=51821
+    ports:
+      - "51820:51820/udp"
+    volumes:
+      - ./storage/vpn-config:/config
+      - /lib/modules:/lib/modules
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: always
 volumes:
   mysql_data:
