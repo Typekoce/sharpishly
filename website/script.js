@@ -199,6 +199,32 @@ class HomeController {
     }
 }
 
+class TenantController {
+  constructor(container) {
+    this.container = document.querySelector(container);
+  }
+
+  async index() {
+    this.container.innerHTML = '<div class="loader"></div>';
+    
+    // Fetch from your optimized PHP backend
+    const response = await fetch('/php/crm/tenants');
+    const tenants = await response.json();
+
+    const rows = tenants.map(t => `
+        <tr>
+            <td><strong>${t.name}</strong></td>
+            <td>${t.property_name}</td>
+            <td><span class="badge ${t.status}">${t.status}</span></td>
+            <td class="${t.balance < 0 ? 'text-danger' : 'text-success'}">$${t.balance}</td>
+            <td><button class="btn-icon" onclick="notifyTenant(${t.id})">✉️</button></td>
+        </tr>
+    `).join('');
+
+    document.getElementById('tenant-list-body').innerHTML = rows;
+  }
+}
+
 class CsvController {
     constructor(container) { this.model = new CsvModel(container); }
     async index() {
