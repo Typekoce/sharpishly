@@ -1,23 +1,36 @@
-# --- Environment & Sensitive ---
+# --- Sensitive Environment ---
 .env
 .env.local
+.env.*.local
 mysql_data/
 
-# --- Dependencies (Keep the repo light) ---
+# --- Dependencies ---
 php/vendor/
+node_modules/
 
-# --- Logs & Debug ---
-php/app.log
-php/logs/*.log
+# --- Centralized Logging (The "Nervous System") ---
+# Ignore all logs in all locations, including the new central volume
 *.log
+storage/logs/*.log
+php/logs/*.log
+php/app.log
+python/logs/*.log
 
-# --- Application Storage ---
-# Ignore all jobs and uploads, but keep the folders
-storage/queue/*.job
+# --- Application Storage & Queue ---
+# We keep the directories but ignore the data
+storage/queue/*
 !storage/queue/.gitkeep
+storage/uploads/*
+!storage/uploads/.gitkeep
 php/uploads/*
 !php/uploads/.gitkeep
 
+# --- Security Vault ---
+# Never track your master keys or SSH identities
+storage/vault/*.key
+storage/vault/id_rsa*
+
 # --- OS Artifacts ---
 .DS_Store
-Thumbs.dbphp/app.log
+Thumbs.db
+.cache/
