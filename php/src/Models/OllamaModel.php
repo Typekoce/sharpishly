@@ -10,7 +10,14 @@ class OllamaModel {
     private string $chatModel = 'llama3.2:3b';
     private string $embedModel = 'nomic-embed-text';
 
+    private bool $devMode = true; // Toggle this to true until the VM is optimized
+
     public function generate(string $prompt): string {
+
+        if ($this->devMode) {
+            return "DEV_MODE: Simulated response to prevent timeout (Prompt: " . substr($prompt, 0, 20) . "...)";
+        }
+
         $payload = [
             'model'  => $this->chatModel,
             'prompt' => $prompt,

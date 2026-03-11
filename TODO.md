@@ -43,3 +43,14 @@ OllamaGuard: Auto-check ollama ps; pause heavy tasks if RAM > 50%.
 
 [ ] Auto-Agreements: Build PDF generation logic for tenancy agreements.
 
+### 🚨 CRITICAL DEADLINE: FRIDAY (March 13, 2026)
+
+**Frontend & UI Consolidation**
+* **Menu Refactor:** Reduce main menu to exactly 5 core links; map and implement a unique submenu for every section.
+* **Navigation:** Implement breadcrumb components on all views for depth tracking.
+* **Core Completion:** Finalize all major layers: Frontend, Backend, Services, API, Messaging, Server, and Client.
+
+**Infrastructure & Reliability**
+* **Ollama Dev Workaround:** Implement a "Mock Mode" or background queue to prevent slow VM timeouts during local development.
+* **Log Aggregation:** Establish a rock-solid, centralized logging system for all services.
+* **Storage Consolidation:** Centralize all persistent assets, including upload folders and system logs, into a unified directory structure.
