@@ -24,4 +24,19 @@ class HealthController extends BaseController {
             'timestamp' => date('Y-m-d H:i:s')
         ]);
     }
+
+    public function pulse() {
+        header('Content-Type: application/json');
+        
+        $stats = [
+            'status' => 'alive',
+            'load' => sys_getloadavg()[0],
+            'memory_peak' => (memory_get_peak_usage(true) / 1024 / 1024) . ' MB',
+            'storage_writable' => is_writable('/var/www/html/storage'),
+            'timestamp' => time()
+        ];
+        
+        echo json_encode($stats);
+    }
+
 }

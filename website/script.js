@@ -170,18 +170,53 @@ class OllamaModel extends BaseModel {
         return text.replace(/\[1;32m/g, '<span class="god-green">').replace(/\[0m/g, '</span>');
     }
 
+    /**
+     * Appends a new line to the terminal and prunes to prevent browser lag.
+     * Use this for streaming updates or manual log injections.
+     */
+    updateTerminal(newLine) {
+        const terminal = this.container.querySelector('.code-block');
+        if (!terminal) return;
+
+        // Wrap the line in a div for easier pruning
+        const lineHtml = `<div>${this.ansiToHtml(newLine)}</div>`;
+        terminal.insertAdjacentHTML('beforeend', lineHtml);
+        
+        // Prune logic: Keep the last 50 entries
+        while (terminal.children.length > 50) {
+            terminal.removeChild(terminal.firstChild);
+        }
+
+        // Auto-scroll to the latest entry
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
     async render() {
         this.loading();
         try {
             const response = await fetch('/php/ollama/index');
             const data = await response.json();
+            
+            // Initial render creates the terminal structure
             this.container.innerHTML = `
                 <div class="ollama-card">
-                    <h3>Brain Status: ${data.status}</h3>
-                    <blockquote class="code-block">${this.ansiToHtml(data.response)}</blockquote>
+                    <div class="card-header">
+                        <h3>Brain Status: <span class="status-badge ${data.status}">${data.status}</span></h3>
+                    </div>
+                    <blockquote class="code-block" id="log-output" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column;">
+                        ${this.ansiToHtml(data.response)}
+                    </blockquote>
                 </div>`;
+            
+            // Ensure the initial content is scrolled to bottom
+            const terminal = this.container.querySelector('.code-block');
+            if (terminal) terminal.scrollTop = terminal.scrollHeight;
+
         } catch (e) {
-            this.container.innerHTML = `<div class="error">Brain Connection Failed.</div>`;
+            this.container.innerHTML = `
+                <div class="ollama-card border-error">
+                    <p class="error">⚠️ Brain Connection Failed: ${e.message}</p>
+                </div>`;
         }
     }
 }
