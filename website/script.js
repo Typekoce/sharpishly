@@ -402,6 +402,38 @@ class CyberdeckController {
 class AboutController { constructor(container){ this.c = document.querySelector(container); } index(){ this.c.innerHTML = `<h1>About</h1>`; } }
 class ContactController { constructor(container){ this.c = document.querySelector(container); } index(){ this.c.innerHTML = `<h1>Contact</h1>`; } }
 
+
+// DashboardController
+class DashboardController { 
+  constructor(container){ 
+    this.c = document.querySelector(container); 
+  } 
+  index(){ 
+    this.c.innerHTML = `<h1>DashboardController</h1>`; 
+  } 
+}
+
+// OperationsController
+class OperationsController { 
+  constructor(container){ 
+    this.c = document.querySelector(container); 
+  } 
+  index(){ 
+    this.c.innerHTML = `<h1>OperationsController</h1>`; 
+  } 
+}
+
+// IntelligenceController
+class IntelligenceController { 
+  constructor(container){ 
+    this.c = document.querySelector(container); 
+  } 
+  index(){ 
+    this.c.innerHTML = `<h1>IntelligenceController</h1>`; 
+  } 
+}
+
+
 /**
  * 4. ROUTER & INITIALIZATION
  */
