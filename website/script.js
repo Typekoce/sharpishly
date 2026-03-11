@@ -479,6 +479,12 @@ const routes = {
   "/landlord": LandlordController,
   "/broadcaster": BroadcasterController,
   "/ollama": OllamaController,
+  // New routes
+  "/dashboard": DashboardController,
+  "/operations": OperationsController,
+  "/intelligence": IntelligenceController,
+
+
 };
 
 // Mobile menu toggle
