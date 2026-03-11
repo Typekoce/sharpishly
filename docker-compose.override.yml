@@ -1,0 +1,8 @@
+# Test the new config without applying it
+docker-compose config
+
+# Pull and build new images in the background
+# docker-compose build --pull
+
+# Re-provision services one-by-one with zero downtime
+# docker-compose up -d --no-deps --build <service_name>
