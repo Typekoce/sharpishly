@@ -54,3 +54,10 @@ OllamaGuard: Auto-check ollama ps; pause heavy tasks if RAM > 50%.
 * **Ollama Dev Workaround:** Implement a "Mock Mode" or background queue to prevent slow VM timeouts during local development.
 * **Log Aggregation:** Establish a rock-solid, centralized logging system for all services.
 * **Storage Consolidation:** Centralize all persistent assets, including upload folders and system logs, into a unified directory structure.
+
+## 🛠️ Infrastructure & Cleanup
+- [ ] **Centralize Logging Architecture**
+  - [ ] Delete orphaned log files: `./php/app.log`, `./php/logs/app.log`, and `./python/logs/`.
+  - [ ] Audit `Logger.php` to ensure `ROOT_PATH` points strictly to `/var/www/html/storage/logs/`.
+  - [ ] Update `ai-worker.php` and `scheduler.php` to use the centralized Logger service rather than local `file_put_contents`.
+  - [ ] Add `*.log` to the root `.gitignore` to prevent stray local logs from being committed.
