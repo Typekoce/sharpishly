@@ -487,6 +487,26 @@ class Router {
       // CLEAR SUB-NAV ON EVERY ROUTE CHANGE
       const subNav = document.querySelector('#sub-nav');
       if (subNav) subNav.innerHTML = '';
+
+      // Define which paths share which sub-menus
+      const subMenuMap = {
+          '/operations': '/view/layout/sub-ops.htm',
+          '/csv-upload': '/view/layout/sub-ops.htm',
+          '/csv': '/view/layout/sub-ops.htm',
+          '/scanner': '/view/layout/sub-ops.htm',
+          '/intelligence': '/view/layout/sub-ai.htm',
+          '/ollama': '/view/layout/sub-ai.htm'
+      };
+
+      // Inject Submenu if it exists for this path
+      if (subMenuMap[path]) {
+          fetch(subMenuMap[path])
+              .then(res => res.text())
+              .then(html => { subNav.innerHTML = html; });
+      } else {
+          subNav.innerHTML = ''; // Clear for Home/About
+      }
+
       const path = window.location.pathname;
       const ControllerClass = this.routes[path] || HomeController;
       const controller = new ControllerClass(this.container);

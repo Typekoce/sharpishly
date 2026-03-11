@@ -33,6 +33,7 @@ services:
       - .:/var/www/html
       - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
       - /dev:/dev
+      - ./storage:/var/www/html/storage # Centralized writeable folder
     devices:
       - "/dev/bus/usb:/dev/bus/usb"
     # Maps host IP to a usable hostname inside the container for Ollama

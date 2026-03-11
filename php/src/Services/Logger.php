@@ -9,6 +9,7 @@ class Logger
     private const DEFAULT_CHANNEL = 'app';
     private const LOG_DIR         = __DIR__ . '/../../logs';
     private const LEVELS          = ['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY'];
+    private static $logPath = '/var/www/html/storage/logs/app.log';
 
     /**
      * Log a message to a channel-specific file
