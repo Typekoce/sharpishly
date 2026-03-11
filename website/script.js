@@ -261,7 +261,11 @@ class Router {
             '/cyberdeck': '/view/layout/sub-cyber.htm',
             '/scanner': '/view/layout/sub-cyber.htm',
             '/cyberdeck/vpn': '/view/layout/sub-cyber.htm',
-            '/cyberdeck/terminal': '/view/layout/sub-cyber.htm'
+            '/cyberdeck/terminal': '/view/layout/sub-cyber.htm',
+            '/landlord': '/view/layout/sub-crm.htm',
+            '/crm/tenants': '/view/layout/sub-crm.htm',
+            '/crm/maintenance': '/view/layout/sub-crm.htm',
+            '/crm/finance': '/view/layout/sub-crm.htm',
         };
 
         // Handle Sub-nav Injection
