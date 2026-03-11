@@ -21,3 +21,9 @@ php-fpm -D
 echo "🐍 Starting Sensory Layer: USB Scanner..."
 # We use 'exec' here so Python becomes PID 1 and receives shutdown signals
 exec python3 /var/www/html/python/usb_scanner.py
+
+# To see the QR code in your terminal (perfect for mobile)
+docker exec -it sharpishly-vpn /app/show-peer myphone
+
+# To copy the text config for your laptop
+docker exec -it sharpishly-vpn cat /config/peer_mylaptop/peer_mylaptop.conf
