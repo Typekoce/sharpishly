@@ -250,7 +250,29 @@ class OllamaController {
 // Placeholder Controllers for Dashboard/Operations
 class DashboardController { constructor(c) { this.c = document.querySelector(c); } index() { this.c.innerHTML = "<h1>Dashboard</h1>"; } }
 class OperationsController { constructor(c) { this.c = document.querySelector(c); } index() { this.c.innerHTML = "<h1>Operations</h1>"; } }
-class IntelligenceController { constructor(c) { this.c = document.querySelector(c); } index() { this.c.innerHTML = "<h1>Intelligence</h1>"; } }
+class IntelligenceController { 
+    constructor(c) { this.c = document.querySelector(c); } 
+    index() { this.c.innerHTML = "<h1>Intelligence</h1>"; }
+    //
+    async handleAiQuery(query) {
+        const response = await fetch('/php/ai/ask', {
+            method: 'POST',
+            body: JSON.stringify({ prompt: query })
+        });
+        const data = await response.json();
+
+        // Show the "Thinking" process
+        document.getElementById('ai-context-debug').innerHTML = `
+            <details>
+                <summary>🔍 View Injected Context</summary>
+                <pre>${JSON.stringify(data.context, null, 2)}</pre>
+            </details>
+        `;
+        
+        document.getElementById('ai-response-body').innerHTML = data.answer;
+    }
+    // 
+}
 
 /**
  * 4. ROUTER (STABILIZED)
