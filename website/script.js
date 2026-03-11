@@ -97,6 +97,26 @@ class HomeModel extends BaseModel {
     }
 }
 
+class CyberdeckModel extends BaseModel {
+    async getData() {
+        try {
+            const response = await fetch('/php/home/response');
+            return await response.json();
+        } catch (e) {
+            return { h1: "Offline", description: "Heartbeat lost." };
+        }
+    }
+
+    async streamLogs() {
+        const response = await fetch('/php/logs/stream');
+        const data = await response.json();
+        
+        // Render the last 20 lines into a terminal-style block
+        const logBox = document.getElementById('log-stream-output');
+        logBox.innerHTML = data.lines.map(line => `<div>${line}</div>`).join('');
+    }
+}
+
 class CsvModel extends BaseModel {
     async getJobs() {
         const response = await fetch('/php/csv/status');
@@ -237,7 +257,11 @@ class Router {
             '/operations': '/view/layout/sub-ops.htm',
             '/csv-upload': '/view/layout/sub-ops.htm',
             '/csv': '/view/layout/sub-ops.htm',
-            '/intelligence': '/view/layout/sub-ai.htm'
+            '/intelligence': '/view/layout/sub-ai.htm',
+            '/cyberdeck': '/view/layout/sub-cyber.htm',
+            '/scanner': '/view/layout/sub-cyber.htm',
+            '/cyberdeck/vpn': '/view/layout/sub-cyber.htm',
+            '/cyberdeck/terminal': '/view/layout/sub-cyber.htm'
         };
 
         // Handle Sub-nav Injection
