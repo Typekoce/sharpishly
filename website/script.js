@@ -303,30 +303,92 @@ class OllamaController {
 }
 
 // Placeholder Controllers for Dashboard/Operations
-class DashboardController { constructor(c) { this.c = document.querySelector(c); } index() { this.c.innerHTML = "<h1>Dashboard</h1>"; } }
-class OperationsController { constructor(c) { this.c = document.querySelector(c); } index() { this.c.innerHTML = "<h1>Operations</h1>"; } }
-class IntelligenceController { 
-    constructor(c) { this.c = document.querySelector(c); } 
-    index() { this.c.innerHTML = "<h1>Intelligence</h1>"; }
-    //
-    async handleAiQuery(query) {
-        const response = await fetch('/php/ai/ask', {
-            method: 'POST',
-            body: JSON.stringify({ prompt: query })
-        });
-        const data = await response.json();
-
-        // Show the "Thinking" process
-        document.getElementById('ai-context-debug').innerHTML = `
-            <details>
-                <summary>🔍 View Injected Context</summary>
-                <pre>${JSON.stringify(data.context, null, 2)}</pre>
-            </details>
-        `;
-        
-        document.getElementById('ai-response-body').innerHTML = data.answer;
+class DashboardController {
+    constructor(c) {
+        this.c = document.querySelector(c);
+        this.endpoint = '/php/home/response'; // Reusing your successful endpoint
     }
-    // 
+
+    async index() {
+        // 1. Visual Feedback
+        this.c.innerHTML = "<h1>Dashboard</h1><p class='status'>Syncing with Neural Link...</p>";
+
+        try {
+            // 2. The Wire (Fetching the data)
+            const response = await fetch(this.endpoint);
+            const data = await response.json();
+
+            // 3. The Injection (Rendering the data)
+            this.render(data);
+        } catch (error) {
+            this.c.innerHTML = `<h1>Dashboard</h1><p class='error'>Connection Failed: ${error.message}</p>`;
+        }
+    }
+
+    render(data) {
+        // This takes the JSON from PHP and builds the UI
+        this.c.innerHTML = `
+            <h1>Dashboard</h1>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>System Status</h3>
+                    <p class="status-online">${data.status || 'Active'}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Last Pulse</h3>
+                    <p>${data.timestamp || 'Just now'}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Message</h3>
+                    <p>${data.message || 'Systems Nominal'}</p>
+                </div>
+            </div>
+        `;
+    }
+}
+class OperationsController { constructor(c) { this.c = document.querySelector(c); } index() { this.c.innerHTML = "<h1>Operations</h1>"; } }
+class IntelligenceController extends BaseController {
+    index() {
+        this.render(`
+            <div class="intelligence-hub">
+                <h2>Intelligence Engine (Ollama)</h2>
+                <div id="ai-chat-output" class="terminal-box" style="height: 300px; overflow-y: auto; background: #000; color: #0f0; padding: 10px; font-family: monospace;">
+                    [READY] System listening...
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <input type="text" id="ai-query-input" placeholder="Enter query..." style="width: 80%; background: #111; color: #fff; border: 1px solid #333; padding: 10px;">
+                    <button id="ai-send-btn" style="padding: 10px 20px; background: #00ff00; color: #000; font-weight: bold; border: none; cursor: pointer;">EXECUTE</button>
+                </div>
+            </div>
+        `);
+        
+        // Wire the button
+        document.getElementById('ai-send-btn').addEventListener('click', () => this.handleAiQuery());
+    }
+
+    async handleAiQuery() {
+        const input = document.getElementById('ai-query-input');
+        const output = document.getElementById('ai-chat-output');
+        const query = input.value;
+
+        if (!query) return;
+
+        output.innerHTML += `\n<div>> ${query}</div>`;
+        input.value = '';
+
+        try {
+            const response = await fetch('/php/ai/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: query })
+            });
+            const data = await response.json();
+            output.innerHTML += `<div class="god-green">AI: ${data.answer}</div>`;
+            output.scrollTop = output.scrollHeight;
+        } catch (e) {
+            output.innerHTML += `<div class="error">🚨 Neural link failed: ${e.message}</div>`;
+        }
+    }
 }
 
 /**
@@ -394,13 +456,25 @@ class Router {
     }
 }
 
+// const routes = {
+//     "/": HomeController,
+//     "/dashboard": DashboardController,
+//     "/operations": OperationsController,
+//     "/intelligence": IntelligenceController,
+//     "/csv-upload": UploadController,
+//     "/ollama": OllamaController
+// };
+
 const routes = {
     "/": HomeController,
     "/dashboard": DashboardController,
     "/operations": OperationsController,
     "/intelligence": IntelligenceController,
     "/csv-upload": UploadController,
-    "/ollama": OllamaController
+    "/csv": CsvController, // Added
+    "/ollama": OllamaController,
+    "/vision": VisionController, // Added (The phone stream)
+    "/landlord": TenantController // Added (Mapping landlord to Tenant list)
 };
 
 
