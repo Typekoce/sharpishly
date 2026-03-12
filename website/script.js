@@ -303,78 +303,44 @@ class OllamaController {
 }
 
 // Placeholder Controllers for Dashboard/Operations
-class DashboardController {
-    constructor(c) {
-        this.c = document.querySelector(c);
-        this.endpoint = '/php/home/response'; // Reusing your successful endpoint
-    }
-
-    async index() {
-        // 1. Visual Feedback
-        this.c.innerHTML = "<h1>Dashboard</h1><p class='status'>Syncing with Neural Link...</p>";
-
-        try {
-            // 2. The Wire (Fetching the data)
-            const response = await fetch(this.endpoint);
-            const data = await response.json();
-
-            // 3. The Injection (Rendering the data)
-            this.render(data);
-        } catch (error) {
-            this.c.innerHTML = `<h1>Dashboard</h1><p class='error'>Connection Failed: ${error.message}</p>`;
-        }
-    }
-
-    render(data) {
-        // This takes the JSON from PHP and builds the UI
-        this.c.innerHTML = `
-            <h1>Dashboard</h1>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>System Status</h3>
-                    <p class="status-online">${data.status || 'Active'}</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Last Pulse</h3>
-                    <p>${data.timestamp || 'Just now'}</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Message</h3>
-                    <p>${data.message || 'Systems Nominal'}</p>
-                </div>
-            </div>
-        `;
-    }
-}
+class DashboardController { constructor(c) { this.c = document.querySelector(c); } index() { this.c.innerHTML = "<h1>Dashboard</h1>"; } }
 class OperationsController { constructor(c) { this.c = document.querySelector(c); } index() { this.c.innerHTML = "<h1>Operations</h1>"; } }
-class IntelligenceController extends BaseController {
-    index() {
-        this.render(`
+
+class IntelligenceController { 
+    constructor(c) { 
+        this.c = document.querySelector(c); 
+    } 
+
+    index() { 
+        this.c.innerHTML = `
             <div class="intelligence-hub">
-                <h2>Intelligence Engine (Ollama)</h2>
-                <div id="ai-chat-output" class="terminal-box" style="height: 300px; overflow-y: auto; background: #000; color: #0f0; padding: 10px; font-family: monospace;">
-                    [READY] System listening...
+                <h1>Intelligence Hub</h1>
+                <div id="ai-context-debug" class="debug-panel"></div>
+                <div class="terminal-box" id="ai-response-body" style="min-height: 200px; background: #000; color: #0f0; padding: 15px; margin-bottom: 15px; font-family: monospace;">
+                    [READY] Waiting for Neural Input...
                 </div>
-                <div class="input-group" style="margin-top: 10px;">
-                    <input type="text" id="ai-query-input" placeholder="Enter query..." style="width: 80%; background: #111; color: #fff; border: 1px solid #333; padding: 10px;">
-                    <button id="ai-send-btn" style="padding: 10px 20px; background: #00ff00; color: #000; font-weight: bold; border: none; cursor: pointer;">EXECUTE</button>
+                <div class="input-group">
+                    <input type="text" id="ai-query-input" placeholder="Query Intelligence Engine..." style="width: 70%; padding: 10px;">
+                    <button id="ai-execute-btn" style="padding: 10px 20px; cursor: pointer;">EXECUTE</button>
                 </div>
             </div>
-        `);
-        
-        // Wire the button
-        document.getElementById('ai-send-btn').addEventListener('click', () => this.handleAiQuery());
+        `; 
+
+        // Wire the local button click to the class method
+        const btn = document.getElementById('ai-execute-btn');
+        const input = document.getElementById('ai-query-input');
+
+        btn.addEventListener('click', () => {
+            this.handleAiQuery(input.value);
+            input.value = ''; // Clear after sending
+        });
     }
 
-    async handleAiQuery() {
-        const input = document.getElementById('ai-query-input');
-        const output = document.getElementById('ai-chat-output');
-        const query = input.value;
-
+    async handleAiQuery(query) {
         if (!query) return;
-
-        output.innerHTML += `\n<div>> ${query}</div>`;
-        input.value = '';
+        
+        const responseBody = document.getElementById('ai-response-body');
+        responseBody.innerHTML = "Thinking...";
 
         try {
             const response = await fetch('/php/ai/ask', {
@@ -383,10 +349,21 @@ class IntelligenceController extends BaseController {
                 body: JSON.stringify({ prompt: query })
             });
             const data = await response.json();
-            output.innerHTML += `<div class="god-green">AI: ${data.answer}</div>`;
-            output.scrollTop = output.scrollHeight;
-        } catch (e) {
-            output.innerHTML += `<div class="error">🚨 Neural link failed: ${e.message}</div>`;
+
+            // Show the "Thinking" process (Context injection)
+            const debugContainer = document.getElementById('ai-context-debug');
+            if (debugContainer) {
+                debugContainer.innerHTML = `
+                    <details style="margin-bottom: 10px; color: #888;">
+                        <summary>🔍 View Injected Context</summary>
+                        <pre style="font-size: 11px;">${JSON.stringify(data.context || 'No context found', null, 2)}</pre>
+                    </details>
+                `;
+            }
+            
+            responseBody.innerHTML = data.answer || "No response received.";
+        } catch (error) {
+            responseBody.innerHTML = `<span class="text-danger">🚨 Link Error: ${error.message}</span>`;
         }
     }
 }
@@ -455,15 +432,6 @@ class Router {
         }
     }
 }
-
-// const routes = {
-//     "/": HomeController,
-//     "/dashboard": DashboardController,
-//     "/operations": OperationsController,
-//     "/intelligence": IntelligenceController,
-//     "/csv-upload": UploadController,
-//     "/ollama": OllamaController
-// };
 
 const routes = {
     "/": HomeController,
