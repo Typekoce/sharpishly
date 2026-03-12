@@ -587,6 +587,7 @@ class Router {
 
         // Layout mapping
         const subMenuMap = {
+            '/crm': '/view/layout/sub-crm.htm', // Add this line
             '/operations': '/view/layout/sub-ops.htm',
             '/csv-upload': '/view/layout/sub-ops.htm',
             '/csv': '/view/layout/sub-ops.htm',
