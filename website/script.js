@@ -221,6 +221,23 @@ class OllamaModel extends BaseModel {
     }
 }
 
+class CrmModel extends BaseModel {
+    constructor(container) {
+        super(container);
+    }
+
+    async getTenants() {
+        try {
+            const response = await fetch('/php/crm/tenants');
+            if (!response.ok) throw new Error("CRM Data unreachable");
+            return await response.json();
+        } catch (e) {
+            console.error("CrmModel Error:", e);
+            return [];
+        }
+    }
+}
+
 /**
  * 3. CONTROLLERS
  */
@@ -231,6 +248,60 @@ class HomeController {
         this.model.updateBreadcrumbs();
         const data = await this.model.getData();
         this.model.container.innerHTML = `<h1>${data.h1}</h1><p>${data.description}</p>`;
+    }
+}
+
+class CrmController {
+    constructor(c) {
+        this.c = document.querySelector(c);
+        this.model = new CrmModel(this.c);
+    }
+
+    async index() {
+        this.model.loading();
+        this.model.updateBreadcrumbs();
+
+        const tenants = await this.model.getTenants();
+        
+        this.render(tenants);
+    }
+
+    render(tenants) {
+        const rows = tenants.length > 0 
+            ? tenants.map(t => `
+                <tr>
+                    <td><strong>${t.name}</strong></td>
+                    <td>${t.property || 'N/A'}</td>
+                    <td><span class="status-badge ${t.status}">${t.status}</span></td>
+                    <td class="${t.balance < 0 ? 'text-danger' : 'text-success'}">$${t.balance}</td>
+                    <td><button class="btn-sm" onclick="alert('Opening File for ${t.name}')">VIEW</button></td>
+                </tr>
+            `).join('')
+            : '<tr><td colspan="5">No tenant records found in the database.</td></tr>';
+
+        this.c.innerHTML = `
+            <div class="crm-container">
+                <div class="header-actions">
+                    <h1>CRM / Tenant Manager</h1>
+                    <button class="btn-primary" onclick="location.href='/csv-upload'" data-link>Import Leads</button>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Property</th>
+                            <th>Status</th>
+                            <th>Balance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
+        `;
     }
 }
 
@@ -303,8 +374,128 @@ class OllamaController {
 }
 
 // Placeholder Controllers for Dashboard/Operations
-class DashboardController { constructor(c) { this.c = document.querySelector(c); } index() { this.c.innerHTML = "<h1>Dashboard</h1>"; } }
-class OperationsController { constructor(c) { this.c = document.querySelector(c); } index() { this.c.innerHTML = "<h1>Operations</h1>"; } }
+class DashboardController {
+    constructor(c) {
+        // This ensures 'this.c' is the actual DOM element
+        this.c = document.querySelector(c);
+        this.endpoint = '/php/home/response';
+    }
+
+    async index() {
+        // 1. Immediate visual feedback
+        this.c.innerHTML = `
+            <div class="dashboard-wrapper">
+                <h1>Dashboard</h1>
+                <p class="status-text">Synchronizing with Neural Link...</p>
+                <div class="loader-mini"></div>
+            </div>
+        `;
+
+        try {
+            // 2. The Handshake: Fetching data from your working PHP endpoint
+            const response = await fetch(this.endpoint);
+            if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+            
+            const data = await response.json();
+
+            // 3. The Injection: Replace loading text with the real data
+            this.render(data);
+        } catch (error) {
+            console.error("Dashboard Wire Failure:", error);
+            this.c.innerHTML = `
+                <h1>Dashboard</h1>
+                <div class="error-box">
+                    <p>🚨 CONNECTION SEVERED</p>
+                    <code>${error.message}</code>
+                </div>
+            `;
+        }
+    }
+
+    render(data) {
+        // This maps the JSON response to your dashboard cards
+        this.c.innerHTML = `
+            <div class="dashboard-container">
+                <h1>System Overview</h1>
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div class="stat-card" style="border: 1px solid #333; padding: 20px; background: #111;">
+                        <h3 style="color: #00ff00;">STATUS</h3>
+                        <p style="font-family: monospace; font-size: 1.2rem;">${data.status || 'ACTIVE'}</p>
+                    </div>
+                    <div class="stat-card" style="border: 1px solid #333; padding: 20px; background: #111;">
+                        <h3 style="color: #00ff00;">PULSE</h3>
+                        <p style="font-family: monospace;">${data.timestamp || 'N/A'}</p>
+                    </div>
+                    <div class="stat-card" style="border: 1px solid #333; padding: 20px; background: #111;">
+                        <h3 style="color: #00ff00;">INTEL</h3>
+                        <p>${data.message || 'Systems Nominal'}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+class OperationsController {
+    constructor(c) {
+        this.c = document.querySelector(c);
+        this.endpoint = '/php/csv/status'; // Targeting your CSV job engine
+    }
+
+    async index() {
+        this.c.innerHTML = `
+            <div class="operations-header">
+                <h1>Operations Control</h1>
+                <p class="status-badge pulse">Scanning Background Tasks...</p>
+            </div>
+            <div id="ops-display" class="ops-grid"></div>
+        `;
+
+        try {
+            const response = await fetch(this.endpoint);
+            if (!response.ok) throw new Error(`Operational Link Failure: ${response.status}`);
+            
+            const data = await response.json();
+            this.render(data);
+        } catch (error) {
+            document.getElementById('ops-display').innerHTML = `
+                <div class="alert alert-error">
+                    <strong>CRITICAL ERROR:</strong> Unable to reach Operations Engine.
+                    <br><code>${error.message}</code>
+                </div>
+            `;
+        }
+    }
+
+    render(data) {
+        const display = document.getElementById('ops-display');
+        
+        // Check if we have active jobs in the response
+        const jobList = data.jobs && data.jobs.length > 0 
+            ? data.jobs.map(job => `
+                <div class="job-row" style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222;">
+                    <span>Job #${job.id}</span>
+                    <span class="status-${job.status}">${job.status.toUpperCase()}</span>
+                </div>
+            `).join('')
+            : '<p style="padding: 20px; color: #666;">No active background processes detected.</p>';
+
+        display.innerHTML = `
+            <div class="ops-card" style="background: #0a0a0a; border: 1px solid #333; margin-top: 20px;">
+                <div class="card-header" style="background: #1a1a1a; padding: 10px; border-bottom: 1px solid #333;">
+                    <h2 style="font-size: 1rem; color: #00ff00; margin: 0;">Task Queue Status</h2>
+                </div>
+                <div class="card-body">
+                    ${jobList}
+                </div>
+                <div class="card-footer" style="padding: 10px; text-align: right;">
+                    <button onclick="location.href='/csv-upload'" data-link class="btn-small">Launch New Job</button>
+                </div>
+            </div>
+        `;
+    }
+}
+
 
 class IntelligenceController { 
     constructor(c) { 
@@ -442,7 +633,8 @@ const routes = {
     "/csv": CsvController, // Added
     "/ollama": OllamaController,
     "/vision": VisionController, // Added (The phone stream)
-    "/landlord": TenantController // Added (Mapping landlord to Tenant list)
+    "/landlord": TenantController, // Added (Mapping landlord to Tenant list)
+    "/crm":CrmController
 };
 
 
