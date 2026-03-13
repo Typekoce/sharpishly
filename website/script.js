@@ -150,15 +150,28 @@ class UploadModel extends BaseModel {
             btn.innerHTML = 'Processing...';
 
             const formData = new FormData(form);
+            // Inside class UploadModel
             try {
-                const response = await fetch('/php/csv/upload', { method: 'POST', body: formData });
+                // UPDATED: Ensure this matches the route to CsvController -> upload()
+                const response = await fetch('/csv/upload', { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
                 const data = await response.json();
-                statusText.textContent = data.success ? "Success!" : data.error;
+                
+                if (data.success) {
+                    statusText.innerHTML = `<span class="god-green">✔ Job #${data.job_id} Registered</span>`;
+                    // Trigger the "Reskin": Move the user to the Operations view to see the progress
+                    setTimeout(() => {
+                        history.pushState(null, null, '/operations');
+                        window.dispatchEvent(new PopStateEvent('popstate'));
+                    }, 1500);
+                } else {
+                    statusText.textContent = "Error: " + data.error;
+                }
             } catch (err) {
-                statusText.textContent = "Upload Failed.";
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Submit to Engine';
+                statusText.textContent = "Upload Failed: Connection Severed.";
             }
         });
     }
