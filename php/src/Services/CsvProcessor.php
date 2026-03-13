@@ -6,7 +6,7 @@ namespace App\Services;
 use App\Db;
 use Exception;
 
-class CSVProcessor
+class CsvProcessor
 {
     private Db $db;
     private int $batchSize = 500; // Keep your high-performance batching
