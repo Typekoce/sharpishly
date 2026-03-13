@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div class="row">
-        <nav class="col-md-3 col-lg-2 d-md-block bg-white sidebar collapse border-end">
+        <nav class="col-md-3 col-lg-2 d-md-block bg-white sidebar collapse">
             <div class="position-sticky pt-3">
                 <h5 class="px-3 text-primary">{{{title}}}</h5>
                 <ul class="nav flex-column">
@@ -16,100 +16,13 @@
                 <h1 class="h2">{{{dashboard}}}</h1>
             </div>
 
-            <div class="card shadow-sm border-0 bg-light">
-                <div class="card-body p-4">
-                    <h5 class="card-title text-secondary mb-4">Back-end Stream Interrogation</h5>
-                    
-                    <div class="mb-4">
-                        <label for="csv-selector" class="form-label fw-bold">Target CSV (Tesla.csv)</label>
-                        <input type="file" id="csv-selector" class="form-control form-control-lg" accept=".csv">
-                        <div id="file-info" class="form-text mt-2 text-muted">Select a file to begin interrogation...</div>
-                    </div>
-
-                    <div id="progress-container" class="progress mb-4" style="display: none; height: 30px; border-radius: 8px;">
-                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
-                             role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                            Initializing...
-                        </div>
-                    </div>
-
-                    <button type="button" id="dispatch-btn" class="btn btn-primary btn-lg w-100 shadow-sm">
-                        🚀 Dispatch Stream to Engine
-                    </button>
-                </div>
-            </div>
-
-            <div class="mt-4 p-3 bg-dark text-success rounded shadow-sm" style="font-family: monospace; font-size: 0.85rem;">
-                <div class="fw-bold border-bottom border-secondary pb-1 mb-2">Browser Console Console Log:</div>
-                <div id="debug-log">Ready for interrogation.</div>
-            </div>
-
-            <script>
-                const btn = document.getElementById('dispatch-btn');
-                const fileInput = document.getElementById('csv-selector');
-                const progressBar = document.getElementById('progress-bar');
-                const progressContainer = document.getElementById('progress-container');
-                const debugLog = document.getElementById('debug-log');
-
-                // Update UI when file is selected
-                fileInput.onchange = () => {
-                    if (fileInput.files.length > 0) {
-                        const file = fileInput.files[0];
-                        document.getElementById('file-info').innerText = `Selected: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
-                    }
-                };
-
-                btn.addEventListener('click', async () => {
-                    if (fileInput.files.length === 0) {
-                        alert("Please select a file first.");
-                        return;
-                    }
-
-                    const file = fileInput.files[0];
-                    
-                    // Reset and Show UI
-                    btn.disabled = true;
-                    btn.innerText = "⚡ Streaming Binary Data...";
-                    progressContainer.style.display = 'flex';
-                    progressBar.className = "progress-bar progress-bar-striped progress-bar-animated bg-primary";
-                    progressBar.style.width = '40%';
-                    progressBar.innerText = "Connecting to Engine...";
-                    debugLog.innerText = `[${new Date().toLocaleTimeString()}] Dispatching ${file.name}...`;
-
-                    try {
-                        // The Fetch Stream: This bypasses multipart form parsing entirely
-                        const response = await fetch('/php/csv/upload-stream', {
-                            method: 'POST',
-                            headers: {
-                                'X-File-Name': file.name,
-                                'Content-Type': 'application/octet-stream'
-                            },
-                            body: file // The binary payload
-                        });
-
-                        const result = await response.json();
-
-                        if (response.ok && result.success) {
-                            progressBar.style.width = '100%';
-                            progressBar.className = "progress-bar bg-success";
-                            progressBar.innerText = "Success: Job Created #" + result.job_id;
-                            btn.innerText = "Dispatch Complete";
-                            debugLog.innerText += `\n[${new Date().toLocaleTimeString()}] Engine Response: Success (Job ID: ${result.job_id})`;
-                        } else {
-                            throw new Error(result.error || "Server rejected the stream.");
-                        }
-
-                    } catch (error) {
-                        console.error("❌ Stream Error:", error);
-                        progressBar.className = "progress-bar bg-danger";
-                        progressBar.style.width = '100%';
-                        progressBar.innerText = "Error: " + error.message;
-                        btn.disabled = false;
-                        btn.innerText = "Retry Dispatch";
-                        debugLog.innerText += `\n[${new Date().toLocaleTimeString()}] FATAL: ${error.message}`;
-                    }
-                });
-            </script>
+            <form action="/php/csv/upload" enctype="multipart/form-data" method="POST">
+                <fieldset>
+                    <legend class="h5">Select Interrogation Source</legend>
+                    <input type="file" name="csv_file" class="form-control mb-2" accept=".csv">
+                    <button type="submit" class="btn btn-primary">Submit to Engine</button>
+                </fieldset>
+            </form>
         </main>
     </div>
 </div>
