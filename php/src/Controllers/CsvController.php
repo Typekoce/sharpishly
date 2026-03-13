@@ -1,18 +1,25 @@
-<?php declare(strict_types=1);
+<?php
+// Location: /var/www/html/php/src/Controllers/CsvController.php
 
 namespace App\Controllers;
 
+use App\Services\Location;
+use App\Services\Logger;
 use App\dBug;
 use Exception;
 
 class CsvController extends BaseController {
     
-    public function __construct()
-    {
-        // Call parent to initialize $this->db and $this->smarty
+    private Location $loc;
+
+    public function __construct() {
         parent::__construct();
+        $this->loc = new Location();
     }
 
+    /**
+     * Dashboard view for CSV operations
+     */
     public function index(): void
     {
         $conditions = [
@@ -23,7 +30,8 @@ class CsvController extends BaseController {
 
         $jobs = $this->db->find($conditions);
 
-        // new dBug($jobs);
+        // Debug output for development
+        new dBug($jobs);
 
         $data = [
             'title'     => 'CSV Interrogation Hub',
@@ -40,28 +48,64 @@ class CsvController extends BaseController {
         $this->render($data, $views);
     }
 
-    public function upload(): void
-    {
-        echo "<pre>";
-        print_r(['FILES'=>$_FILES,'POST'=>$_POST]);
-        echo "</pre>";
+    /**
+     * Handles the physical file upload and worker handoff
+     */
+    public function upload(): void {
+        try {
+            if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
+                throw new Exception("Upload failed or file missing.");
+            }
 
-        // Define where you want it to go
-        $destination = "/var/www/html/storage/uploads/" . $_FILES['csv_file']['name'];
+            $fileName = basename($_FILES['csv_file']['name']);
+            // Use the Location service for consistent absolute paths
+            $absTarget = $this->loc->uploads($fileName);
 
-        // Move it from the temp folder to your storage folder
-        if (move_uploaded_file($_FILES['csv_file']['tmp_name'], $destination)) {
-            echo "✅ Success: File moved to " . $destination;
-        } else {
-            echo "❌ Error: Could not move file. Check permissions.";
+            if (move_uploaded_file($_FILES['csv_file']['tmp_name'], $absTarget)) {
+                
+                // 1. Database Entry: Track the job
+                $jobId = $this->db->save([
+                    'tbl'       => 'jobs',
+                    'title'     => 'Import: ' . $fileName,
+                    'file_path' => $this->loc->relative($absTarget), 
+                    'status'    => 'pending'
+                ]);
+
+                // 2. Queue Trigger: Drop the .job file for the worker-daemon
+                $payload = [
+                    'job_id'   => $jobId, 
+                    'filepath' => $this->loc->relative($absTarget)
+                ];
+                
+                file_put_contents($this->loc->queue($jobId . '.job'), json_encode($payload));
+
+                // 3. Technical Debt: Register the Full App Code Review task
+                $this->db->save([
+                    'tbl'    => 'tasks',
+                    'title'  => 'Full App Code Review',
+                    'status' => 'active',
+                    'type'   => 'cron'
+                ]);
+
+                Logger::info("File queued for processing", ['job_id' => $jobId, 'file' => $fileName]);
+                echo "✅ File queued successfully. Job ID: " . $jobId;
+            } else {
+                throw new Exception("Failed to move uploaded file to storage.");
+            }
+        } catch (Exception $e) {
+            Logger::error($e->getMessage());
+            http_response_code(500);
+            echo "❌ " . $e->getMessage();
         }
-        
         die();
     }
 
+    /**
+     * API Endpoint for checking active job status
+     */
     public function status(): void
     {
-        // Find all jobs that aren't 'completed' or 'failed'
+        // Find all jobs that are still being processed
         $activeJobs = $this->db->find([
             'tbl'   => 'jobs',
             'where' => ['status !=' => 'completed', 'status !=' => 'failed']
@@ -71,5 +115,4 @@ class CsvController extends BaseController {
         echo json_encode($activeJobs);
         die();
     }
-    
-    }// end of class
+}
