@@ -40,6 +40,79 @@ class CsvController extends BaseController {
         $this->render($data, $views);
     }
 
+/**
+ * Binary Stream Handler: Bypasses $_FILES to handle large CSVs
+ */
+public function uploadStream(): void 
+{
+    try {
+        // 1. Metadata from Custom Headers
+        $fileName = $_SERVER['HTTP_X_FILE_NAME'] ?? 'unnamed.csv';
+        // Sanitize: allow only alphanumeric, dots, underscores, and dashes
+        $safeName = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $fileName);
+        $uniqueName = time() . '_' . $safeName;
+
+        // 2. Absolute Pathing
+        $baseStorage = '/var/www/html/storage';
+        $uploadDir   = $baseStorage . '/uploads';
+        $queueDir    = $baseStorage . '/queue';
+        $absolutePath = $uploadDir . '/' . $uniqueName;
+
+        // Ensure directories exist AND are writable
+        foreach ([$uploadDir, $queueDir] as $dir) {
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777, true);
+            }
+            if (!is_writable($dir)) {
+                throw new Exception("Directory not writable: " . $dir);
+            }
+        }
+
+        // 3. Stream Transfer (Network -> Disk)
+        $input = fopen('php://input', 'rb');
+        $target = fopen($absolutePath, 'wb');
+
+        if (!$input || !$target) {
+            throw new Exception("Stream failure: Could not open input or target path.");
+        }
+
+        stream_copy_to_stream($input, $target);
+        fclose($input);
+        fclose($target);
+
+        // 4. Persistence: Register the Job in MySQL
+        $relativeStoragePath = 'uploads/' . $uniqueName;
+        $jobId = $this->db->save([
+            'tbl'            => 'jobs',
+            'title'          => 'Stream Import: ' . $fileName,
+            'file_path'      => $relativeStoragePath, 
+            'status'         => 'pending',
+            'total_rows'     => 0,
+            'processed_rows' => 0
+        ]);
+
+        // 5. Trigger: Create the .job file for the Background Worker
+        $jobPayload = [
+            'job_id'   => $jobId,
+            'type'     => 'CSV_IMPORT',
+            'filepath' => $relativeStoragePath,
+            'filename' => $fileName
+        ];
+
+        file_put_contents($queueDir . '/' . $jobId . '.job', json_encode($jobPayload));
+
+        // 6. Response
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'job_id' => $jobId]);
+
+    } catch (Exception $e) {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode(['error' => $e->getMessage()]);
+    }
+    die();
+}
+
     /**
      * The Hand-off: Handles the upload and alerts the Worker Agent
      */

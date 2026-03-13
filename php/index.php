@@ -42,6 +42,22 @@ class FrontController
         @file_put_contents($this->logFile, $line, FILE_APPEND | LOCK_EX);
     }
 
+    private function handleSpecialRoutes(): void
+    {
+        $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+        
+        // Exact match for our stream interrogation
+        if ($uri === '/php/csv/upload-stream') {
+            // Assuming your bootstrap.php provides a way to get the DB
+            // If you have a global $db, use it here.
+            global $db; 
+            
+            $controller = new \App\Controllers\CsvController($db);
+            $controller->uploadStream();
+            exit; // Stop the FrontController here
+        }
+    }
+
     private function parseUrl(): void
     {
         $path = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/');
@@ -72,6 +88,10 @@ class FrontController
 
     private function run(): void
     {
+        
+        // 1. Check for manual/special overrides first
+        $this->handleSpecialRoutes();
+    
         $controllerClass = "App\\Controllers\\{$this->controllerName}Controller";
 
         if (!class_exists($controllerClass)) {

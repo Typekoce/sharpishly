@@ -153,7 +153,7 @@ class UploadModel extends BaseModel {
             // Inside class UploadModel
             try {
                 // UPDATED: Ensure this matches the route to CsvController -> upload()
-                const response = await fetch('/csv/upload', { 
+                const response = await fetch('/php/csv/upload', { 
                     method: 'POST', 
                     body: formData 
                 });

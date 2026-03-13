@@ -1,30 +1,28 @@
 #!/bin/bash
-# Save as: dev-up.sh
+# Location: shells/dev-up.sh
 
 line=$'\n-----------------\n'
 clear
 
-echo "🚀 Building and Starting Sharpishly Infrastructure..."
-docker compose up -d --build
+echo "🚀 Recreating Sharpishly Infrastructure..."
+docker compose up -d --force-recreate
 
-echo "${line}🔍 Running Python Hardware Check..."
-# Give the container a second to run start.sh before exec
-sleep 3
-docker exec sharpishly-php python3 /var/www/html/python/usb_scanner.py --once || echo "⚠️ Scanner script not found yet."
+echo "${line}⚙️  Verifying PHP Upload Limits..."
+docker exec sharpishly-php php -r "echo 'Upload Max: ' . ini_get('upload_max_filesize') . \"\n\";"
+docker exec sharpishly-php php -r "echo 'Post Max: ' . ini_get('post_max_size') . \"\n\";"
+
+echo "${line}📂 Aligning Storage Permissions..."
+# Use absolute container paths to avoid ambiguity
+docker exec sharpishly-php mkdir -p /var/www/html/storage/uploads /var/www/html/storage/queue /tmp
+docker exec sharpishly-php chmod -R 777 /var/www/html/storage/
+docker exec sharpishly-php chmod 1777 /tmp
+
+echo "✅ Storage synced and permissions set to 777"
 
 echo "${line}🧠 Ollama Health Check"
-# Check if Ollama is responding on the host
 curl -s http://localhost:11434/api/tags | grep -q "models" && echo "✅ Ollama is Responding" || echo "❌ Ollama Connection Failed"
 
-echo "${line}🛠️ Worker Debug Flow"
-echo "🛑 Stopping background worker container..."
-docker stop sharpishly-worker
-
-echo "🤖 Starting Manual Worker Debug (CTRL+C to exit)..."
-docker exec -it sharpishly-php php /var/www/html/php/src/Agents/worker.php
-
-echo "🚀 Restarting background worker..."
-docker start sharpishly-worker
-
-echo "${line}📊 Current Container Status"
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+echo "${line}🛠️ Worker Daemon Launch"
+# Launching with absolute path to ensure autoloading is consistent
+echo "🤖 Starting Manual Worker Interrogation (CTRL+C to exit)..."
+docker exec -it sharpishly-php php /var/www/html/php/src/worker-daemon.php
