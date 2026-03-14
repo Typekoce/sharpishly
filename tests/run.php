@@ -1,15 +1,60 @@
 <?php
 declare(strict_types=1);
+
+/**
+ * SHARPISHLY TEST RUNNER
+ * Location: /tests/run.php
+ */
+
 require_once __DIR__ . '/../php/src/bootstrap.php';
 
 class TestRunner {
-    public int $passed = 0; $failed = 0;
-    public function assert($cond, $msg) {
-        if ($cond) { echo "✅ PASS: $msg\n"; $this->passed++; }
-        else { echo "❌ FAIL: $msg\n"; $this->failed++; }
+    public int $passed = 0;
+    public int $failed = 0;
+
+    public function assert(bool $cond, string $msg): void {
+        if ($cond) {
+            echo "✅ PASS: $msg\n";
+            $this->passed++;
+        } else {
+            echo "❌ FAIL: $msg\n";
+            $this->failed++;
+        }
+    }
+
+    public function report(): void {
+        echo "\n------------------------------------------\n";
+        echo "TOTAL RESULTS\n";
+        echo "Passed: {$this->passed} | Failed: {$this->failed}\n";
+        echo "------------------------------------------\n";
+        
+        if ($this->failed > 0) {
+            exit(1); // Signal failure to GitHub Actions / Scripts
+        }
     }
 }
+
+// 1. Initialize Runner
 $tester = new TestRunner();
-require_once __DIR__ . '/unit/BaseControllerTest.php';
-(new \App\Tests\BaseControllerTest($tester))->run();
-echo "\nPassed: {$tester->passed} | Failed: {$tester->failed}\n";
+
+// 2. Load and Execute Unit Tests
+// Note: Since our bootstrap has an autoloader, we don't strictly need require_once 
+// for every test file if the namespaces/paths match.
+try {
+    echo "🚀 Starting Sharpishly Unit Tests...\n\n";
+
+    // DB Layer
+    (new \App\Tests\DbTest($tester))->run();
+
+    // MVC Layer
+    (new \App\Tests\HomeModelTest($tester))->run();
+    (new \App\Tests\BaseControllerTest($tester))->run();
+
+} catch (\Throwable $e) {
+    echo "🚫 CRITICAL TEST ERROR: " . $e->getMessage() . "\n";
+    echo "In " . $e->getFile() . " on line " . $e->getLine() . "\n";
+    exit(1);
+}
+
+// 3. Output Results
+$tester->report();

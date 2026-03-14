@@ -1,89 +1,81 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Smarty;
+use App\Models\HomeModel;
+use App\Registry;
 use Exception;
-use App\Models\HomeModel; // add this if needed
 
-class HomeController
+class HomeController extends BaseController
 {
-    private Smarty $smarty;
     private HomeModel $home;
 
     public function __construct()
     {
-        $this->smarty = new Smarty();
+        parent::__construct();
+        // Models also use Registry internally for the DB
         $this->home = new HomeModel();
     }
 
-    public function response(){
-        $data = array(
-            "h1"=>"hello",
-            "description"=>"Six Million Dollar Man"
-        );
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data);
-        die();
-    }
-
-    public function render()
+    /**
+     * Dashboard view logic
+     */
+    public function index(): void
     {
         $data = [
             'title'     => 'Sharpishly Dashboard',
             'dashboard' => 'Your Dashboard',
-            //'jobs'      => $jobs,
+            'recent_jobs' => $this->home->csv()
         ];
 
-        $header = $this->getViewContent('layouts/header');
-        $footer = $this->getViewContent('layouts/footer');
-        $main   = $this->getViewContent('home/main');
-
-        $renderedMain = $this->smarty->render($main, $data);
-
-        echo $header . $renderedMain . $footer;
+        // Using a standardized view helper (Logic would move to BaseController eventually)
+        echo $this->renderView('home/main', $data);
     }
 
-    public function index(): void
-    {
-        $this->render();
-    }
-
-    public function about(string $name = 'Guest'): void
-    {
-        echo "<h1>About page</h1>";
-        echo "<p>Hello, " . htmlspecialchars($name) . "!</p>";
-    }
-
+    /**
+     * JSON response for AJAX dashboard updates
+     */
     public function csv(): void
     {
-
-        $data = $this->home->csv();
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data);
-        die();
+        $this->json($this->home->csv());
     }
 
+    /**
+     * Browser-triggered Migration
+     */
     public function migrate(): void
     {
         try {
-            $model = new HomeModel();
-            echo $model->migrate();
+            // Returns the HTML report from the model
+            echo $this->home->migrate();
         } catch (Exception $e) {
             http_response_code(500);
-            echo "<h1>Migration Error</h1>";
-            echo "<pre style=\"color:red;\">" . htmlspecialchars($e->getMessage()) . "</pre>";
+            echo "<h1>Migration Error</h1><pre>{$e->getMessage()}</pre>";
         }
     }
 
-    private function getViewContent(string $path): string
+    /**
+     * Simple View Loader
+     */
+    private function renderView(string $path, array $data): string
     {
-        $file = dirname(__DIR__, 1) . "/views/$path.html"; // fixed path (up 2 levels)
-
-        if (file_exists($file)) {
-            return file_get_contents($file);
+        // Path alignment: php/src/Controllers/ -> php/views/
+        $file = dirname(__DIR__) . "/views/$path.html";
+        
+        if (!file_exists($file)) {
+            return "";
         }
 
-        return "<!-- View not found: $path -->";
+        $content = file_get_contents($file);
+        
+        // Simple template replacement (Placeholder for Smarty logic)
+        foreach ($data as $key => $val) {
+            if (is_string($val)) {
+                $content = str_replace('{$' . $key . '}', $val, $content);
+            }
+        }
+
+        return $content;
     }
 }
