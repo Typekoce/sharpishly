@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="php/src/autoload.php" colors="true">
-    <testsuites>
-        <testsuite name="Factory Integrity">
-            <directory>tests</directory>
-        </testsuite>
-    </testsuites>
-</phpunit>
