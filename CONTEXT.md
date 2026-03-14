@@ -26,3 +26,14 @@
 [PATCH] Added 'title' column to 'jobs'
 [SEED] Added 1 initial job record
 Migration completed successfully.
+
+## 🧱 Controller Architecture
+- **BaseController:** Owns `db`, `loc`, `json()`, and `render()`.
+- **View Pattern:** Layout-based (Header -> Main -> Footer).
+- **Variable Injection:** Uses `{$variable}` syntax in `.html` views.
+
+## 🧱 Controller Architecture
+- **BaseController:** Owns `db`, `loc`, `json()`, and `render()`.
+- **Template Engine:** Smarty is required and integrated into `BaseController`.
+- **Pathing:** Uses `dirname(__DIR__, 1)` to reach `/php/views/` from `/php/src/Controllers/`.
+- **Rendering:** `renderView()` delegates to `Smarty::render()`.
