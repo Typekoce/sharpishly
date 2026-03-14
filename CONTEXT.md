@@ -37,3 +37,7 @@ Migration completed successfully.
 - **Template Engine:** Smarty is required and integrated into `BaseController`.
 - **Pathing:** Uses `dirname(__DIR__, 1)` to reach `/php/views/` from `/php/src/Controllers/`.
 - **Rendering:** `renderView()` delegates to `Smarty::render()`.
+
+## 🧱 Controller Architecture
+- **HomeController:** Restored `status()` endpoint for AJAX job tracking.
+- **BaseController Handshake:** Using parent `render()` and `json()` methods exclusively.

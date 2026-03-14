@@ -22,7 +22,6 @@ services:
   php:
     build: .
     container_name: sharpishly-php
-    # privileged: true
     user: "0:0" 
     environment:
       DB_HOST: ${DB_HOST}
@@ -34,8 +33,6 @@ services:
       - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
       - /dev:/dev
       - ./storage:/var/www/html/storage
-    # devices:
-    #  - "/dev/bus/usb:/dev/bus/usb"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: php-fpm
@@ -48,7 +45,7 @@ services:
   worker:
     build: .
     container_name: sharpishly-worker
-    user: "1000:1000"
+    user: "0:0" # Switched to root to allow apt-get installs during runtime
     environment:
       DB_HOST: ${DB_HOST}
       DB_NAME: ${DB_NAME}
@@ -56,8 +53,9 @@ services:
       DB_PASS: ${DB_PASS}
     volumes:
       - .:/var/www/html
-    # Flattened command to prevent YAML unmarshal errors
-    command: sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php /var/www/html/php/src/Agents/worker.php || tail -f /dev/null"
+    command: >
+      sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip 
+      && php /var/www/html/php/src/Agents/worker.php || tail -f /dev/null"
     depends_on:
       db:
         condition: service_healthy
@@ -67,7 +65,7 @@ services:
   mail-agent:
     build: .
     container_name: sharpishly-mail-agent
-    user: "1000:1000"
+    user: "0:0"
     environment:
       DB_HOST: ${DB_HOST}
       DB_NAME: ${DB_NAME}
@@ -75,8 +73,12 @@ services:
       DB_PASS: ${DB_PASS}
     volumes:
       - .:/var/www/html
-    # Flattened command to prevent YAML unmarshal errors
-    command: sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip && php /var/www/html/php/src/Agents/mail_agent.php || tail -f /dev/null"
+    command: >
+      sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip 
+      && php /var/www/html/php/src/Agents/mail_agent.php || tail -f /dev/null"
+    depends_on:
+      db:
+        condition: service_healthy
     restart: always
 
   # --- Nginx Web Server ---

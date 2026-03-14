@@ -6,7 +6,7 @@ namespace App\Controllers;
 use App\Registry;
 use App\Db;
 use App\Services\Location;
-use App\Smarty; // Ensure this class exists in your App namespace
+use App\Smarty;
 
 abstract class BaseController {
     protected Db $db;
@@ -44,7 +44,11 @@ abstract class BaseController {
      * Loads a view file and processes it via the Smarty engine.
      */
     protected function renderView(string $path, array $data): string {
-        $file = dirname(__DIR__, 1) . "/views/$path.html";
+        /**
+         * Refactored to use Location service.
+         * Assumes $this->loc->baseDir() returns /var/www/html/
+         */
+        $file = $this->loc->baseDir() . "php/views/$path.html";
         
         if (!file_exists($file)) {
             return "";
@@ -52,7 +56,6 @@ abstract class BaseController {
 
         $content = file_get_contents($file);
         
-        // Use the Smarty instance to render the content with the provided data
         return $this->smarty->render($content, $data);
     }
 }

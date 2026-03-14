@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Models\HomeModel;
-use App\Registry;
 use Exception;
 
 class HomeController extends BaseController
@@ -14,27 +13,43 @@ class HomeController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        // Models also use Registry internally for the DB
         $this->home = new HomeModel();
     }
 
     /**
-     * Dashboard view logic
+     * Main Dashboard View
      */
     public function index(): void
     {
         $data = [
-            'title'     => 'Sharpishly Dashboard',
-            'dashboard' => 'Your Dashboard',
+            'title'       => 'Sharpishly Dashboard',
+            'dashboard'   => 'Your Dashboard',
             'recent_jobs' => $this->home->csv()
         ];
 
-        // Using a standardized view helper (Logic would move to BaseController eventually)
-        echo $this->renderView('home/main', $data);
+        // Standardized layout rendering via BaseController
+        $this->render($data, [
+            'header' => 'layouts/header',
+            'main'   => 'home/main',
+            'footer' => 'layouts/footer'
+        ]);
     }
 
     /**
-     * JSON response for AJAX dashboard updates
+     * RESTORED: API Endpoint for checking active job status
+     */
+    public function status(): void
+    {
+        $activeJobs = $this->db->find([
+            'tbl'   => 'jobs',
+            'where' => ['status !=' => 'completed', 'status !=' => 'failed']
+        ]);
+
+        $this->json($activeJobs);
+    }
+
+    /**
+     * JSON response for data table updates
      */
     public function csv(): void
     {
@@ -42,40 +57,15 @@ class HomeController extends BaseController
     }
 
     /**
-     * Browser-triggered Migration
+     * Database Schema Migration Report
      */
     public function migrate(): void
     {
         try {
-            // Returns the HTML report from the model
             echo $this->home->migrate();
         } catch (Exception $e) {
             http_response_code(500);
             echo "<h1>Migration Error</h1><pre>{$e->getMessage()}</pre>";
         }
-    }
-
-    /**
-     * Simple View Loader
-     */
-    private function renderView(string $path, array $data): string
-    {
-        // Path alignment: php/src/Controllers/ -> php/views/
-        $file = dirname(__DIR__) . "/views/$path.html";
-        
-        if (!file_exists($file)) {
-            return "";
-        }
-
-        $content = file_get_contents($file);
-        
-        // Simple template replacement (Placeholder for Smarty logic)
-        foreach ($data as $key => $val) {
-            if (is_string($val)) {
-                $content = str_replace('{$' . $key . '}', $val, $content);
-            }
-        }
-
-        return $content;
     }
 }
