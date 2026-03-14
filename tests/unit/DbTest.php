@@ -3,51 +3,61 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
-use App\Registry;
 use App\Db;
 
 class DbTest {
     private $tester;
-    private $db;
+    private Db $db;
 
     public function __construct($tester) {
         $this->tester = $tester;
-        $this->db = Registry::get(Db::class);
+        $this->db = new Db();
     }
 
     public function run(): void {
-        $this->testCreateTable();
+        $this->testExecuteAndCreateTable();
         $this->testSaveInsert();
+        $this->testFindWithConditions();
         $this->testSaveUpdate();
     }
 
-    private function testCreateTable(): void {
-        $this->db->createTable('test_table', "id INT AUTO_INCREMENT PRIMARY KEY, val VARCHAR(50)");
-        $result = $this->db->query("SHOW TABLES LIKE 'test_table'");
-        $this->tester->assert(count($result) > 0, "Db: Table 'test_table' created.");
+    private function testExecuteAndCreateTable(): void {
+        // Test the array-based table creation we just fixed
+        $res = $this->db->createTable('test_table', [
+            'id'   => 'INT AUTO_INCREMENT PRIMARY KEY',
+            'note' => 'VARCHAR(255)'
+        ]);
+        $this->tester->assert($res === true, "Db: Table 'test_table' created using array definition.");
     }
 
     private function testSaveInsert(): void {
-        $id = $this->db->save(['tbl' => 'test_table', 'val' => 'Original Value']);
-        $this->tester->assert(is_numeric($id), "Db: Save (Insert) returned numeric ID.");
+        $id = $this->db->save([
+            'tbl'  => 'test_table',
+            'note' => 'Unit Test Entry'
+        ]);
+        $this->tester->assert(is_int($id) && $id > 0, "Db: Save (Insert) returned numeric ID: $id");
+    }
+
+    private function testFindWithConditions(): void {
+        $results = $this->db->find([
+            'tbl'   => 'test_table',
+            'where' => ['note' => 'Unit Test Entry'],
+            'limit' => 1
+        ]);
         
-        $row = $this->db->find(['tbl' => 'test_table', 'where' => ['id' => $id]]);
-        $this->tester->assert($row[0]['val'] === 'Original Value', "Db: Data verified after Insert.");
+        $pass = (!empty($results) && $results[0]['note'] === 'Unit Test Entry');
+        $this->tester->assert($pass, "Db: find() retrieved data correctly via conditions array.");
     }
 
     private function testSaveUpdate(): void {
-        // We find the last inserted row
-        $rows = $this->db->find(['tbl' => 'test_table', 'limit' => 1, 'order' => ['id' => 'DESC']]);
-        $id = $rows[0]['id'];
-
-        // Perform Update
-        $this->db->save(['tbl' => 'test_table', 'id' => $id, 'val' => 'Updated Value']);
+        // Upsert logic (ON DUPLICATE KEY UPDATE)
+        $id = $this->db->save([
+            'tbl'  => 'test_table',
+            'id'   => 1,
+            'note' => 'Updated Note'
+        ]);
         
-        // Verify Update
-        $updatedRow = $this->db->find(['tbl' => 'test_table', 'where' => ['id' => $id]]);
-        $this->tester->assert($updatedRow[0]['val'] === 'Updated Value', "Db: Save (Update) successfully modified the record.");
-        
-        // Final Cleanup
-        $this->db->query("DROP TABLE test_table");
+        $results = $this->db->find(['tbl' => 'test_table', 'where' => ['id' => 1]]);
+        $this->tester->assert($results[0]['note'] === 'Updated Note', "Db: Save (Update) successfully modified the record.");
     }
 }

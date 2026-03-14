@@ -38,15 +38,19 @@ class TestRunner {
 $tester = new TestRunner();
 
 // 2. Load and Execute Unit Tests
-// Note: Since our bootstrap has an autoloader, we don't strictly need require_once 
-// for every test file if the namespaces/paths match.
 try {
     echo "🚀 Starting Sharpishly Unit Tests...\n\n";
 
+    // Infrastructure & Services
+    echo "--- Services ---\n";
+    (new \App\Tests\LocationTest($tester))->run();
+
     // DB Layer
+    echo "\n--- Database ---\n";
     (new \App\Tests\DbTest($tester))->run();
 
     // MVC Layer
+    echo "\n--- MVC Core ---\n";
     (new \App\Tests\HomeModelTest($tester))->run();
     (new \App\Tests\BaseControllerTest($tester))->run();
 

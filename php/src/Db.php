@@ -5,17 +5,15 @@ namespace App;
 
 use PDO;
 use Exception;
-use App\Services\Logger;
 
 class Db {
     private PDO $pdo;
 
-    public function __construct()
-    {
-        $host = 'sharpishly-db';
-        $db   = 'sharpishly';
-        $user = 'user';
-        $pass = 'pass';
+    public function __construct() {
+        $host = getenv('DB_HOST') ?: 'db';
+        $db   = getenv('DB_NAME') ?: 'sharpishly';
+        $user = getenv('DB_USER') ?: 'user';
+        $pass = getenv('DB_PASS') ?: 'pass';
         $dsn  = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 
         $options = [
@@ -27,91 +25,118 @@ class Db {
         try {
             $this->pdo = new PDO($dsn, $user, $pass, $options);
         } catch (\PDOException $e) {
-            // Logs to storage/logs/app.log via Registry-managed Logger
-            Logger::error("Database Connection Failed: " . $e->getMessage());
-            throw new Exception("Database connection error.");
+            throw new Exception("Database Connection Failed: " . $e->getMessage());
         }
     }
 
     /**
-     * Creates a table if it doesn't exist.
+     * Creates a table. Signature supports raw strings or structured arrays.
      */
-    public function createTable(string $table, string $definition): void
-    {
-        $sql = "CREATE TABLE IF NOT EXISTS `$table` ($definition) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-        $this->pdo->exec($sql);
-        Logger::info("Table verified/created", ['table' => $table]);
-    }
+    public function createTable(string $table, string|array $definition): bool {
+        $columnSql = '';
 
-    /**
-     * Handles schema updates (ADD COLUMN, INDEX, etc.)
-     */
-    public function alter(string $table, string $action, string $name, string $definition = ''): void
-    {
-        $sql = "ALTER TABLE `$table` $action `$name` $definition";
-        $this->pdo->exec($sql);
-        Logger::info("Schema change executed", ['sql' => $sql]);
-    }
-
-    /**
-     * Primary Persistence: Automatically handles INSERT vs UPDATE
-     */
-    public function save(array $data): int|string
-    {
-        $table = $data['tbl'];
-        unset($data['tbl']);
-
-        if (isset($data['id'])) {
-            // UPDATE EXISTING
-            $id = $data['id'];
-            unset($data['id']);
-            $fields = implode(' = ?, ', array_keys($data)) . ' = ?';
-            $sql = "UPDATE `$table` SET $fields WHERE id = ?";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([...array_values($data), $id]);
-            return $id;
+        if (is_array($definition)) {
+            $parts = [];
+            foreach ($definition as $column => $spec) {
+                // If key is numeric, assume the value is the raw line
+                if (is_numeric($column)) {
+                    $parts[] = $spec;
+                } else {
+                    $parts[] = "`$column` $spec";
+                }
+            }
+            $columnSql = implode(",\n            ", $parts);
         } else {
-            // INSERT NEW
-            $columns = implode('`, `', array_keys($data));
-            $placeholders = implode(', ', array_fill(0, count($data), '?'));
-            $sql = "INSERT INTO `$table` (`$columns`) VALUES ($placeholders)";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(array_values($data));
-            return $this->pdo->lastInsertId();
+            $columnSql = $definition;
+        }
+
+        $sql = "CREATE TABLE IF NOT EXISTS `$table` (
+            $columnSql
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+        return $this->execute($sql);
+    }
+
+    /**
+     * Helper to verify column existence before ALTER commands
+     */
+    public function columnExists(string $table, string $column): bool {
+        try {
+            $stmt = $this->pdo->prepare("SHOW COLUMNS FROM `$table` LIKE ?");
+            $stmt->execute([$column]);
+            return (bool)$stmt->fetch();
+        } catch (Exception $e) {
+            return false;
         }
     }
 
     /**
-     * Standard Query Execution (for custom SQL)
+     * Structured finding via $conditions array
      */
-    public function query(string $sql, array $params = []): array
-    {
+    public function find(array $params): array {
+        $tbl    = $params['tbl'];
+        $fields = isset($params['fields']) ? implode(', ', $params['fields']) : '*';
+        $where  = "";
+        $values = [];
+
+        if (isset($params['where'])) {
+            $conds = [];
+            foreach ($params['where'] as $col => $val) {
+                // ADDED BACKTICKS: Prevents issues with reserved words
+                $conds[] = "`$col` = ?";
+                $values[] = $val;
+            }
+            $where = "WHERE " . implode(' AND ', $conds);
+        }
+
+        $order = isset($params['order']) ? "ORDER BY `" . key($params['order']) . "` " . current($params['order']) : "";
+        $limit = isset($params['limit']) ? "LIMIT " . (int)$params['limit'] : "";
+
+        $sql = "SELECT $fields FROM `$tbl` $where $order $limit";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
+        $stmt->execute($values);
         return $stmt->fetchAll();
     }
 
     /**
-     * Shorthand Finder with Filter/Sort/Limit logic
+     * UPSERT: Insert or update on key conflict
      */
-    public function find(array $params): array
-    {
-        $table = $params['tbl'];
-        $whereSql = '';
-        $values = [];
+    public function save(array $data): int|bool {
+        $tbl = $data['tbl'];
+        unset($data['tbl']);
 
-        if (isset($params['where'])) {
-            $conditions = [];
-            foreach ($params['where'] as $col => $val) {
-                $conditions[] = "`$col` = ?";
-                $values[] = $val;
-            }
-            $whereSql = 'WHERE ' . implode(' AND ', $conditions);
+        $columns = implode('`, `', array_keys($data));
+        $placeholders = implode(', ', array_fill(0, count($data), '?'));
+        
+        $sql = "INSERT INTO `$tbl` (`$columns`) VALUES ($placeholders) 
+                ON DUPLICATE KEY UPDATE ";
+        
+        $updates = [];
+        foreach ($data as $col => $val) {
+            $updates[] = "`$col` = VALUES(`$col`)";
         }
+        $sql .= implode(', ', $updates);
 
-        $order = isset($params['order']) ? "ORDER BY " . key($params['order']) . " " . current($params['order']) : "";
-        $limit = isset($params['limit']) ? "LIMIT " . $params['limit'] : "";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(array_values($data));
+        
+        $id = $this->pdo->lastInsertId();
+        return $id ? (int)$id : true;
+    }
 
-        return $this->query("SELECT * FROM `$table` $whereSql $order $limit", $values);
+    /**
+     * Structural changes
+     */
+    public function alter(string $table, string $action, string $name, string $spec): bool {
+        $sql = "ALTER TABLE `$table` $action `$name` $spec";
+        return $this->execute($sql);
+    }
+
+    /**
+     * Base execution helper
+     */
+    public function execute(string $sql, array $params = []): bool {
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute($params);
     }
 }

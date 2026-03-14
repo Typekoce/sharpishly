@@ -13,18 +13,17 @@ class HomeModel
 
     public function __construct()
     {
-        // Use Registry to ensure we share the same DB connection instance
         $this->db = Registry::get(Db::class);
     }
 
     /**
-     * Fetch recent CSV jobs using structured conditions
+     * Fetch recent jobs using structured conditions
      */
     public function csv(): array
     {
         $conditions = [
             'tbl'    => 'jobs',
-            'fields' => ['id', 'status', 'processed_rows', 'total_rows', 'updated_at'],
+            'fields' => ['id', 'title', 'status', 'processed_rows', 'total_rows', 'updated_at'],
             'order'  => ['id' => 'DESC'],
             'limit'  => 5
         ];
@@ -33,14 +32,14 @@ class HomeModel
     }
 
     /**
-     * Orchestrates the migration process using array-based definitions
+     * Orchestrates the migration process
      */
     public function migrate(): string
     {
-        $report = "<h2>Migration Report</h2><pre>\n";
+        $report = "<h2>Sharpishly Migration Report</h2><pre>\n";
 
         try {
-            // --- Merchandise Inventory ---
+            // 1. Merchandise Inventory
             $this->db->createTable('merchandise_inventory', [
                 'id'           => 'INT AUTO_INCREMENT PRIMARY KEY',
                 'item_name'    => 'VARCHAR(255) NOT NULL',
@@ -50,7 +49,7 @@ class HomeModel
             ]);
             $report .= "[OK] Table 'merchandise_inventory' ready\n";
 
-            // --- Orders ---
+            // 2. Orders System
             $this->db->createTable('orders', [
                 'id'           => 'INT AUTO_INCREMENT PRIMARY KEY',
                 'order_type'   => "ENUM('B2C', 'B2B') DEFAULT 'B2C'",
@@ -62,7 +61,7 @@ class HomeModel
             ]);
             $report .= "[OK] Table 'orders' ready\n";
 
-            // --- Hardware Scans ---
+            // 3. Hardware Scans
             $this->db->createTable('hardware_scans', [
                 'id'           => 'BIGINT AUTO_INCREMENT PRIMARY KEY',
                 'scan_type'    => 'VARCHAR(50) DEFAULT "full"',
@@ -75,11 +74,12 @@ class HomeModel
             ]);
             $report .= "[OK] Table 'hardware_scans' ready\n";
 
-            // --- Workflow Tables (Social, Users, Jobs) ---
+            // 4. Workflow Infrastructure (Social, Users, Jobs)
             $standardFields = [
                 'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
                 'status'         => "ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending'",
                 'processed_rows' => 'INT DEFAULT 0',
+                'total_rows'     => 'INT DEFAULT 0',
                 'created_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
                 'updated_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
             ];
@@ -88,18 +88,21 @@ class HomeModel
             $this->db->createTable('users', $standardFields);
             
             // Specialized Jobs table
-            $this->db->createTable('jobs', array_merge(['file_path' => 'VARCHAR(255) NOT NULL'], $standardFields));
-            $report .= "[OK] Workflow tables (Social, Users, Jobs) ready\n";
+            $jobFields = array_merge([
+                'title'     => 'VARCHAR(255)', 
+                'file_path' => 'VARCHAR(255) NOT NULL'
+            ], $standardFields);
+            
+            $this->db->createTable('jobs', $jobFields);
+            $report .= "[OK] Workflow tables ready\n";
 
-            // PATCH: Add 'title' column to jobs if missing
-            try {
-                $this->db->alter('jobs', 'ADD COLUMN', 'title', 'VARCHAR(255) AFTER id');
-                $report .= "[PATCH] Added 'title' column to 'jobs'\n";
-            } catch (Exception $e) {
-                $report .= "[SKIP] 'title' column already exists\n";
+            // PATCH: Add 'note' to jobs if it's missing (Required for current unit tests)
+            if (!$this->db->columnExists('jobs', 'note')) {
+                $this->db->alter('jobs', 'ADD COLUMN', 'note', 'TEXT NULL AFTER status');
+                $report .= "[PATCH] Added 'note' column to 'jobs'\n";
             }
 
-            // --- Tasks ---
+            // 5. Tasks
             $this->db->createTable('tasks', [
                 'id'          => 'BIGINT AUTO_INCREMENT PRIMARY KEY',
                 'name'        => 'VARCHAR(255) NOT NULL',
@@ -114,7 +117,7 @@ class HomeModel
             ]);
             $report .= "[OK] Table 'tasks' ready\n";
 
-            // --- CSV Records ---
+            // 6. CSV Records
             $this->db->createTable('csv_records', [
                 'id'         => 'INT AUTO_INCREMENT PRIMARY KEY',
                 'job_id'     => 'INT',
@@ -125,19 +128,19 @@ class HomeModel
             ]);
             $report .= "[OK] Table 'csv_records' ready\n";
 
-            // PATCH: Add Index and Foreign Key
+            // 7. Relational Constraints
             try {
                 $this->db->alter('csv_records', 'ADD INDEX', 'idx_job_id', '(job_id)');
-                $this->db->alter('csv_records', 'ADD FOREIGN KEY', 'fk_job_id', '(job_id) REFERENCES jobs(id) ON DELETE CASCADE ON UPDATE CASCADE');
+                $this->db->alter('csv_records', 'ADD FOREIGN KEY', 'fk_job_id', '(job_id) REFERENCES jobs(id) ON DELETE CASCADE');
                 $report .= "[PATCH] Constraints applied to 'csv_records'\n";
             } catch (Exception $e) {
-                $report .= "[SKIP] Constraints already exist\n";
+                $report .= "[SKIP] Constraints exist\n";
             }
 
-            // --- Seeding ---
+            // 8. Seeding
             $this->seedInitialData($report);
 
-            $report .= "\nMigration completed successfully.\n";
+            $report .= "\n✅ Migration completed successfully.\n";
         } catch (Exception $e) {
             $report .= "[ERROR] " . htmlspecialchars($e->getMessage()) . "\n";
         }
@@ -151,35 +154,29 @@ class HomeModel
      */
     private function seedInitialData(string &$report): void
     {
-        // Seed Mugs
-        $mugs = $this->db->find(['tbl' => 'merchandise_inventory', 'limit' => 1]);
-        if (empty($mugs)) {
+        $hasMugs = $this->db->find(['tbl' => 'merchandise_inventory', 'limit' => 1]);
+        if (empty($hasMugs)) {
             $this->db->save([
-                'tbl' => 'merchandise_inventory',
-                'item_name' => 'Premium White Mug Blank',
+                'tbl'         => 'merchandise_inventory',
+                'item_name'   => 'Premium White Mug Blank',
                 'stock_count' => 1000,
-                'unit_price' => 4.50
+                'unit_price'  => 4.50
             ]);
             $report .= "[SEED] Initial mug stock added\n";
         }
 
-        // Seed Initial Job
-        $jobs = $this->db->find(['tbl' => 'jobs', 'limit' => 1]);
-        if (empty($jobs)) {
+        $hasJobs = $this->db->find(['tbl' => 'jobs', 'limit' => 1]);
+        if (empty($hasJobs)) {
             $this->db->save([
-                'tbl'           => 'jobs',
-                'title'         => 'Initial Seed Job',
-                'file_path'     => 'php/uploads/initial-seed.csv',
-                'status'        => 'pending',
-                'total_rows'    => 50000,
-                'processed_rows'=> 0,
+                'tbl'            => 'jobs',
+                'title'          => 'System Initial Test',
+                'file_path'      => 'php/uploads/seed.csv',
+                'status'         => 'pending',
+                'total_rows'     => 500,
+                'processed_rows' => 0,
+                'note'           => 'Initial system-generated seed job.'
             ]);
-            $report .= "[SEED] Added 1 initial job record\n";
+            $report .= "[SEED] Initial job record added\n";
         }
-    }
-
-    public function trackEmailOpen(string $emailId, string $recipient): bool
-    {
-        return true; // Stub
     }
 }
