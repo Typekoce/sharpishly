@@ -39,6 +39,10 @@ $tester = new TestRunner();
 try {
     echo "🚀 Starting Sharpishly Unit Tests...\n\n";
 
+    // --- Hardware & Systems ---
+    echo "\n--- Hardware & Systems ---\n";
+    (new \App\Tests\DevicesControllerTest($tester))->run();
+
     // 1. Infrastructure & Services
     echo "--- Services ---\n";
     (new \App\Tests\LocationTest($tester))->run();
