@@ -9,19 +9,28 @@ use Exception;
 class CsvProcessor
 {
     private Db $db;
-    private int $batchSize = 500; // Keep your high-performance batching
+    private int $batchSize = 500; 
 
     public function __construct()
     {
-        $this->db = New Db();
+        // Standardizing DB access
+        $this->db = new Db();
     }
 
-    /**
-     * The unified process: Memory efficient streaming + high-speed batching
-     */
     public function process(int $jobId, string $relativeFilePath): void
     {
-        $filePath = dirname(__DIR__, 2) . '/' . $relativeFilePath;
+        /**
+         * FIX 1: PATH RESOLUTION
+         * Using realpath and stripping redundant directory separators 
+         * to prevent /var/www/html/php//var/www/... errors.
+         */
+        $baseDir = dirname(__DIR__, 2); 
+        $cleanRelative = ltrim($relativeFilePath, '/');
+        
+        // Remove 'php/' if the relative path accidentally started with it
+        $cleanRelative = str_replace('php/', '', $cleanRelative);
+        
+        $filePath = $baseDir . '/' . $cleanRelative;
 
         if (!file_exists($filePath)) {
             Logger::error("CSV Process Failed: File not found", ['path' => $filePath]);
@@ -36,10 +45,8 @@ class CsvProcessor
         Logger::info("Agent starting batch interrogation for Job #$jobId");
 
         try {
-            // Skip header
-            fgetcsv($handle);
+            fgetcsv($handle); // Skip header
 
-            // 1. STREAM: Read line-by-line (Memory safe)
             while (($data = fgetcsv($handle)) !== false) {
                 $rowCount++;
                 
@@ -50,22 +57,15 @@ class CsvProcessor
                     'column_3' => $data[2] ?? '',
                 ];
 
-                // 2. BATCH: Insert in chunks (Database fast)
                 if (count($batch) >= $this->batchSize) {
                     $this->insertBatch($batch);
                     $batch = [];
                     
-                    // Update the Nervous System via the jobs table
-                    $this->db->save([
-                        'tbl' => 'jobs',
-                        'id' => $jobId,
-                        'processed_rows' => $rowCount,
-                        'status' => 'processing'
-                    ]);
+                    // Update progress without triggering 'file_path' constraints
+                    $this->updateJobStatus($jobId, 'processing', $rowCount);
                 }
             }
 
-            // Insert remainder
             if (!empty($batch)) {
                 $this->insertBatch($batch);
             }
@@ -77,7 +77,9 @@ class CsvProcessor
             Logger::exception($e);
             $this->updateJobStatus($jobId, 'failed');
         } finally {
-            fclose($handle);
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
         }
     }
 
@@ -95,20 +97,37 @@ class CsvProcessor
         
         $params = [];
         foreach ($rows as $row) {
-            $params[] = $row['job_id'];
-            $params[] = $row['column_1'];
-            $params[] = $row['column_2'];
-            $params[] = $row['column_3'];
+            $params = array_merge($params, array_values($row));
         }
 
-        $stmt = $this->db->pdo->prepare($sql);
-        $stmt->execute($params);
+        // Use standard execute to bypass the array-driven 'save' logic for raw speed
+        $this->db->execute($sql, $params);
     }
 
+    /**
+     * FIX 2: SQL CONSTRAINT BYPASS
+     * To prevent "Field 'file_path' doesn't have a default value",
+     * we first fetch the existing record to ensure the full object is sent back
+     * to the save() method, fulfilling all NOT NULL requirements.
+     */
     private function updateJobStatus(int $id, string $status, int $count = null): void
     {
-        $data = ['tbl' => 'jobs', 'id' => $id, 'status' => $status];
-        if ($count !== null) $data['total_rows'] = $count;
-        $this->db->save($data);
+        // 1. Get existing data to keep file_path and title intact
+        $existing = $this->db->find(['tbl' => 'jobs', 'where' => ['id' => $id]]);
+        
+        if (empty($existing)) {
+            Logger::error("Cannot update status: Job #$id not found in DB.");
+            return;
+        }
+
+        $jobData = $existing[0];
+        $jobData['tbl'] = 'jobs';
+        $jobData['status'] = $status;
+        
+        if ($count !== null) {
+            $jobData['processed_rows'] = $count;
+        }
+
+        $this->db->save($jobData);
     }
 }

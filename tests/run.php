@@ -29,38 +29,39 @@ class TestRunner {
         echo "------------------------------------------\n";
         
         if ($this->failed > 0) {
-            exit(1); // Signal failure to GitHub Actions / Scripts
+            exit(1); 
         }
     }
 }
 
-// 1. Initialize Runner
 $tester = new TestRunner();
 
-// 2. Load and Execute Unit Tests
 try {
     echo "🚀 Starting Sharpishly Unit Tests...\n\n";
 
-    // Infrastructure & Services
+    // 1. Infrastructure & Services
     echo "--- Services ---\n";
     (new \App\Tests\LocationTest($tester))->run();
 
-    // DB Layer
+    // 2. DB Layer
     echo "\n--- Database ---\n";
     (new \App\Tests\DbTest($tester))->run();
 
-    // MVC Layer
+    // 3. MVC Layer
     echo "\n--- MVC Core ---\n";
     (new \App\Tests\HomeModelTest($tester))->run();
     (new \App\Tests\BaseControllerTest($tester))->run();
-    (new \App\Tests\BaseControllerTest($tester))->run();
 
+    // 4. CSV Engine (Controller & Processor)
+    echo "\n--- CSV Engine ---\n";
+    (new \App\Tests\CsvControllerTest($tester))->run();
+    (new \App\Tests\CsvProcessorTest($tester))->run(); 
 
 } catch (\Throwable $e) {
     echo "🚫 CRITICAL TEST ERROR: " . $e->getMessage() . "\n";
     echo "In " . $e->getFile() . " on line " . $e->getLine() . "\n";
+    // Optional: add $e->getTraceAsString() if you need deep debugging
     exit(1);
 }
 
-// 3. Output Results
 $tester->report();

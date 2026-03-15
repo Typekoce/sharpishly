@@ -74,3 +74,15 @@
   - [ ] Connect `CsvController::status()` to the HUD progress bars.
 - [ ] **View Verification:** Audit `BaseController` to ensure it looks for views in `php/views/` (one level up from `src`).
 
+# 🚀 Sharpishly Master Strategy: Phase 2
+
+### 🧱 Layer 1: Core Engine & Infrastructure
+- [ ] **Docker Fix:** Resolve `unmarshal errors` on line 2 of `docker-compose.yml`.
+- [ ] **CsvProcessor Logic:** - [ ] Fix double-root pathing in `process()`.
+    - [ ] Resolve `file_path` SQL constraint during `updateJobStatus()`.
+- [ ] **Sanitization:** Final sweep to replace `die()`/`exit()` with Exceptions.
+
+### 🖥️ Layer 3: HUD & UI/UX (Glassmorphism)
+- [ ] **script.js Refactor:** Connect UI to `CsvController::status()` JSON.
+- [ ] **View Verification:** Ensure all `.html` templates are recognized in `php/views/`.
+
