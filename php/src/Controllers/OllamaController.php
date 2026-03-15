@@ -1,84 +1,84 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Registry;
+use App\Services\OllamaService;
 use App\Services\Logger;
-use App\Models\OllamaModel;
-use App\dBug;
+use Exception;
 
-class OllamaController extends BaseController {
+class OllamaController extends BaseController 
+{
+    private OllamaService $ollama;
 
-    public OllamaModel $ollama;
-
-    private $ollama_url = "http://host.docker.internal:11434/api/tags";
-
-    public function __construct() {
+    public function __construct() 
+    {
         parent::__construct();
-        die();
-        $this->ollama = new OllamaModel;
-
+        $this->ollama = Registry::get(OllamaService::class);
     }
 
-    public function index(){
+    public function index(): void
+    {
         $data = [
-            'title'     => 'Ollama',
-            'dashboard' => 'Data Engine',
+            'title'     => 'Ollama AI',
+            'dashboard' => 'Neural Engine',
             'jobs'      => [],
         ];
 
         $views = [
-           'header' => 'layouts/header',
-           'main'   => 'csv/upload', 
-           'footer' => 'layouts/footer'
+           'header' => 'test/header',
+           'main'   => 'test/test', 
+           'footer' => 'test/footer'
         ];
-
-        new dBug(array_merge($data,$views));
 
         $this->render($data, $views);
     }
 
-    public function response() {
-
-        $debug = TRUE;
-
-        if($debug){
-
+    public function response(): void
+    {
+        // 1. Determine the Question
+        if (php_sapi_name() === 'cli') {
+            global $argv;
             $question = $argv[1] ?? readline("Ask me anything: ");
-
-            $answer = $this->ollama->ragAsk($question);
-
-            echo "\n\033[1;32mGod Mode:\033[0m $answer\n\n";
-
         } else {
+            $input = json_decode(file_get_contents('php://input'), true);
+            $question = $input['question'] ?? '';
+        }
 
-            // Old code
+        if (empty($question)) {
+            $this->json(['error' => 'Question is empty'], 400);
+            return;
+        }
 
-                $ch = curl_init($this->ollama_url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 3); // Don't let a down LLM hang the UI
-                
-                $response = curl_exec($ch);
-                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
+        // 2. Dev Mode Check: Return static response if APP_ENV is "dev"
+        if (getenv('APP_ENV') === 'dev') {
+            $this->handleOutput("[DEV MODE] This is a static response. Ollama container was not called.");
+            return;
+        }
 
-                header('Content-Type: application/json');
+        try {
+            // 3. Live AI Interrogation
+            $answer = $this->ollama->ask($question);
+            $this->handleOutput($answer);
+        } catch (Exception $e) {
+            Logger::error("Ollama Error: " . $e->getMessage());
+            $this->json(['error' => 'AI Link Offline'], 500);
+        }
+    }
 
-                if ($http_code === 200) {
-                    $data = json_decode($response, true);
-                    echo json_encode([
-                        'status' => 'online',
-                        'models' => $data['models'] ?? [],
-                        'message' => 'Ollama is responding'
-                    ]);
-                } else {
-                    Logger::log("Ollama connection failed with code: " . $http_code);
-                    echo json_encode([
-                        'status' => 'offline',
-                        'message' => 'Could not connect to Ollama server at ' . $this->ollama_url
-                    ]);
-                }
-            // End old code
-
+    /**
+     * Helper to unify CLI and Web output
+     */
+    private function handleOutput(string $answer): void
+    {
+        if (php_sapi_name() === 'cli') {
+            echo "\n\033[1;32mGod Mode:\033[0m $answer\n\n";
+        } else {
+            $this->json([
+                'status' => 'success',
+                'answer' => $answer
+            ]);
         }
     }
 }
