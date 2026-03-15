@@ -1,34 +1,39 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\TenantModel;
-use App\Logger;
+use App\Services\Logger;
+use Exception;
 
 class CrmController extends BaseController {
-    protected $tenantModel;
+    
+    protected TenantModel $tenantModel;
 
     public function __construct() {
         parent::__construct();
+        // In the future, we will pull this from a Dependency Injection Container
         $this->tenantModel = new TenantModel();
     }
 
     public function index(): void {
         try {
             // 1. Fetch data from the Model
-            $tenants = $this->tenantModel.getAllTenants();
+            $tenants = $this->tenantModel->getAllTenants();
 
             // 2. Audit the access
-            Logger::info("CrmController: Tenant records retrieved via TenantModel.");
+            Logger::info("CrmController: Tenant records retrieved.");
 
-            // 3. Dispatch JSON to the frontend script.js
-            header('Content-Type: application/json');
-            echo json_encode($tenants);
+            // 3. Leverage BaseController's json method (Standardized & Testable)
+            $this->json($tenants);
             
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Logger::error("CRM Failure: " . $e->getMessage());
-            header('Content-Type: application/json', true, 500);
-            echo json_encode(["error" => "Internal System Error"]);
+            
+            // Standardized error response
+            $this->json(["error" => "Internal System Error"], 500);
         }
-        exit;
+        // REMOVED: exit; (BaseController::json handles response termination gracefully)
     }
 }

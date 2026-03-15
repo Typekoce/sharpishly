@@ -39,28 +39,27 @@ $tester = new TestRunner();
 try {
     echo "🚀 Starting Sharpishly Unit Tests...\n\n";
 
-    // 1. Infrastructure & Services
     echo "--- Services ---\n";
     (new \App\Tests\LocationTest($tester))->run();
 
-    // 2. DB Layer
     echo "\n--- Database ---\n";
     (new \App\Tests\DbTest($tester))->run();
 
-    // 3. MVC Layer
-    echo "\n--- MVC Core ---\n";
+    echo "\n--- MVC Core & CRM ---\n";
     (new \App\Tests\HomeModelTest($tester))->run();
     (new \App\Tests\BaseControllerTest($tester))->run();
+    (new \App\Tests\CrmControllerTest($tester))->run(); // Integrated CRM
 
-    // 4. CSV Engine (Controller & Processor)
     echo "\n--- CSV Engine ---\n";
     (new \App\Tests\CsvControllerTest($tester))->run();
     (new \App\Tests\CsvProcessorTest($tester))->run(); 
 
+    echo "\n--- AI Agent Adapters (Mocks) ---\n";
+    // We will add (new \App\Tests\AgentAdapterTest($tester))->run(); here tomorrow
+
 } catch (\Throwable $e) {
     echo "🚫 CRITICAL TEST ERROR: " . $e->getMessage() . "\n";
     echo "In " . $e->getFile() . " on line " . $e->getLine() . "\n";
-    // Optional: add $e->getTraceAsString() if you need deep debugging
     exit(1);
 }
 

@@ -86,3 +86,11 @@
 - [ ] **script.js Refactor:** Connect UI to `CsvController::status()` JSON.
 - [ ] **View Verification:** Ensure all `.html` templates are recognized in `php/views/`.
 
+### 🏗️ Layer 1: Core Engine & Testability
+- [ ] **CrmController Audit:** - [ ] Fix `.` to `->` syntax.
+    - [ ] Replace `exit` with return/response objects.
+    - [ ] Align Logger namespace with `App\Services\Logger`.
+- [ ] **TenantModel:** Verify `getAllTenants()` is using the `Db` service and not raw PDO.
+
+### 🤖 Layer 4: Autonomous Agency (Mocks)
+- [ ] **Crm Summarizer:** Mock a "Claude Agent" to provide a 1-sentence summary for each tenant.
