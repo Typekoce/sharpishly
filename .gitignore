@@ -29,6 +29,7 @@ php/uploads/*
 # Never track your master keys or SSH identities
 storage/vault/*.key
 storage/vault/id_rsa*
+php/var/*
 
 # --- OS Artifacts ---
 .DS_Store

@@ -42,6 +42,7 @@ try {
     // 1. Infrastructure & Services
     echo "--- Services ---\n";
     (new \App\Tests\LocationTest($tester))->run();
+    (new \App\Tests\VaultTest($tester))->run(); // Add this line
 
     // 2. DB Layer
     echo "\n--- Database ---\n";
