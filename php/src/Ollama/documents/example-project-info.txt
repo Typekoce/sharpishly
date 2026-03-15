@@ -1,1 +1,0 @@
-Sharpishly is a research project combining PHP MVC, Docker, agents, RAG, and more.

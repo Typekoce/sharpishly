@@ -13,26 +13,25 @@ class HomeModel
 
     public function __construct()
     {
+        // Pulling the shared DB instance from the Registry
         $this->db = Registry::get(Db::class);
     }
 
     /**
-     * Fetch recent jobs using structured conditions
+     * Fetch recent jobs for the dashboard
      */
     public function csv(): array
     {
-        $conditions = [
+        return $this->db->find([
             'tbl'    => 'jobs',
             'fields' => ['id', 'title', 'status', 'processed_rows', 'total_rows', 'updated_at'],
             'order'  => ['id' => 'DESC'],
             'limit'  => 5
-        ];
-
-        return $this->db->find($conditions);
+        ]);
     }
 
     /**
-     * Orchestrates the migration process
+     * Orchestrates the full system migration
      */
     public function migrate(): string
     {
@@ -74,7 +73,17 @@ class HomeModel
             ]);
             $report .= "[OK] Table 'hardware_scans' ready\n";
 
-            // 4. Workflow Infrastructure (Social, Users, Jobs)
+            // 4. CRM Infrastructure (NEW: Tenants)
+            $this->db->createTable('tenants', [
+                'id'         => 'INT AUTO_INCREMENT PRIMARY KEY',
+                'name'       => 'VARCHAR(255) NOT NULL',
+                'status'     => "ENUM('active', 'inactive', 'suspended') DEFAULT 'active'",
+                'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+                'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            ]);
+            $report .= "[OK] Table 'tenants' ready\n";
+
+            // 5. Workflow Infrastructure (Social, Users, Jobs)
             $standardFields = [
                 'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
                 'status'         => "ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending'",
@@ -87,7 +96,6 @@ class HomeModel
             $this->db->createTable('social', $standardFields);
             $this->db->createTable('users', $standardFields);
             
-            // Specialized Jobs table
             $jobFields = array_merge([
                 'title'     => 'VARCHAR(255)', 
                 'file_path' => 'VARCHAR(255) NOT NULL'
@@ -96,28 +104,22 @@ class HomeModel
             $this->db->createTable('jobs', $jobFields);
             $report .= "[OK] Workflow tables ready\n";
 
-            // PATCH: Add 'note' to jobs if it's missing (Required for current unit tests)
+            // PATCH: Add 'note' to jobs
             if (!$this->db->columnExists('jobs', 'note')) {
                 $this->db->alter('jobs', 'ADD COLUMN', 'note', 'TEXT NULL AFTER status');
                 $report .= "[PATCH] Added 'note' column to 'jobs'\n";
             }
 
-            // 5. Tasks
+            // 6. Tasks & CSV Records
             $this->db->createTable('tasks', [
                 'id'          => 'BIGINT AUTO_INCREMENT PRIMARY KEY',
                 'name'        => 'VARCHAR(255) NOT NULL',
                 'type'        => "ENUM('cron', 'webhook', 'manual', 'file_drop') NOT NULL",
-                'schedule'    => 'VARCHAR(100) NULL',
                 'payload'     => 'JSON NOT NULL',
-                'action_type' => 'VARCHAR(50) NOT NULL',
                 'status'      => "ENUM('active', 'paused', 'failed') DEFAULT 'active'",
-                'last_run'    => 'TIMESTAMP NULL',
-                'next_run'    => 'TIMESTAMP NULL',
                 'created_at'  => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
             ]);
-            $report .= "[OK] Table 'tasks' ready\n";
 
-            // 6. CSV Records
             $this->db->createTable('csv_records', [
                 'id'         => 'INT AUTO_INCREMENT PRIMARY KEY',
                 'job_id'     => 'INT',
@@ -126,7 +128,7 @@ class HomeModel
                 'column_3'   => 'TEXT',
                 'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
             ]);
-            $report .= "[OK] Table 'csv_records' ready\n";
+            $report .= "[OK] CSV Engine tables ready\n";
 
             // 7. Relational Constraints
             try {
@@ -134,7 +136,7 @@ class HomeModel
                 $this->db->alter('csv_records', 'ADD FOREIGN KEY', 'fk_job_id', '(job_id) REFERENCES jobs(id) ON DELETE CASCADE');
                 $report .= "[PATCH] Constraints applied to 'csv_records'\n";
             } catch (Exception $e) {
-                $report .= "[SKIP] Constraints exist\n";
+                $report .= "[SKIP] Constraints already exist\n";
             }
 
             // 8. Seeding
@@ -150,10 +152,22 @@ class HomeModel
     }
 
     /**
-     * Handles initial data population
+     * Seeds initial data if tables are empty
      */
     private function seedInitialData(string &$report): void
     {
+        // Seed Tenants
+        $hasTenants = $this->db->find(['tbl' => 'tenants', 'limit' => 1]);
+        if (empty($hasTenants)) {
+            $this->db->save([
+                'tbl'    => 'tenants',
+                'name'   => 'Sharpishly Global HQ',
+                'status' => 'active'
+            ]);
+            $report .= "[SEED] Initial tenant record added\n";
+        }
+
+        // Seed Mugs
         $hasMugs = $this->db->find(['tbl' => 'merchandise_inventory', 'limit' => 1]);
         if (empty($hasMugs)) {
             $this->db->save([
@@ -165,12 +179,13 @@ class HomeModel
             $report .= "[SEED] Initial mug stock added\n";
         }
 
+        // Seed Jobs
         $hasJobs = $this->db->find(['tbl' => 'jobs', 'limit' => 1]);
         if (empty($hasJobs)) {
             $this->db->save([
                 'tbl'            => 'jobs',
                 'title'          => 'System Initial Test',
-                'file_path'      => 'php/uploads/seed.csv',
+                'file_path'      => 'storage/uploads/seed.csv',
                 'status'         => 'pending',
                 'total_rows'     => 500,
                 'processed_rows' => 0,

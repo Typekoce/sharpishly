@@ -39,23 +39,33 @@ $tester = new TestRunner();
 try {
     echo "🚀 Starting Sharpishly Unit Tests...\n\n";
 
+    // 1. Infrastructure & Services
     echo "--- Services ---\n";
     (new \App\Tests\LocationTest($tester))->run();
 
+    // 2. DB Layer
     echo "\n--- Database ---\n";
     (new \App\Tests\DbTest($tester))->run();
 
+    // 3. MVC Layer & CRM
     echo "\n--- MVC Core & CRM ---\n";
     (new \App\Tests\HomeModelTest($tester))->run();
+    (new \App\Tests\TenantModelTest($tester))->run();
     (new \App\Tests\BaseControllerTest($tester))->run();
-    (new \App\Tests\CrmControllerTest($tester))->run(); // Integrated CRM
+    (new \App\Tests\CrmControllerTest($tester))->run(); 
 
+    // 4. CSV Engine
     echo "\n--- CSV Engine ---\n";
     (new \App\Tests\CsvControllerTest($tester))->run();
     (new \App\Tests\CsvProcessorTest($tester))->run(); 
 
+    // 5. AI & Intelligence (New)
+    echo "\n--- AI & Intelligence ---\n";
+    (new \App\Tests\OllamaServiceTest($tester))->run();
+
+    // 6. Multi-Model Adapters (Tomorrow's Mission)
     echo "\n--- AI Agent Adapters (Mocks) ---\n";
-    // We will add (new \App\Tests\AgentAdapterTest($tester))->run(); here tomorrow
+    // (new \App\Tests\AgentAdapterTest($tester))->run();
 
 } catch (\Throwable $e) {
     echo "🚫 CRITICAL TEST ERROR: " . $e->getMessage() . "\n";

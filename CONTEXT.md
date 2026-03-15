@@ -33,3 +33,13 @@
 1. **YAML Fix:** Resolve `unmarshal errors` in `docker-compose.yml` line 2.
 2. **Test Cleanup:** Clear `test_table` in `DbTest.php` to break the 'Unknown column' loop.
 3. **Dashboard:** Verify `HomeController::status()` AJAX endpoint for real-time progress.
+
+# 🏛️ Sharpishly Architectural Context
+
+### 🧱 Database Layer
+- **No Raw SQL:** Direct execution of raw SQL strings is strictly prohibited in Controllers, Models, and Services.
+- **Abstraction Requirement:** All database operations must use the `App\Db` service.
+- **Testability:** By using the abstraction layer, we ensure that all database interactions can be mocked during unit testing.
+
+### 🤖 AI & Agents
+- Agents must interface with the `Db` service via Models to ensure data integrity and audit logging.

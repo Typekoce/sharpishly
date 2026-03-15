@@ -4,36 +4,39 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Db;
+use App\Registry;
+use App\Services\Location;
 use Exception;
 
 class CsvProcessor
 {
     private Db $db;
+    private Location $loc;
     private int $batchSize = 500; 
 
     public function __construct()
     {
-        // Standardizing DB access
         $this->db = new Db();
+        // Use the verified Location service from the Registry
+        $this->loc = Registry::get(Location::class);
     }
 
     public function process(int $jobId, string $relativeFilePath): void
     {
         /**
-         * FIX 1: PATH RESOLUTION
-         * Using realpath and stripping redundant directory separators 
-         * to prevent /var/www/html/php//var/www/... errors.
+         * FIX: PATH RESOLUTION
+         * We leverage the Location service to get the absolute base,
+         * then ensure we only append the filename or the relative sub-path
+         * to avoid the double-rooting seen in the logs.
          */
-        $baseDir = dirname(__DIR__, 2); 
-        $cleanRelative = ltrim($relativeFilePath, '/');
-        
-        // Remove 'php/' if the relative path accidentally started with it
-        $cleanRelative = str_replace('php/', '', $cleanRelative);
-        
-        $filePath = $baseDir . '/' . $cleanRelative;
+        $fileName = basename($relativeFilePath);
+        $filePath = $this->loc->uploads() . '/' . $fileName;
 
         if (!file_exists($filePath)) {
-            Logger::error("CSV Process Failed: File not found", ['path' => $filePath]);
+            Logger::error("CSV Process Failed: File not found", [
+                'job_id' => $jobId,
+                'attempted_path' => $filePath
+            ]);
             $this->updateJobStatus($jobId, 'failed');
             return;
         }
@@ -60,8 +63,6 @@ class CsvProcessor
                 if (count($batch) >= $this->batchSize) {
                     $this->insertBatch($batch);
                     $batch = [];
-                    
-                    // Update progress without triggering 'file_path' constraints
                     $this->updateJobStatus($jobId, 'processing', $rowCount);
                 }
             }
@@ -97,26 +98,22 @@ class CsvProcessor
         
         $params = [];
         foreach ($rows as $row) {
-            $params = array_merge($params, array_values($row));
+            foreach ($row as $val) {
+                $params[] = $val;
+            }
         }
 
-        // Use standard execute to bypass the array-driven 'save' logic for raw speed
+        // Standard execute for high-performance batching
         $this->db->execute($sql, $params);
     }
 
-    /**
-     * FIX 2: SQL CONSTRAINT BYPASS
-     * To prevent "Field 'file_path' doesn't have a default value",
-     * we first fetch the existing record to ensure the full object is sent back
-     * to the save() method, fulfilling all NOT NULL requirements.
-     */
     private function updateJobStatus(int $id, string $status, int $count = null): void
     {
-        // 1. Get existing data to keep file_path and title intact
+        // Hydrate existing record to satisfy NOT NULL constraints (file_path, etc.)
         $existing = $this->db->find(['tbl' => 'jobs', 'where' => ['id' => $id]]);
         
         if (empty($existing)) {
-            Logger::error("Cannot update status: Job #$id not found in DB.");
+            Logger::error("Cannot update status: Job #$id not found.");
             return;
         }
 

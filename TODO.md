@@ -94,3 +94,20 @@
 
 ### 🤖 Layer 4: Autonomous Agency (Mocks)
 - [ ] **Crm Summarizer:** Mock a "Claude Agent" to provide a 1-sentence summary for each tenant.
+
+# 🚀 Sharpishly Master Strategy: Phase 2
+
+### 🧱 Layer 1: Core Engine & "Fire Drills"
+- [ ] **Fix Double-Root Pathing:** Resolve `CsvProcessor` concatenation logic that results in `/php/var/www/html/...` paths.
+- [ ] **Debug Upload Intermittency:** Investigate why `nike.csv` fails initially but `puma.csv` eventually queues. Check PHP `tmp_dir` permissions.
+- [ ] **Docker YAML:** Fix the unmarshal error on line 2 of `docker-compose.yml`.
+
+### 🏗️ Layer 1: Testability & Code Review
+- [x] **TenantModelTest:** Implement and verify data flow. (Completed)
+- [x] **CrmControllerTest:** Verify JSON dispatching. (Completed)
+- [ ] **Code Review:** Continue audit of remaining Controllers for `exit;` removals.
+
+### 🤖 Layer 4: Autonomous Agency (Omni-Agent)
+- [ ] **AgentInterface:** Standardize the contract for Ollama, Claude, and Grok.
+- [ ] **Mock Gallery:** Deploy the `MockClaude` and `MockGrok` adapters.
+- [ ] **Sensor Mocks:** Build the `Inbox.json` to feed the Omni-Agent suite.
