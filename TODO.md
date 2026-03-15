@@ -48,4 +48,29 @@
 
 ### 🚨 CRITICAL DEADLINE: FRIDAY (March 13, 2026)
 * **Menu Refactor:** Exactly 5 core links; map and implement submenus.
-* **Storage:** Unified directory structure for assets and logs.
+* **Storage:** Unified directory structure for assets and logs.# 🚀 Sharpishly Master Strategy: Phase 2
+
+### 🏗️ Layer 1: Core Engine & Infrastructure
+- [ ] **Docker Fix:** Resolve `unmarshal errors` on line 2 of `docker-compose.yml`.
+- [ ] **Code Sanitization:** Remove all remaining `die()` and `exit()` commands.
+- [ ] **Migration Reliability:** Fix `Duplicate column` error in `HomeModel::migrate()`.
+
+### 🖥️ Layer 3: HUD & UI/UX
+- [ ] **script.js Refactor:** - [ ] Implement `AppState` object for job tracking.
+  - [ ] Replace string-concatenation HTML with Template Literals.
+  - [ ] Connect `upload()` response to the HUD "Toast" system.
+- [ ] **Csv View:** Finalize `php/views/csv/upload.tpl` Smarty layout.
+
+# 🚀 Sharpishly Master Strategy: Phase 2
+
+### 🏗️ Layer 1: Core Engine & Infrastructure
+- [x] **Namespace Synchronization:** All core services aligned under `App\`.
+- [x] **View Refactor:** Moved `views/` out of `src/` to comply with PSR-4.
+- [ ] **Docker Fix:** Resolve `unmarshal errors` on line 2 of `docker-compose.yml`.
+- [ ] **Sanitization:** Final sweep to replace `die()`/`exit()` with Exceptions.
+
+### 🖥️ Layer 3: HUD & UI/UX (Glassmorphism)
+- [ ] **script.js Refactor:** - [ ] Implement `AppState` to track `csv_records` progress.
+  - [ ] Connect `CsvController::status()` to the HUD progress bars.
+- [ ] **View Verification:** Audit `BaseController` to ensure it looks for views in `php/views/` (one level up from `src`).
+

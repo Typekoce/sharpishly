@@ -53,6 +53,8 @@ try {
     echo "\n--- MVC Core ---\n";
     (new \App\Tests\HomeModelTest($tester))->run();
     (new \App\Tests\BaseControllerTest($tester))->run();
+    (new \App\Tests\BaseControllerTest($tester))->run();
+
 
 } catch (\Throwable $e) {
     echo "🚫 CRITICAL TEST ERROR: " . $e->getMessage() . "\n";
