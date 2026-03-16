@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 // 1. Initialize the application environment (Autoloader + Registry)
-require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/../bootstrap.php';
 
 use App\Registry;
 use App\Services\Logger;

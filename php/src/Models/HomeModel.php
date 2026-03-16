@@ -73,7 +73,7 @@ class HomeModel
             ]);
             $report .= "[OK] Table 'hardware_scans' ready\n";
 
-            // 4. CRM Infrastructure (NEW: Tenants)
+            // 4. CRM Infrastructure (Tenants)
             $this->db->createTable('tenants', [
                 'id'         => 'INT AUTO_INCREMENT PRIMARY KEY',
                 'name'       => 'VARCHAR(255) NOT NULL',
@@ -104,10 +104,12 @@ class HomeModel
             $this->db->createTable('jobs', $jobFields);
             $report .= "[OK] Workflow tables ready\n";
 
-            // PATCH: Add 'note' to jobs
+            // PATCH: Add 'note' to jobs (Defensive Check)
             if (!$this->db->columnExists('jobs', 'note')) {
                 $this->db->alter('jobs', 'ADD COLUMN', 'note', 'TEXT NULL AFTER status');
                 $report .= "[PATCH] Added 'note' column to 'jobs'\n";
+            } else {
+                $report .= "[SKIP] Column 'note' already exists in 'jobs'\n";
             }
 
             // 6. Tasks & CSV Records
@@ -130,7 +132,20 @@ class HomeModel
             ]);
             $report .= "[OK] CSV Engine tables ready\n";
 
-            // 7. Relational Constraints
+            // 7. Landlord Infrastructure (NEW)
+            $this->db->createTable('properties', [
+                'id'           => 'INT AUTO_INCREMENT PRIMARY KEY',
+                'name'         => 'VARCHAR(255) NOT NULL',
+                'address'      => 'TEXT NOT NULL',
+                'unit_number'  => 'VARCHAR(50)',
+                'monthly_rent' => 'DECIMAL(10, 2) NOT NULL',
+                'status'       => "ENUM('vacant', 'occupied', 'maintenance') DEFAULT 'vacant'",
+                'created_at'   => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+                'updated_at'   => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            ]);
+            $report .= "[OK] Table 'properties' ready\n";
+
+            // 8. Relational Constraints
             try {
                 $this->db->alter('csv_records', 'ADD INDEX', 'idx_job_id', '(job_id)');
                 $this->db->alter('csv_records', 'ADD FOREIGN KEY', 'fk_job_id', '(job_id) REFERENCES jobs(id) ON DELETE CASCADE');
@@ -139,7 +154,7 @@ class HomeModel
                 $report .= "[SKIP] Constraints already exist\n";
             }
 
-            // 8. Seeding
+            // 9. Seeding
             $this->seedInitialData($report);
 
             $report .= "\n✅ Migration completed successfully.\n";
@@ -157,8 +172,7 @@ class HomeModel
     private function seedInitialData(string &$report): void
     {
         // Seed Tenants
-        $hasTenants = $this->db->find(['tbl' => 'tenants', 'limit' => 1]);
-        if (empty($hasTenants)) {
+        if (empty($this->db->find(['tbl' => 'tenants', 'limit' => 1]))) {
             $this->db->save([
                 'tbl'    => 'tenants',
                 'name'   => 'Sharpishly Global HQ',
@@ -168,8 +182,7 @@ class HomeModel
         }
 
         // Seed Mugs
-        $hasMugs = $this->db->find(['tbl' => 'merchandise_inventory', 'limit' => 1]);
-        if (empty($hasMugs)) {
+        if (empty($this->db->find(['tbl' => 'merchandise_inventory', 'limit' => 1]))) {
             $this->db->save([
                 'tbl'         => 'merchandise_inventory',
                 'item_name'   => 'Premium White Mug Blank',
@@ -180,8 +193,7 @@ class HomeModel
         }
 
         // Seed Jobs
-        $hasJobs = $this->db->find(['tbl' => 'jobs', 'limit' => 1]);
-        if (empty($hasJobs)) {
+        if (empty($this->db->find(['tbl' => 'jobs', 'limit' => 1]))) {
             $this->db->save([
                 'tbl'            => 'jobs',
                 'title'          => 'System Initial Test',
@@ -192,6 +204,19 @@ class HomeModel
                 'note'           => 'Initial system-generated seed job.'
             ]);
             $report .= "[SEED] Initial job record added\n";
+        }
+
+        // Seed Properties
+        if (empty($this->db->find(['tbl' => 'properties', 'limit' => 1]))) {
+            $this->db->save([
+                'tbl'          => 'properties',
+                'name'         => 'TARDIS View Apartments',
+                'address'      => '742 Evergreen Terrace',
+                'unit_number'  => 'A1',
+                'monthly_rent' => 1200.00,
+                'status'       => 'occupied'
+            ]);
+            $report .= "[SEED] Initial property record added\n";
         }
     }
 }

@@ -111,3 +111,77 @@
 - [ ] **AgentInterface:** Standardize the contract for Ollama, Claude, and Grok.
 - [ ] **Mock Gallery:** Deploy the `MockClaude` and `MockGrok` adapters.
 - [ ] **Sensor Mocks:** Build the `Inbox.json` to feed the Omni-Agent suite.
+
+## BUG FIXES
+- [x] Fix `worker.php` pathing to bootstrap.
+- [x] Fix `HomeModel` migration crash on duplicate 'note' column.
+
+## INFRASTRUCTURE
+- [x] Centralized logging (Nginx/PHP/MySQL -> storage/logs).
+- [ ] Remove legacy `php/src/worker-daemon.php`.
+
+## LANDLORD MVC
+- [x] Update `HomeModel` with `properties` table and seed data.
+- [ ] Create `App\Models\LandlordModel`.
+- [ ] Create `App\Controllers\LandlordController`.
+- [ ] Implement AJAX fetch in `website/index.html`.
+
+## 🚨 RECENT ERRORS
+- [2026-03-16 16:13] SQLSTATE[42S21]: Duplicate column name 'note' in HomeModel. (FIXED: Added columnExists check)
+- [2026-03-16 16:21] SQLSTATE[42S02]: Table 'sharpishly.properties' doesn't exist. 
+  * Trace: App\Db->find called by LandlordModel->getAll() line 23.
+  * Status: Pending final migration run.
+
+## 🧠 NEURAL ENGINE (OLLAMA)
+- [ ] Implement RAG (Retrieval-Augmented Generation) for project codebase.
+- [ ] Create `App\Controllers\OllamaController`.
+- [ ] Connect Worker Agent to Ollama for background CSV analysis.
+- [ ] Add real-time chat interface to `index.html`.
+
+## 🚨 RECENT ERRORS
+- [2026-03-16 16:13] SQLSTATE[42S21]: Duplicate column name 'note' in HomeModel. (FIXED: Added columnExists check)
+- [2026-03-16 16:21] SQLSTATE[42S02]: Table 'sharpishly.properties' doesn't exist. 
+  * Trace: App\Db->find called by LandlordModel->getAll() line 23.
+  * Status: Pending final migration run to initialize properties infrastructure.
+
+## 🧪 TESTING SUITE (CRITICAL)
+- [ ] Create `OllamaControllerTest.php` (Mocking OllamaService responses)
+- [ ] Create `LandlordControllerTest.php` (Testing JSON output for SPA)
+- [ ] Create `LandlordModelTest.php` (Validating Db abstraction logic)
+
+## 🧠 NEURAL ENGINE (OLLAMA)
+- [x] Create `App\Controllers\OllamaController` with Context-Aware logic.
+- [x] Implement log and directory mapping injection.
+- [ ] Add specific file-reading capability for deep code analysis.
+
+## 🏠 LANDLORD MVC
+- [x] Create `LandlordModel.php` (Using Registry/Db abstraction).
+- [x] Create `LandlordController.php`.
+
+## 🚨 RECENT ERRORS
+- [2026-03-16 16:21] SQLSTATE[42S02]: Table 'sharpishly.properties' doesn't exist. 
+  * Fix: Added 'System Migrate' link to header for easy recovery.
+
+## 🧪 QUALITY ASSURANCE (Tests)
+- [ ] Create `tests/OllamaControllerTest.php`
+- [ ] Create `tests/LandlordControllerTest.php`
+- [ ] Create `tests/LandlordModelTest.php`
+
+## 🧠 NEURAL ENGINE (OLLAMA)
+- [x] Context-Aware OllamaController (Logs/Structure access).
+- [x] Added 'AI Interrogate' (/php/ollama/response) to navigation.
+
+## 🚨 RECENT ERRORS
+- [2026-03-16 16:40] TypeError: getCpuInfo() fixed.
+- [2026-03-16 16:54] Python LightMVC Scanner verified stable in VirtualBox.
+
+## 🧪 QUALITY ASSURANCE (Tests)
+- [ ] Create `tests/OllamaControllerTest.php`
+- [ ] Create `tests/LandlordControllerTest.php`
+- [ ] Create `tests/LandlordModelTest.php`
+- [ ] Create `tests/HardwareControllerTest.php`
+
+## 🛠️ HARDWARE INTEGRATION
+- [x] HardwareController strict-type return fix.
+- [ ] Create `App\Models\HardwareModel` to support `saveScan($data)`.
+- [ ] Bridge Python scanner output to PHP `hardware_scans` table.

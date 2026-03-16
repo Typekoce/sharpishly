@@ -5,12 +5,10 @@ namespace App\Controllers;
 
 use App\Models\HardwareModel;
 
-class HardwareController
+class HardwareController extends BaseController
 {
     public function info(): void
     {
-        header('Content-Type: application/json');
-
         $data = [
             'cpu'     => $this->getCpuInfo(),
             'memory'  => $this->getMemoryInfo(),
@@ -20,17 +18,42 @@ class HardwareController
             'disks'   => $this->getDisks(),
         ];
 
-        // Save to history
+        // Save to history using your Db abstraction in the Model
         $model = new HardwareModel();
         $model->saveScan($data);
 
-        echo json_encode($data, JSON_PRETTY_PRINT);
-        exit;
+        $this->json($data);
     }
 
-    private function getCpuInfo(): string { /* same as before */ }
-    private function getMemoryInfo(): array { /* same as before */ }
-    private function getUsbDevices(): array { /* same as before */ }
-    private function getNetworkInterfaces(): array { /* same as before */ }
-    private function getDisks(): array { /* same as before */ }
+    private function getCpuInfo(): string 
+    {
+        // Reading from /proc/cpuinfo (Standard Linux)
+        $cpu = shell_exec("grep 'model name' /proc/cpuinfo | head -1 | cut -d ':' -f 2");
+        return $cpu ? trim($cpu) : "Unknown CPU";
+    }
+
+    private function getMemoryInfo(): array 
+    {
+        $mem = shell_exec("free -m");
+        return ['raw' => $mem ? trim($mem) : "Unavailable"];
+    }
+
+    private function getUsbDevices(): array 
+    {
+        // lsusb might not be in the container, so we check /sys/bus/usb/devices
+        $devices = is_dir('/sys/bus/usb/devices') ? scandir('/sys/bus/usb/devices') : [];
+        return array_values(array_filter($devices, fn($d) => !str_starts_with($d, '.')));
+    }
+
+    private function getNetworkInterfaces(): array 
+    {
+        $interfaces = shell_exec("ip -br link show");
+        return $interfaces ? explode("\n", trim($interfaces)) : [];
+    }
+
+    private function getDisks(): array 
+    {
+        $df = shell_exec("df -h /");
+        return $df ? explode("\n", trim($df)) : [];
+    }
 }
