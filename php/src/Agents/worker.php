@@ -1,86 +1,95 @@
 <?php
+declare(strict_types=1);
+
 /**
- * SHARPISHLY MASTER WORKER (DAEMON)
+ * SHARPISHLY WORKER DAEMON
+ * Location: /var/www/html/php/src/worker-daemon.php
  */
 
-require_once __DIR__ . '/../bootstrap.php';
+// 1. Initialize the application environment (Autoloader + Registry)
+require_once __DIR__ . '/bootstrap.php';
 
-use App\Services\CSVProcessor;
+use App\Registry;
 use App\Services\Logger;
+use App\Services\CsvProcessor;
+use App\Services\Location;
 use App\Db;
 
-$db = new Db();
-Logger::info("🤖 Master Worker Online...");
+// Safety & Resource Constraints
+$maxIterations = 1000; 
+$iteration = 0;
+$memoryLimit = 128 * 1024 * 1024; // 128MB
 
-while (true) {
-    // 1. Guard
-    if (file_exists(__DIR__ . '/../../../storage/queue/STOP')) { 
-        sleep(5); 
-        continue; 
-    }
+// Access services via Registry
+$loc = Registry::get(Location::class);
+$db  = Registry::get(Db::class);
 
-    $jobs = glob(__DIR__ . '/../../../storage/queue/*.job');
+Logger::info("Neural Factory Daemon Online", ['pid' => getmypid()], 'scheduler');
 
-    foreach ($jobs as $f) {
-        $job = json_decode(file_get_contents($f), true);
-        $type = $job['type'] ?? 'UNKNOWN';
-        $jobId = (int)($job['job_id'] ?? 0);
+while ($iteration < $maxIterations) {
+    $iteration++;
 
-        Logger::info("Agent received task: $type (#$jobId)");
+    try {
+        // --- 1. SCAN QUEUE ---
+        $jobFiles = glob($loc->queue('*.job'));
 
-        try {
-            switch ($type) {
-                case 'CSV_IMPORT':
-                    $absolutePath = dirname(__DIR__, 2) . '/' . $job['filepath'];
-                    
-                    // PRE-FLIGHT: Calculate size so UI progress bar works
-                    if (file_exists($absolutePath)) {
-                        $totalRows = bin_count_lines($absolutePath) - 1;
-                        $db->save([
-                            'tbl' => 'jobs',
-                            'id' => $jobId,
-                            'total_rows' => $totalRows,
-                            'status' => 'processing'
-                        ]);
-                    }
+        foreach ($jobFiles as $jobFile) {
+            $rawContent = file_get_contents($jobFile);
+            $jobData = json_decode((string)$rawContent, true);
+            
+            if ($jobData && isset($jobData['job_id'], $jobData['filepath'])) {
+                
+                // Resolve absolute path via Location service
+                $fileName = basename($jobData['filepath']);
+                $absoluteCsvPath = $loc->uploads($fileName);
 
-                    $processor = new CSVProcessor();
-                    $processor->process($jobId, $job['filepath']);
-                    $result = "CSV Interrogation Complete.";
-                    break;
+                if (!file_exists($absoluteCsvPath)) {
+                    Logger::error("CSV missing on disk", ['path' => $absoluteCsvPath], 'scheduler');
+                    rename($jobFile, $jobFile . '.missing');
+                    continue;
+                }
 
-                case 'SCOUT_TRENDS':
-                    // Keep your original Scout logic here
-                    $result = "Trends Scouted."; 
-                    break;
+                Logger::info("Processing Job #{$jobData['job_id']}", ['file' => $absoluteCsvPath], 'scheduler');
 
-                default:
-                    $result = "Unknown task type ignored.";
+                /**
+                 * CsvProcessor now pulls its own Db/Location from Registry internally.
+                 * No need to pass dependencies manually.
+                 */
+                $processor = new CsvProcessor();
+                $processor->process(
+                    (int)$jobData['job_id'], 
+                    $absoluteCsvPath
+                );
+
+                // Cleanup job file
+                unlink($jobFile);
+                
+            } else {
+                Logger::error("Invalid job file format", ['file' => $jobFile], 'scheduler');
+                rename($jobFile, $jobFile . '.bad');
             }
-
-            unlink($f); 
-            Logger::info("Task finished: $result");
-
-        } catch (Exception $e) {
-            Logger::error("Worker Error: " . $e->getMessage());
-            if ($jobId) {
-                $db->save(['tbl' => 'jobs', 'id' => $jobId, 'status' => 'failed']);
-            }
-            unlink($f); // Remove failed job to prevent infinite loops
         }
+
+        // --- 2. HEALTH HEARTBEAT ---
+        file_put_contents($loc->queue('health.json'), json_encode([
+            'status' => 'running',
+            'iteration' => $iteration,
+            'memory_peak' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . 'MB',
+            'last_run' => date('c')
+        ]));
+
+    } catch (Throwable $e) {
+        Logger::exception($e, 'scheduler');
     }
-    sleep(1);
+
+    // --- 3. RESOURCE GUARD ---
+    if (memory_get_usage(true) > $memoryLimit) {
+        Logger::info("Memory limit reached. Cycling daemon...", [], 'scheduler');
+        break; 
+    }
+
+    sleep(5);
 }
 
-/**
- * High-speed line count for 50k+ rows
- */
-function bin_count_lines(string $file): int {
-    $count = 0;
-    $handle = fopen($file, "r");
-    while (!feof($handle)) {
-        $count += substr_count(fread($handle, 8192), "\n");
-    }
-    fclose($handle);
-    return $count;
-}
+Logger::info("Daemon reaching iteration limit. Restarting...");
+exit(0);

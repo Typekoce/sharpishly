@@ -4,11 +4,6 @@ server {
     root /var/www/html/website; # Standardized root to match Docker Compose
     index index.html index.php;
 
-    # --- LOGGING CENTRALIZATION ---
-    # Points to your storage folder in the php directory
-    access_log /var/www/html/storage/logs/nginx_access.log;
-    error_log  /var/www/html/storage/logs/nginx_error.log warn;
-
 
     # FIX 1: Allow larger files (Set to 50MB)
     client_max_body_size 50M;
