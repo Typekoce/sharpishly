@@ -38,6 +38,39 @@ class HomeModel
         $report = "<h2>Sharpishly Migration Report</h2><pre>\n";
 
         try {
+
+
+            /**
+             * Using the Db abstraction to ensure the table structure exists.
+             * We pass the schema array to the Db service.
+             */
+            $this->db->createTable('properties', [
+                'id'          => 'INT AUTO_INCREMENT PRIMARY KEY',
+                'address'     => 'VARCHAR(255) NOT NULL',
+                'rent'        => 'DECIMAL(10, 2) NOT NULL',
+                'status'      => "ENUM('Paid', 'Overdue', 'Pending') DEFAULT 'Pending'",
+                'tenant_name' => 'VARCHAR(100)',
+                'updated_at'  => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
+            ]);
+            $report .= "[OK] Table 'properties' ready\n";
+
+
+            // Seed check using abstraction
+            $existing = $this->db->find(['tbl' => 'properties', 'limit' => 1]);
+
+            if (empty($existing)) {
+                $this->db->save([
+                    'tbl'     => 'properties',
+                    'address' => '221B Baker St',
+                    'rent'    => 1200.00,
+                    'status'  => 'Paid'
+                ]);
+
+                $report .= "[OK] Table 'properties seeded' ready\n";
+
+            }
+
+
             // 1. Merchandise Inventory
             $this->db->createTable('merchandise_inventory', [
                 'id'           => 'INT AUTO_INCREMENT PRIMARY KEY',

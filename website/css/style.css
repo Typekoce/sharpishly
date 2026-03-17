@@ -14,3 +14,37 @@ button:hover { filter: brightness(1.2); }
 .btn-stop { background: var(--red); color: white; }
 .btn-run { background: var(--blue); color: white; }
 .btn-scout { background: var(--green); color: white; }
+
+/* website/css/style.css */
+
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --neon-blue: #00d2ff;
+}
+
+.hud-container {
+    background: var(--glass-bg);
+    /* The core Glassmorphism effect */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); 
+    
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    
+    /* Cyberdeck aesthetic */
+    font-family: 'Courier New', Courier, monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hud-header {
+    border-bottom: 1px solid var(--neon-blue);
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    font-size: 0.8rem;
+    color: var(--neon-blue);
+}

@@ -3,11 +3,6 @@ declare(strict_types=1);
 
 namespace App;
 
-/**
- * Location: php/index.php
- * BACKEND FRONT CONTROLLER
- */
-
 require_once __DIR__ . '/src/bootstrap.php';
 
 use App\Registry;
@@ -21,6 +16,15 @@ class FrontController
     private string $methodName = 'index';
     private array $params = [];
 
+    /**
+     * TIER 2: The Exception Map
+     * For routes that don't follow the standard naming convention.
+     */
+    private array $specialRoutes = [
+        'jeff_bezo' => 'Amazon',
+        'csv/upload-stream' => ['Csv', 'uploadStream'],
+    ];
+
     public function __construct()
     {
         try {
@@ -28,57 +32,49 @@ class FrontController
             $this->logRequest();
             $this->run();
         } catch (Throwable $e) {
-            // Logs to /storage/logs via the shared Logger instance
             Logger::exception($e);
             $this->abort(500, "Internal Server Error");
         }
     }
 
-    private function logRequest(): void
-    {
-        Logger::info("PHP Backend Request", [
-            'uri' => $_SERVER['REQUEST_URI'] ?? 'unknown',
-            'controller' => $this->controllerName,
-            'method' => $this->methodName,
-            'params' => $this->params
-        ]);
-    }
-
-    private function handleSpecialRoutes(): void
-    {
-        $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-        
-        if ($uri === '/php/csv/upload-stream') {
-            // Pull the single DB instance from the Registry
-            $db = Registry::get(\App\Db::class); 
-            
-            $controller = new \App\Controllers\CsvController();
-            $controller->uploadStream();
-            exit;
-        }
-    }
-
     private function parseUrl(): void
     {
-        $path = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/');
+        $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+        $path = trim($uri, '/');
 
-        // Normalize path by stripping the 'php' segment
+        // Remove 'php/' prefix
         if (str_starts_with($path, 'php/')) {
             $path = substr($path, 4);
-        } elseif ($path === 'php' || $path === 'php/') {
+        } elseif ($path === 'php') {
             $path = '';
         }
 
         if ($path === '') return;
 
+        // 1. Check Tier 2: Special Routes first
+        if (isset($this->specialRoutes[$path])) {
+            $mapping = $this->specialRoutes[$path];
+            if (is_array($mapping)) {
+                $this->controllerName = $mapping[0];
+                $this->methodName = $mapping[1];
+            } else {
+                $this->controllerName = $mapping;
+            }
+            return;
+        }
+
         $segments = explode('/', $path);
 
+        // 2. Tier 1: Auto-Mapping with Underscore Support
         if (!empty($segments[0])) {
-            $this->controllerName = ucfirst(strtolower($segments[0]));
+            // Converts 'nervous_system' -> 'NervousSystem'
+            $this->controllerName = str_replace(' ', '', ucwords(str_replace('_', ' ', $segments[0])));
         }
 
         if (isset($segments[1]) && $segments[1] !== '') {
-            $this->methodName = strtolower($segments[1]);
+            // Converts 'upload_csv' -> 'uploadCsv' (camelCase for methods)
+            $methodRaw = str_replace(' ', '', ucwords(str_replace('_', ' ', $segments[1])));
+            $this->methodName = lcfirst($methodRaw);
         }
 
         $this->params = array_slice($segments, 2);
@@ -86,15 +82,12 @@ class FrontController
 
     private function run(): void
     {
-        $this->handleSpecialRoutes();
-    
         $controllerClass = "App\\Controllers\\{$this->controllerName}Controller";
 
         if (!class_exists($controllerClass)) {
             $this->abort(404, "Controller '{$this->controllerName}' not found.");
         }
 
-        // Instantiated via custom autoloader defined in bootstrap
         $controller = new $controllerClass();
 
         if (!method_exists($controller, $this->methodName)) {
@@ -107,6 +100,15 @@ class FrontController
         }
 
         call_user_func_array([$controller, $this->methodName], $this->params);
+    }
+
+    private function logRequest(): void
+    {
+        Logger::info("PHP Backend Request", [
+            'uri' => $_SERVER['REQUEST_URI'] ?? 'unknown',
+            'controller' => $this->controllerName,
+            'method' => $this->methodName
+        ]);
     }
 
     private function abort(int $code, string $message = ''): never

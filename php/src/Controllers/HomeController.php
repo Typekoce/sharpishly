@@ -68,4 +68,29 @@ class HomeController extends BaseController
             echo "<h1>Migration Error</h1><pre>{$e->getMessage()}</pre>";
         }
     }
+
+    /**
+     * Endpoint: /php/home/signal?type=stop
+     */
+    public function signal(): void
+    {
+        $type = $_GET['type'] ?? '';
+        $allowedSignals = ['stop', 'restart', 'clear_logs'];
+
+        if (!in_array($type, $allowedSignals)) {
+            $this->json(['status' => 'error', 'message' => 'Invalid signal'], 400);
+            return;
+        }
+
+        // Create the physical signal file in the queue directory
+        // The Worker loop checks for file_exists($loc->queue('STOP'))
+        $signalFile = $this->loc->queue(strtoupper($type));
+        
+        if (touch($signalFile)) {
+            \App\Services\Logger::info("System Signal Issued: " . strtoupper($type));
+            $this->json(['status' => 'success', 'signal' => $type]);
+        } else {
+            $this->json(['status' => 'error', 'message' => 'Failed to issue signal'], 500);
+        }
+    }
 }
