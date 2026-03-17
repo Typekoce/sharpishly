@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-
+//Location: php/src/Controllers/CsvController.php
 namespace App\Controllers;
 
 use App\Services\Logger;
@@ -112,5 +112,18 @@ class CsvController extends BaseController {
         ]);
 
         $this->json($activeJobs);
+    }
+
+    /**
+     * API Endpoint for records
+     */    public function records(): void 
+    {
+        $records = $this->db->find([
+            'tbl' => 'csv_records',
+            'limit' => 50,
+            'order' => ['id' => 'DESC']
+        ]);
+
+        $this->json(['status' => 'success', 'data' => $records]);
     }
 }

@@ -1,0 +1,37 @@
+<div class="text-center mb-5">
+  <h1 class="display-4">{{ title }}</h1>
+  <p class="lead text-muted">{{ message }}</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card bg-secondary text-light shadow">
+      <div class="card-body">
+        <h5 class="card-title">Request Info</h5>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item bg-dark text-light"><strong>Path:</strong> {{ url }}</li>
+          <li class="list-group-item bg-dark text-light"><strong>Query:</strong> {{ query }}</li>
+          <li class="list-group-item bg-dark text-light"><strong>Time:</strong> {{ server_time }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card bg-secondary text-light shadow">
+      <div class="card-body">
+        <h5 class="card-title">Example Data</h5>
+        <ul class="list-group list-group-flush">
+          {% for item in example_items %}
+          <li class="list-group-item bg-dark text-light">{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="text-center mt-5">
+  <a href="?format=json" class="btn btn-outline-light">View as JSON</a>
+  <a href="?pretty=1&format=json" class="btn btn-outline-info">Pretty JSON</a>
+</div>

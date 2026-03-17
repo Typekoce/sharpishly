@@ -11,6 +11,7 @@ use Exception;
 class OllamaController extends BaseController 
 {
     private OllamaService $ollama;
+    private string $rootDir = '/var/www/html/';
 
     public function __construct() 
     {
@@ -51,20 +52,82 @@ class OllamaController extends BaseController
             return;
         }
 
-        // 2. Dev Mode Check: Return static response if APP_ENV is "dev"
+        // 2. Dev Mode Check
         if (getenv('APP_ENV') === 'dev') {
-            $this->handleOutput("[DEV MODE] This is a static response. Ollama container was not called.");
+            $this->handleOutput("[DEV MODE] Static response enabled.");
             return;
         }
 
         try {
-            // 3. Live AI Interrogation
-            $answer = $this->ollama->ask($question);
+            // 3. Inject Project Context
+            $context = $this->gatherContext($question);
+            
+            $prompt = !empty($context) 
+                ? "CONTEXT FROM PROJECT FILES:\n$context\n\nUSER QUESTION:\n$question" 
+                : $question;
+
+            // 4. Live AI Interrogation
+            $answer = $this->ollama->ask($prompt);
             $this->handleOutput($answer);
+
         } catch (Exception $e) {
             Logger::error("Ollama Error: " . $e->getMessage());
             $this->json(['error' => 'AI Link Offline'], 500);
         }
+    }
+
+    /**
+     * Scans the project based on keywords in the question
+     */
+    private function gatherContext(string $question): string
+    {
+        $q = strtolower($question);
+        $context = "";
+
+        // Log Context
+        if (str_contains($q, 'log') || str_contains($q, 'error') || str_contains($q, 'failed')) {
+            $logPath = $this->rootDir . 'storage/logs/app.log';
+            $errPath = $this->rootDir . 'storage/logs/php_error.log';
+            
+            if (file_exists($logPath)) {
+                $context .= "--- APP LOG (Last 15 lines) ---\n" . $this->getLastLines($logPath, 15) . "\n";
+            }
+            if (file_exists($errPath)) {
+                $context .= "--- PHP ERRORS (Last 15 lines) ---\n" . $this->getLastLines($errPath, 15) . "\n";
+            }
+        }
+
+        // Structure/Code Context
+        if (str_contains($q, 'code') || str_contains($q, 'file') || str_contains($q, 'structure')) {
+            $context .= "--- PROJECT STRUCTURE ---\n" . $this->getMap() . "\n";
+        }
+
+        return $context;
+    }
+
+    /**
+     * Reads the end of a log file safely
+     */
+    private function getLastLines(string $file, int $n): string
+    {
+        $data = file($file);
+        return implode("", array_slice($data, -$n));
+    }
+
+    /**
+     * Maps the core src directory
+     */
+    private function getMap(): string
+    {
+        $path = $this->rootDir . 'php/src';
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
+        $map = "";
+        foreach ($files as $file) {
+            if ($file->isFile()) {
+                $map .= str_replace($this->rootDir, '', $file->getPathname()) . "\n";
+            }
+        }
+        return substr($map, 0, 1000); // Token safety cap
     }
 
     /**

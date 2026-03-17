@@ -185,3 +185,16 @@
 - [x] HardwareController strict-type return fix.
 - [ ] Create `App\Models\HardwareModel` to support `saveScan($data)`.
 - [ ] Bridge Python scanner output to PHP `hardware_scans` table.
+
+## ✅ COMPLETED TODAY
+- [x] CSV Batch Processor with path resolution fix.
+- [x] CsvController API endpoints (status/records).
+- [x] Landlord Dashboard Mocks.
+- [x] Ollama Service "Dev Mock" toggle.
+- [x] Infrastructure stabilization (net-tools/arp fix).
+
+## 🌅 NEXT SESSION (Tomorrow)
+- [ ] **UI Integration:** Update `website/js/script.js` to poll `/php/csv/status`.
+- [ ] **Data Visualization:** Create a simple HTML table in `csv/upload.html` to display `/php/csv/records`.
+- [ ] **Worker Verification:** Ensure `worker.php` is correctly picking up `.job` files from `storage/queue`.
+- [ ] **Code Review:** Remove any remaining `exit;` calls in older controllers.

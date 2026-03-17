@@ -6,6 +6,9 @@ class OllamaService {
     private string $model = 'llama3.2:3b';
 
     public function ask(string $prompt, string $system = "You are a Business Intelligence Agent."): string {
+        if (getenv('APP_ENV') === 'dev') {
+        return "MOCK AI: I have analyzed your request regarding '$prompt'. Everything looks stable.";
+        }   
         $payload = [
             'model' => $this->model,
             'prompt' => $prompt,
