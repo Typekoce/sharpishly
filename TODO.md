@@ -198,3 +198,9 @@
 - [ ] **Data Visualization:** Create a simple HTML table in `csv/upload.html` to display `/php/csv/records`.
 - [ ] **Worker Verification:** Ensure `worker.php` is correctly picking up `.job` files from `storage/queue`.
 - [ ] **Code Review:** Remove any remaining `exit;` calls in older controllers.
+
+## 🚀 SPRINT 3.1: THE DATA LOOP (Scheduled)
+- [ ] **Worker Update:** Implement `Db`-based CSV parsing in `worker.php`.
+- [ ] **Event Signaling:** Add JSON broadcast logic for the SSE stream.
+- [ ] **Database Sink:** Ensure processed rows land in the correct table.
+- [ ] **HUD Connection:** Finalize `script.js` to listen to the SSE stream.
