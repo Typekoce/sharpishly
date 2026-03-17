@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  pymvc:
+    build:
+      context: .                     # current dir = pymvc-server/
+      dockerfile: Dockerfile
+    container_name: sharpishly-pymvc
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Optional: live reload during dev (uncomment if editing files often)
+    # volumes:
+    #   - .:/app
