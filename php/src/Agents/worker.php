@@ -8,6 +8,18 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 
+/**
+ * @file worker.php
+ * @package App\Agents
+ * @brief Background Processing Daemon.
+ *
+ * This script runs as a persistent background process (Daemon). It monitors
+ * the database for pending jobs (CSV uploads, AI tasks) and executes 
+ * them asynchronously from the web request.
+ *
+ * @note This agent communicates with the UI by writing JSON signals to 
+ * the 'events.json' queue, which are then picked up by the NervousSystemController.
+ */
 use App\Registry;
 use App\Services\Logger;
 use App\Services\CsvProcessor;

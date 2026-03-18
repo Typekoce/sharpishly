@@ -6,6 +6,20 @@ namespace App;
 use PDO;
 use Exception;
 
+/**
+ * @file Db.php
+ * @package App
+ * @brief Database Abstraction & Self-Healing Schema Manager.
+ *
+ * A PDO wrapper that enforces the "Zero-Manual-SQL" rule in controllers.
+ * It provides methods for automated table migrations and safe data 
+ * persistence.
+ *
+ * @details 
+ * - Automated Table Creation: Checks for table existence before queries.
+ * - Prepared Statements: Prevents SQL injection across the entire stack.
+ * - Singleton Access: Managed via the App\Registry for resource efficiency.
+ */
 class Db {
     private PDO $pdo;
 

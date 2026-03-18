@@ -7,6 +7,22 @@ use App\Services\Logger;
 use App\Registry;
 use App\Services\Location;
 
+/**
+ * @file NervousSystemController.php
+ * @package App\Controllers
+ * @brief The System's Real-Time Communication Hub.
+ *
+ * This controller implements the Server-Sent Events (SSE) protocol. It acts as
+ * the "Nervous System" of the application, streaming background worker updates
+ * from the server's internal queue directly to the client's HUD.
+ *
+ * @section sse_logic SSE Implementation
+ * The stream() method maintains a persistent HTTP connection using a 
+ * non-blocking while-loop. It monitors 'events.json' and broadcasts 
+ * updates to the frontend via the 'data:' stream.
+ *
+ * @see Registry, Location
+ */
 class NervousSystemController extends BaseController
 {
     /**

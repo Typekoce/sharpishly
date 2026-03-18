@@ -5,6 +5,24 @@ namespace App\Controllers;
 
 use App\Models\HardwareModel;
 
+/**
+ * @file HardwareController.php
+ * @package App\Controllers
+ * @brief The Gatekeeper for Hardware Abstraction.
+ *
+ * This controller serves as a bridge between the PHP Orchestrator and the 
+ * Python-based PyMVC node. It abstracts the complexity of OS-level device 
+ * scanning into a unified JSON API.
+ *
+ * @section hw_flow Hardware Scanning Process
+ * 1. Controller receives a scan request.
+ * 2. It dispatches an internal HTTP request to the PyMVC service (Port 8083).
+ * 3. The returned Python hardware map is cached in the Registry.
+ * 4. Data is pushed to the Nervous System if state changes are detected.
+ *
+ * @note Requires the Nginx reverse proxy for /pymvc/ to be active.
+ * @see NervousSystemController
+ */
 class HardwareController extends BaseController
 {
     public function info(): void
