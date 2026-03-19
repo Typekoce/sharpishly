@@ -5,163 +5,131 @@ namespace App\Services;
 
 use App\Db;
 use App\Registry;
-use App\Services\Location;
+use App\Core\Location;
 use App\Services\Logger;
+use App\Services\VectorService;
 use Exception;
 
 /**
  * @file CsvProcessor.php
  * @package App\Services
- * @brief High-performance Batch Interrogation Engine.
- *
- * This service handles the heavy lifting of parsing uploaded CSV files,
- * batching them into atomic SQL transactions, and notifying the 
- * NervousSystemController (SSE) of real-time progress.
+ * @brief Neural-Enhanced Batch Interrogation Engine.
  */
 class CsvProcessor
 {
     private Db $db;
     private Location $loc;
-    private int $batchSize = 500; 
+    private VectorService $vector;
+    private int $batchSize = 100; // Reduced batch size for neural overhead
 
     public function __construct()
     {
-        $this->db = new Db();
-        $this->loc = Registry::get(Location::class);
+        $this->db     = new Db();
+        $this->loc    = Registry::get(Location::class);
+        $this->vector = Registry::get(VectorService::class);
     }
 
     /**
-     * Orchestrates the transformation of raw CSV data into persisted records.
-     * * @param int $jobId The ID from the 'jobs' table.
-     * @param string $relativeFilePath The path provided by the upload controller.
+     * Orchestrates the transformation of raw CSV data into Relational + Vector records.
      */
-    public function process(int $jobId, string $relativeFilePath): void
+    public function process(int $jobId, string $fileName): void
     {
-        // Path Resolution: Ensure we are looking in the correct absolute directory
-        $fileName = basename($relativeFilePath);
-        $filePath = $this->loc->uploads() . '/' . $fileName;
+        $filePath = $this->loc->getStoragePath("uploads/$fileName");
 
         if (!file_exists($filePath)) {
-            Logger::error("CSV Process Failed: File not found", [
-                'job_id' => $jobId,
-                'attempted_path' => $filePath
-            ]);
+            Logger::error("CSV Process Failed: File not found", ['path' => $filePath]);
             $this->updateJobStatus($jobId, 'failed');
             return;
         }
 
         $handle = fopen($filePath, 'r');
+        $headers = fgetcsv($handle); // Capture headers for dynamic mapping
         $rowCount = 0;
         $batch = [];
 
-        Logger::info("Agent starting batch interrogation for Job #$jobId");
+        Logger::info("Agent starting neural-batch interrogation for Job #$jobId");
 
         try {
-            // Skip header row
-            fgetcsv($handle); 
-
             while (($data = fgetcsv($handle)) !== false) {
                 $rowCount++;
+                $row = array_combine($headers, $data);
+                
+                // 1. Prepare the "Searchable String" for the AI context
+                $searchableText = $this->prepareSearchableString($row);
                 
                 $batch[] = [
-                    'job_id'   => $jobId,
-                    'column_1' => $data[0] ?? '',
-                    'column_2' => $data[1] ?? '',
-                    'column_3' => $data[2] ?? '',
+                    'job_id'          => $jobId,
+                    'raw_data'        => json_encode($row),
+                    'searchable_text' => $searchableText,
+                    'status'          => 'pending_vector' 
                 ];
 
-                // When the buffer hits the limit, commit to DB and "Shout" to the HUD
                 if (count($batch) >= $this->batchSize) {
-                    $this->insertBatch($batch);
+                    $this->commitBatch($jobId, $batch, $rowCount);
                     $batch = [];
-                    
-                    // Update DB and Pulse the Nervous System
-                    $this->updateJobStatus($jobId, 'processing', $rowCount);
-                    $this->shoutProgress($jobId, $rowCount, "Integrating batch: $rowCount rows...");
                 }
             }
 
-            // Final cleanup for remaining rows
+            // Final cleanup
             if (!empty($batch)) {
-                $this->insertBatch($batch);
-                $this->updateJobStatus($jobId, 'completed', $rowCount);
-                $this->shoutProgress($jobId, $rowCount, "Integration successful: $rowCount rows total.");
+                $this->commitBatch($jobId, $batch, $rowCount);
             }
 
-            Logger::info("Job #$jobId completed successfully", ['total' => $rowCount]);
+            $this->updateJobStatus($jobId, 'completed', $rowCount);
+            $this->shoutProgress($jobId, $rowCount, "Integration successful: $rowCount rows total.");
 
         } catch (Exception $e) {
-            Logger::exception($e);
+            Logger::error("CsvProcessor Critical Failure: " . $e->getMessage());
             $this->updateJobStatus($jobId, 'failed');
-            $this->shoutProgress($jobId, 0, "Critical Failure: " . $e->getMessage());
         } finally {
-            if (is_resource($handle)) {
-                fclose($handle);
-            }
+            if (is_resource($handle)) fclose($handle);
         }
     }
 
     /**
-     * Executes a single, high-speed multi-row INSERT.
+     * Commits data to MariaDB and signals the Nervous System.
      */
-    private function insertBatch(array $rows): void
+    private function commitBatch(int $jobId, array $batch, int $currentCount): void
     {
-        if (empty($rows)) return;
-
-        $columns = ['job_id', 'column_1', 'column_2', 'column_3'];
-        $colString = implode(', ', $columns);
-        
-        $rowPlaceholders = '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
-        $allPlaceholders = implode(', ', array_fill(0, count($rows), $rowPlaceholders));
-
-        $sql = "INSERT INTO csv_records ($colString) VALUES $allPlaceholders";
-        
-        $params = [];
-        foreach ($rows as $row) {
-            foreach ($row as $val) {
-                $params[] = $val;
-            }
+        // Insert into relational table 'csv_contents'
+        foreach ($batch as $row) {
+            $this->db->save(array_merge(['tbl' => 'csv_contents'], $row));
         }
 
-        $this->db->execute($sql, $params);
+        $this->updateJobStatus($jobId, 'processing', $currentCount);
+        $this->shoutProgress($jobId, $currentCount, "Ingested $currentCount rows. Awaiting Vectorization...");
     }
 
     /**
-     * Drops a JSON signal into the queue for the NervousSystemController (SSE).
+     * Converts a CSV row into a descriptive sentence for the VectorDB.
+     * Customize this based on your specific CSV headers.
      */
+    private function prepareSearchableString(array $row): string
+    {
+        // Example: If CSV has 'Title', 'Location', 'Price'
+        $title    = $row['Title'] ?? $row['name'] ?? 'Unknown Item';
+        $location = $row['Location'] ?? $row['city'] ?? 'Unknown Location';
+        $desc     = $row['Description'] ?? $row['notes'] ?? '';
+
+        return "Property: $title located in $location. Details: $desc";
+    }
+
     private function shoutProgress(int $jobId, int $count, string $msg): void
     {
-        $eventFile = $this->loc->queue('events.json');
-        
+        $eventFile = $this->loc->getStoragePath('queue/events.json');
         file_put_contents($eventFile, json_encode([
-            'event' => 'PROGRESS',
+            'event'  => 'PROGRESS',
             'job_id' => $jobId,
-            'val'   => $count,
-            'msg'   => $msg,
-            'ts'    => time()
+            'val'    => $count,
+            'msg'    => $msg,
+            'ts'     => time()
         ]));
-
-        // Small delay ensures the Controller has time to consume the file before the next batch
-        usleep(50000); 
     }
 
-    /**
-     * Persists the current state of the job to the database.
-     */
     private function updateJobStatus(int $id, string $status, int $count = null): void
     {
-        $existing = $this->db->find(['tbl' => 'jobs', 'where' => ['id' => $id]]);
-        
-        if (empty($existing)) return;
-
-        $jobData = $existing[0];
-        $jobData['tbl'] = 'jobs';
-        $jobData['status'] = $status;
-        
-        if ($count !== null) {
-            $jobData['processed_rows'] = $count;
-        }
-
-        $this->db->save($jobData);
+        $data = ['tbl' => 'jobs', 'id' => $id, 'status' => $status];
+        if ($count !== null) $data['processed_rows'] = $count;
+        $this->db->save($data);
     }
 }

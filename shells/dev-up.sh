@@ -4,21 +4,24 @@
 line=$'\n-----------------\n'
 clear
 
+echo "🛑 Stopping bare metal Ollama Service..."
+sudo systemctl stop ollama 2>/dev/null || echo "Ollama not running on host."
+
 echo "🚀 Recreating Sharpishly Infrastructure..."
 docker compose up -d --force-recreate
 
 echo "${line}⚙️  Verifying PHP Upload Limits..."
 docker exec sharpishly-php php -r "echo 'Upload Max: ' . ini_get('upload_max_filesize') . \"\n\";"
-docker exec sharpishly-php php -r "echo 'Post Max: ' . ini_get('post_max_size') . \"\n\";"
 
 echo "${line}📂 Aligning Storage Permissions..."
+# CRITICAL: Re-establishing your directory structure
 docker exec sharpishly-php mkdir -p \
     /var/www/html/storage/uploads \
     /var/www/html/storage/queue \
     /var/www/html/storage/logs \
     /tmp
 
-# Initialize all log files
+# CRITICAL: Restoring your log initialization
 docker exec sharpishly-php touch \
     /var/www/html/storage/logs/php_error.log \
     /var/www/html/storage/logs/nginx_access.log \
@@ -27,34 +30,43 @@ docker exec sharpishly-php touch \
     /var/www/html/storage/logs/app.log \
     /var/www/html/storage/logs/scheduler.log
 
-# SET PERMISSIONS & OWNERSHIP
+# CRITICAL: Restoring your specific Ownership & Permission levels
 docker exec sharpishly-php chown -R 1000:33 /var/www/html/storage/
 docker exec sharpishly-php chmod -R 777 /var/www/html/storage/
 docker exec sharpishly-php chmod 666 /var/www/html/storage/logs/mysql_error.log
 docker exec sharpishly-php chmod 1777 /tmp
 
-echo "✅ Storage synced. Logs redirected to storage/logs/"
+echo "✅ Storage synced. Logs redirected and permissions locked."
 
-echo "${line}🧠 Ollama Health Check"
-curl -s http://localhost:11434/api/tags | grep -q "models" && echo "✅ Ollama is Responding" || echo "❌ Ollama Connection Failed"
+echo "${line}🧠 Neural Memory Initialization (Qdrant)"
+# Check if collection exists to avoid error noise
+COLLECTION_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:6333/collections/properties)
+if [ "$COLLECTION_STATUS" -ne 200 ]; then
+    echo "📦 Creating 'properties' vector collection..."
+    curl -X PUT "http://localhost:6333/collections/properties" \
+         -H "Content-Type: application/json" \
+         --data '{ "vectors": { "size": 768, "distance": "Cosine" } }'
+else
+    echo "✅ Qdrant collection 'properties' is active."
+fi
+
+echo "${line}🧠 Ollama Model Check"
+# Ensure the embedding model is available inside the container
+if ! docker exec sharpishly-ollama ollama list | grep -q "nomic-embed-text"; then
+    echo "📥 Pulling nomic-embed-text embedding model..."
+    docker exec sharpishly-ollama ollama pull nomic-embed-text
+else
+    echo "✅ Ollama is Responding and Models are Loaded."
+fi
 
 echo "${line}🧪 Automated Quality Gate"
 docker exec sharpishly-php php /var/www/html/tests/run.php
-TEST_EXIT_CODE=$?
-
-if [ $TEST_EXIT_CODE -ne 0 ]; then
+if [ $? -ne 0 ]; then
     echo "❌ CRITICAL: Tests failed!"
     read -p "Do you want to launch the worker anyway? (y/n) " -n 1 -r
     echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Exiting to fix errors..."
-        exit 1
-    fi
-else
-    echo "✅ Tests Passed. System is stable."
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then exit 1; fi
 fi
 
 echo "${line}🛠️ Worker Daemon Launch"
-echo "🤖 Starting Manual Worker Interrogation (CTRL+C to exit)..."
-# Using -it for interactive control and pointing to the structured Agents path
 docker exec -it sharpishly-php php /var/www/html/php/src/Agents/worker.php

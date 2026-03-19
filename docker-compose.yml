@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # --- Database Service ---
+  # --- Database Service (Relational Memory) ---
   db:
     image: mysql:8.0
     container_name: sharpishly-db
@@ -18,7 +18,28 @@ services:
       timeout: 20s
       retries: 10
 
-  # --- Main PHP Application Service ---
+  # --- Local AI Node (Neural Processor) ---
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sharpishly-ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./storage/ollama:/root/.ollama
+
+  # --- Vector Database (Semantic Memory) ---
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: sharpishly-vector-db
+    restart: always
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./storage/vector_db:/qdrant/storage
+
+  # --- Main PHP Application Service (The Brain) ---
   php:
     build: .
     container_name: sharpishly-php
@@ -41,7 +62,7 @@ services:
         condition: service_healthy
     restart: always
 
-  # --- Background Task Worker ---
+  # --- Background Task Worker (The Muscle) ---
   worker:
     build: .
     container_name: sharpishly-worker
@@ -53,12 +74,29 @@ services:
       DB_PASS: ${DB_PASS}
     volumes:
       - .:/var/www/html
+    # Included wait logic to ensure AI nodes are ready
     command: >
       sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip 
       && php /var/www/html/php/src/Agents/worker.php || tail -f /dev/null"
     depends_on:
       db:
         condition: service_healthy
+      ollama:
+        condition: service_started
+    restart: always
+
+  # --- Nginx Web Server (The Thalamus) ---
+  web:
+    image: nginx:alpine
+    container_name: sharpishly-app
+    ports:
+      - "8080:80"
+      - "8081:8080" # Mapping for documentation if needed
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
     restart: always
 
   # --- Automated Email Handler ---
@@ -81,28 +119,14 @@ services:
         condition: service_healthy
     restart: always
 
-  # --- Nginx Web Server ---
-  web:
-    image: nginx:alpine
-    container_name: sharpishly-app
-    ports:
-      - "8080:80"
-    volumes:
-      - .:/var/www/html
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - php
-    restart: always
-
-  # --- Database Management GUI ---
+  # --- Management Tooling ---
   adminer:
     image: adminer
     container_name: sharpishly-adminer
     restart: always
     ports:
-      - "8081:8080"
+      - "8083:8080" # Moved port to avoid conflict with PyMVC
 
-  # --- Real-time Log Monitoring ---
   dozzle:
     image: amir20/dozzle:latest
     container_name: sharpishly-logs
@@ -112,7 +136,6 @@ services:
       - "8082:8080"
     restart: always
 
-  # --- VPN Service ---
   vpn:
     image: linuxserver/wireguard:latest
     container_name: sharpishly-vpn

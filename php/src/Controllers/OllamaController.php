@@ -5,26 +5,39 @@ namespace App\Controllers;
 
 use App\Registry;
 use App\Services\OllamaService;
+use App\Services\VectorService;
 use App\Services\Logger;
+use App\Core\Location; // Handles all directory paths
 use Exception;
 
+/**
+ * @file OllamaController.php
+ * @package App\Controllers
+ * @brief The Neural Gateway for Sharpishly.
+ * Handles RAG (Retrieval-Augmented Generation) across logs and vector data.
+ */
 class OllamaController extends BaseController 
 {
     private OllamaService $ollama;
-    private string $rootDir = '/var/www/html/';
+    private VectorService $vector;
+    private Location $location;
 
     public function __construct() 
     {
         parent::__construct();
-        $this->ollama = Registry::get(OllamaService::class);
+        $this->ollama   = Registry::get(OllamaService::class);
+        $this->vector   = Registry::get(VectorService::class);
+        $this->location = Registry::get(Location::class);
     }
 
+    /**
+     * Renders the AI HUD Interface
+     */
     public function index(): void
     {
         $data = [
             'title'     => 'Ollama AI',
             'dashboard' => 'Neural Engine',
-            'jobs'      => [],
         ];
 
         $views = [
@@ -36,112 +49,131 @@ class OllamaController extends BaseController
         $this->render($data, $views);
     }
 
+    /**
+     * Primary AI Endpoint: Handles Question -> Search -> Augment -> Answer
+     */
     public function response(): void
     {
-        // 1. Determine the Question
-        if (php_sapi_name() === 'cli') {
-            global $argv;
-            $question = $argv[1] ?? readline("Ask me anything: ");
-        } else {
-            $input = json_decode(file_get_contents('php://input'), true);
-            $question = $input['question'] ?? '';
-        }
+        $question = $this->getQuestion();
 
         if (empty($question)) {
             $this->json(['error' => 'Question is empty'], 400);
             return;
         }
 
-        // 2. Dev Mode Check
+        // Dev Mode Bypass
         if (getenv('APP_ENV') === 'dev') {
-            $this->handleOutput("[DEV MODE] Static response enabled.");
+            $this->handleOutput("[DEV MODE] AI Link active but bypassed.");
             return;
         }
 
         try {
-            // 3. Inject Project Context
-            $context = $this->gatherContext($question);
+            // 1. RETRIEVE: Get Semantic Context from VectorDB (Properties)
+            $queryVector = $this->vector->getEmbedding($question);
+            $semanticMatches = $this->vector->search($queryVector, 3);
             
-            $prompt = !empty($context) 
-                ? "CONTEXT FROM PROJECT FILES:\n$context\n\nUSER QUESTION:\n$question" 
-                : $question;
+            // 2. RETRIEVE: Get System Context (Logs/Files)
+            $systemContext = $this->gatherSystemContext($question);
 
-            // 4. Live AI Interrogation
+            // 3. AUGMENT: Construct the Hybrid Prompt
+            $prompt = $this->buildSuperPrompt($question, $semanticMatches, $systemContext);
+
+            // 4. GENERATE: Live AI Interrogation
             $answer = $this->ollama->ask($prompt);
             $this->handleOutput($answer);
 
         } catch (Exception $e) {
-            Logger::error("Ollama Error: " . $e->getMessage());
-            $this->json(['error' => 'AI Link Offline'], 500);
+            Logger::error("Ollama Controller Error: " . $e->getMessage());
+            $this->json(['error' => 'Neural Link Interrupted'], 500);
         }
     }
 
     /**
-     * Scans the project based on keywords in the question
+     * Builds the final prompt for the LLM
      */
-    private function gatherContext(string $question): string
+    private function buildSuperPrompt(string $question, array $matches, string $system): string
+    {
+        $context = "";
+        
+        if (!empty($matches)) {
+            $context .= "--- RELEVANT CSV DATA ---\n";
+            foreach ($matches as $m) {
+                // Assuming payload contains 'description' or 'row_data'
+                $context .= "- " . ($m['payload']['text'] ?? 'Data found') . "\n";
+            }
+        }
+
+        if (!empty($system)) {
+            $context .= "\n--- SYSTEM STATUS ---\n$system";
+        }
+
+        return "You are the Sharpishly AI. Answer accurately based on the context provided.
+                CONTEXT:
+                $context
+                
+                USER QUESTION:
+                $question";
+    }
+
+    /**
+     * Logic for scanning logs and project maps via Location class
+     */
+    private function gatherSystemContext(string $question): string
     {
         $q = strtolower($question);
         $context = "";
 
         // Log Context
-        if (str_contains($q, 'log') || str_contains($q, 'error') || str_contains($q, 'failed')) {
-            $logPath = $this->rootDir . 'storage/logs/app.log';
-            $errPath = $this->rootDir . 'storage/logs/php_error.log';
-            
-            if (file_exists($logPath)) {
-                $context .= "--- APP LOG (Last 15 lines) ---\n" . $this->getLastLines($logPath, 15) . "\n";
-            }
-            if (file_exists($errPath)) {
-                $context .= "--- PHP ERRORS (Last 15 lines) ---\n" . $this->getLastLines($errPath, 15) . "\n";
+        if (str_contains($q, 'log') || str_contains($q, 'error')) {
+            $logFile = $this->location->getStoragePath('logs/app.log');
+            if (file_exists($logFile)) {
+                $context .= "--- LATEST LOGS ---\n" . $this->getLastLines($logFile, 10) . "\n";
             }
         }
 
-        // Structure/Code Context
-        if (str_contains($q, 'code') || str_contains($q, 'file') || str_contains($q, 'structure')) {
-            $context .= "--- PROJECT STRUCTURE ---\n" . $this->getMap() . "\n";
+        // Structure Context
+        if (str_contains($q, 'code') || str_contains($q, 'structure')) {
+            $context .= "--- SRC MAP ---\n" . $this->getProjectMap() . "\n";
         }
 
         return $context;
     }
 
-    /**
-     * Reads the end of a log file safely
-     */
     private function getLastLines(string $file, int $n): string
     {
-        $data = file($file);
-        return implode("", array_slice($data, -$n));
+        $lines = file($file);
+        return implode("", array_slice($lines, -$n));
     }
 
-    /**
-     * Maps the core src directory
-     */
-    private function getMap(): string
+    private function getProjectMap(): string
     {
-        $path = $this->rootDir . 'php/src';
+        $path = $this->location->getPhpPath('src');
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
         $map = "";
         foreach ($files as $file) {
             if ($file->isFile()) {
-                $map .= str_replace($this->rootDir, '', $file->getPathname()) . "\n";
+                $map .= $file->getFilename() . "\n";
             }
         }
-        return substr($map, 0, 1000); // Token safety cap
+        return substr($map, 0, 500);
     }
 
-    /**
-     * Helper to unify CLI and Web output
-     */
+    private function getQuestion(): string
+    {
+        if (php_sapi_name() === 'cli') {
+            global $argv;
+            return $argv[1] ?? '';
+        }
+        $input = json_decode(file_get_contents('php://input'), true);
+        return $input['question'] ?? '';
+    }
+
     private function handleOutput(string $answer): void
     {
         if (php_sapi_name() === 'cli') {
-            echo "\n\033[1;32mGod Mode:\033[0m $answer\n\n";
+            echo "\n[AI]: $answer\n\n";
         } else {
-            $this->json([
-                'status' => 'success',
-                'answer' => $answer
-            ]);
+            $this->json(['status' => 'success', 'answer' => $answer]);
         }
     }
 }
