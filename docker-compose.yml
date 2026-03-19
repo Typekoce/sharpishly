@@ -35,15 +35,14 @@ services:
     restart: always
     ports:
       - "6333:6333"
-      - "6334:6334"
     volumes:
       - ./storage/vector_db:/qdrant/storage
 
-  # --- Main PHP Application Service (The Brain) ---
+  # --- Main PHP Application Service ---
   php:
     build: .
     container_name: sharpishly-php
-    user: "0:0" 
+    user: "0:0"
     environment:
       DB_HOST: ${DB_HOST}
       DB_NAME: ${DB_NAME}
@@ -62,7 +61,7 @@ services:
         condition: service_healthy
     restart: always
 
-  # --- Background Task Worker (The Muscle) ---
+  # --- Background Task Worker ---
   worker:
     build: .
     container_name: sharpishly-worker
@@ -74,7 +73,6 @@ services:
       DB_PASS: ${DB_PASS}
     volumes:
       - .:/var/www/html
-    # Included wait logic to ensure AI nodes are ready
     command: >
       sh -c "apt-get update && apt-get install -y usbutils iproute2 util-linux pciutils python3 python3-pip 
       && php /var/www/html/php/src/Agents/worker.php || tail -f /dev/null"
@@ -85,13 +83,12 @@ services:
         condition: service_started
     restart: always
 
-  # --- Nginx Web Server (The Thalamus) ---
+  # --- Nginx Web Server ---
   web:
     image: nginx:alpine
     container_name: sharpishly-app
     ports:
       - "8080:80"
-      - "8081:8080" # Mapping for documentation if needed
     volumes:
       - .:/var/www/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
@@ -119,13 +116,13 @@ services:
         condition: service_healthy
     restart: always
 
-  # --- Management Tooling ---
+  # --- Management Tools ---
   adminer:
     image: adminer
     container_name: sharpishly-adminer
     restart: always
     ports:
-      - "8083:8080" # Moved port to avoid conflict with PyMVC
+      - "8081:8080"
 
   dozzle:
     image: amir20/dozzle:latest

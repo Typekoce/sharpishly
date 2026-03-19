@@ -8,7 +8,10 @@ echo "🛑 Stopping bare metal Ollama Service..."
 sudo systemctl stop ollama 2>/dev/null || echo "Ollama not running on host."
 
 echo "🚀 Recreating Sharpishly Infrastructure..."
-docker compose up -d --force-recreate
+#docker compose up -d --force-recreate
+# 1. Be explicit about the file — this bypasses auto-discovery
+docker compose -f docker-compose.yml down
+docker compose -f docker-compose.yml up -d
 
 echo "${line}⚙️  Verifying PHP Upload Limits..."
 docker exec sharpishly-php php -r "echo 'Upload Max: ' . ini_get('upload_max_filesize') . \"\n\";"
