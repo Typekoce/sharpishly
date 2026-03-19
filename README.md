@@ -1,145 +1,121 @@
+Here is the complete README.md content in one single, clean block — ready for you to copy and paste directly into your `README.md` file:
+
+```markdown
 # Sharpishly Research & Development
 
-Minimal, modern, dependency-free responsive navbar + landing page.
-
-> Research and development accessible to everyone  
-> © Sharpishly Research and Development
-
-## Features
-
-- Pure HTML + CSS + JavaScript (no framework, no Bootstrap)
-- Responsive navbar with dropdown menus
-- Mobile offcanvas menu (slide-in from right)
-- Hover + click support for dropdowns on desktop
-- Accessible keyboard navigation (Esc to close mobile menu)
-- Very lightweight (~4 KB minified JS + CSS combined)
-- Custom Bootstrap-inspired color variables and styling
-
-## Technologies
-
-- HTML5
-- CSS (custom properties / variables, modern layout)
-- Vanilla JavaScript (ES6+)
-
-## Project structure
-
-```website/
-├── index.html
-├── styles.css
-├── script.js
-├── README.md
-├── CONTRIBUTORS.md
-├── CHANGELOG.md
-└── ROADMAP.md
-
-```
-
-# Website Live Preview
-[Sharpishly R&D](https://html-preview.github.io/?url=https://github.com/Typekoce/sharpishly/blob/main/website/index.html)
-
-# Sharpishly Research & Development
-
-Minimal, modern, dependency-free responsive navbar + landing page.
-
-## Technologies
-- HTML5 / CSS3 / Vanilla JS
-- **PHP 8.2 (FPM)**
-- **Nginx (Web Server & Reverse Proxy)**
-- **Docker & Docker Compose**
-
-## Project structure
-```website/
-├── website/            # Frontend assets (HTML, CSS, JS)
-├── php/                # Backend logic
-│   ├── src/            # MVC Core & Controllers
-│   ├── logs/           # Application logging
-│   └── index.php       # PHP Front Controller
-├── nginx.conf          # Reverse Proxy Configuration
-├── Dockerfile          # Nginx container build
-└── docker-compose.yml  # Multi-container orchestration
-
-This README update reflects your transition from a simple static landing page to a sophisticated, **Agent-driven MVC Ecosystem**. It highlights the new "God Mode" architecture, the secure Vault, and the Dockerized worker environment.
+> **The Sovereign Multimodal Ecosystem**  
+> High-performance Agentic MVC, Neural Ingestion, and Hardware Orchestration.  
+> © 2026 Sharpishly Research and Development
 
 ---
 
-# Sharpishly Research & Development
+## 🚀 The Evolution: God Mode
 
-Minimal, modern, dependency-free responsive navbar + landing page, now evolved into a high-performance **Agentic MVC Ecosystem**.
+Sharpishly has evolved from a static landing page into a **Sovereign Agentic System**. It is designed to bridge the gap between human language, physical hardware, and digital knowledge.  
 
-> Research and development accessible to everyone
-> © Sharpishly Research and Development
+The architecture follows a **"Brain-Body" model**:
 
-## 🚀 Evolution: God Mode
+- **PHP** handles reasoning, routing, and orchestration  
+- **Dockerized nodes** manage heavy-duty neural computation, vector storage, and hardware interrogation
 
-Sharpishly has transitioned from a static site to a fully autonomous system. It now features background agents for SEO, social media automation, and web research, all managed through a unified Cyberpunk-style Command Center.
+## ✨ Core Features
 
-## ✨ Key Features
-
-* **Pure Frontend:** Dependency-free HTML5/CSS3/Vanilla JS UI.
-* **Agentic Nervous System:** Real-time task streaming via PHP SSE (Server-Sent Events).
-* **Secure Vault:** AES-256-CBC encryption for sensitive API keys and credentials.
-* **Autonomous Workers:** Multi-threaded background daemons for handling high-stakes tasks.
-* **Dockerized Infrastructure:** Fully containerized Nginx, PHP-FPM, MySQL, and Worker services.
+- **3-Tier Intelligent Routing** — Subdomain-aware routing (`docs.*`, `shop.*`, `blog.*`) managed by a unified Front Controller
+- **The Nervous System (SSE)** — Real-time, non-buffered task streaming from background workers directly to the Cyberdeck HUD
+- **Neural Long-Term Memory (RAG)** — Full integration with **Ollama** and **Qdrant** for semantic search and document "understanding"
+- **The Surveyor’s Suite** — Multimodal ingestion of property contracts (PDF/CSV) and meeting audio (Automatic Transcription → Vectorization)
+- **The Vault** — AES-256-CBC encryption for secure handling of API keys, project credentials, and sensitive surveyor data
+- **Hardware Senses** — Python-based PyMVC node for low-level USB scanning and device interrogation via the `HardwareController`
 
 ## 🛠️ Technologies
 
-* **PHP 8.2 (FPM):** Core MVC logic and background daemons.
-* **Nginx:** Web server and high-performance reverse proxy.
-* **MySQL 8.0:** Persistent data storage with integrated health checks.
-* **Docker & Compose:** Seamless multi-container orchestration.
-* **OpenClaw Engine:** Custom-built agent reasoning and task queuing logic.
+- **PHP 8.2 (FPM)** — Core Orchestrator & Multi-threaded Background Workers
+- **Python 3.10** — Hardware Logic (PyMVC) & Vision Agents
+- **Nginx** — High-fidelity "Thalamus" for proxying and Server-Sent Events (SSE) optimization
+- **Ollama** — Neural Inference Engine (Llama 3.1 & Nomic-Embed-Text)
+- **Qdrant** — High-speed Vector Database for semantic memory
+- **MariaDB** — Relational data persistence for structured records
 
 ## 📂 Project Structure
 
-```text
+```
 .
-├── website/                # Cyberpunk Dashboard & Frontend assets
-│   ├── dashboard.html      # Agent Command Center
-│   ├── index.html          # Main Landing Page
-│   └── js/script.js        # SSE-driven Nervous System logic
-├── php/                    # Backend logic
-│   ├── nervous_system.php  # Task Queue & SSE bridge
-│   └── src/
-│       ├── Agents/         # Autonomous Scout & Social agents
-│       ├── Controllers/    # MVC Routing & Business logic
-│       ├── Vault.php       # AES-256 Encryption Service
-│       └── worker-daemon.php # Background Task Processor
-├── shells/                 # Automated DevOps & Maintenance scripts
-├── storage/                # Persistant Vault & Job Queues
-├── nginx.conf              # Proxy & Route Configuration
-├── Dockerfile              # Container definitions
-└── docker-compose.yml      # Orchestration of the God Mode stack
-
+├── website/                # The "Skin": Cyberdeck Dashboard & UI assets
+├── php/                    # The "Brain": MVC Core, Agents & Neural Services
+│   ├── src/                # Controllers, Models, and Services (Vector, CSV, Vault)
+│   ├── Agents/             # Background Daemons (worker.php, scout.php)
+│   └── index.php           # Front Controller & 3-Tier Subdomain Router
+├── pymvc-server/           # The "Senses": Python-based Hardware Interface
+├── android/                # Mobile Node: LightMVC implementation for Android
+├── shells/                 # The "Reflexes": Automated DevOps, Purge, & Sync scripts
+├── storage/                # The "Memory": Vault keys, Uploads, Vectors, and Logs
+├── nginx.conf              # The "Thalamus": Traffic Orchestration & SSE Rules
+└── docker-compose.yml      # The "Body": Containerized Infrastructure Orchestration
 ```
 
 ## 🛠️ Getting Started
 
-1. **Initialize Environment:**
-```bash
-chmod +x shells/*.sh
-./shells/setup_openclaw.sh
+### 1. Environmental Cleanse
 
+If you previously ran Ollama manually on the host, purge it to prevent port conflicts with the Dockerized instance:
+
+```bash
+chmod +x shells/purge-local-ollama.sh
+./shells/purge-local-ollama.sh
 ```
 
+### 2. Ignite the Body
 
-2. **Launch Ecosystem:**
+Launch the multi-container ecosystem from the project root:
+
 ```bash
-docker-compose up -d
-
+docker compose up -d
 ```
 
+### 3. Initialize Neural Memory
 
-3. **Access Dashboard:**
-Navigate to `http://192.168.0.11:8080/dashboard.html` to witness the Thought Stream.
+Pull the model weights inside the running Ollama container:
 
-## 📊 Monitoring
+```bash
+docker exec -it sharpishly-ollama ollama pull llama3.1
+docker exec -it sharpishly-ollama ollama pull nomic-embed-text
+```
 
-* **Logs:** View real-time container logs via Dozzle at `http://192.168.0.11:8082`.
-* **Database:** Manage MySQL schemas via Adminer at `http://192.168.0.11:8081`.
+### 4. Create the Vector Collection
+
+Create the Qdrant collection for property documents (768 dimensions for Nomic embeddings):
+
+```bash
+curl -X PUT "http://localhost:6333/collections/property_docs" \
+     -H "Content-Type: application/json" \
+     --data '{
+       "vectors": {
+         "size": 768,
+         "distance": "Cosine"
+       }
+     }'
+```
+
+## 🔐 Environment (.env)
+
+Create a `.env` file in the project root. Sensitive values are automatically encrypted and managed via `Vault.php`:
+
+```env
+DB_PASSWORD=your_secure_pass
+VAULT_KEY=your_aes_master_key
+LOCAL_IP=192.168.0.11
+# Add any other required variables here
+```
+
+## 📊 Monitoring & Access
+
+- **Main App** → http://sharpishly.vm  
+- **Documentation** → http://docs.sharpishly.vm (served via DocsController)  
+- **Logs** → `storage/logs/` (Nginx, PHP, Worker logs)  
+- **Qdrant Dashboard** → http://192.168.0.11:6333/dashboard (or replace with your actual IP)
+
+> "Research and development accessible to everyone."
 
 ---
 
-**Commit Message for this update:**
-`docs(readme): update project documentation to reflect Agentic MVC architecture`
-
-**Would you like me to add a "Roadmap" section to the README detailing the upcoming AI integration for your Scout Agent?**
+Built with 🔥 by Sharpishly R&D — 2026
