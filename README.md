@@ -1,4 +1,3 @@
-Here is the complete README.md content in one single, clean block — ready for you to copy and paste directly into your `README.md` file:
 
 ```markdown
 # Sharpishly Research & Development
