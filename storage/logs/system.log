@@ -1,0 +1,48 @@
+[2026-03-19 17:43:00] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:43:01] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:46:14] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:46:14] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:54:20] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:54:47] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:54:56] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:55:03] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:55:08] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:55:17] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:55:26] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:55:35] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-19 17:56:03] [INFO] System bootstrap completed. Namespace: App\, Root: /var/www/html/
+[2026-03-20 09:09:30] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:09:34] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:11:13] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:11:22] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:11:24] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:11:24] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:11:31] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:11:35] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:20:56] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:21:08] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:21:45] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:21:55] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:22:03] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:22:09] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:22:12] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:22:15] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:23:39] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:23:39] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:31:01] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:31:04] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:33:22] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:33:22] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:33:26] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:33:34] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:33:45] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:33:54] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:34:26] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:34:46] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:36:07] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:36:07] [INFO] System bootstrap completed successfully. {"mode":"cli"}
+[2026-03-20 09:36:39] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:36:42] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:36:43] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:36:45] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}
+[2026-03-20 09:36:47] [INFO] System bootstrap completed successfully. {"mode":"fpm-fcgi"}

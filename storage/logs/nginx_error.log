@@ -1,0 +1,1 @@
+2026/03/20 09:33:13 [error] 22#22: *1 upstream timed out (110: Operation timed out) while reading response header from upstream, client: 192.168.0.10, server: sharpishly.vm, request: "GET /php/csv/upload HTTP/1.1", upstream: "fastcgi://172.18.0.10:9000", host: "192.168.0.11:8080", referrer: "http://192.168.0.11:8080/php/ollama/response"

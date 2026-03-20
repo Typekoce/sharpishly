@@ -15,3 +15,14 @@ mysql_data/
 # Temporary Uploads
 php/uploads/*
 !php/uploads/.gitkeep
+
+.env
+php/*.log
+php/storage/logs/*.log
+php/storage/uploads/*
+php/storage/queue/*
+# Ignore any dynamic data directories if they exist
+mysql/
+qdrant/
+ollama/
+tardis@tardis-VirtualBox:~/Documents/sharpishly$ 

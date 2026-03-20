@@ -1,0 +1,48 @@
+[16-Mar-2026 15:20:37 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[16-Mar-2026 15:20:38 UTC] PHP Warning:  require_once(/var/www/html/php/src/Agents/bootstrap.php): Failed to open stream: No such file or directory in /var/www/html/php/src/Agents/worker.php on line 10
+[16-Mar-2026 15:20:38 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/html/php/src/Agents/bootstrap.php' (include_path='.:/usr/local/lib/php') in /var/www/html/php/src/Agents/worker.php:10
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/php/src/Agents/worker.php on line 10
+[16-Mar-2026 16:04:05 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[16-Mar-2026 16:13:53 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[16-Mar-2026 16:16:17 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 11:47:32 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 12:03:57 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 12:26:18 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 12:30:11 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 12:33:48 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 12:34:17 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 12:43:42 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 12:55:57 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 15:38:59 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 15:50:24 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 16:06:13 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 16:25:05 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 16:27:50 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[17-Mar-2026 16:30:12 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[18-Mar-2026 13:33:46 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[18-Mar-2026 14:38:30 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[18-Mar-2026 14:52:00 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[18-Mar-2026 14:59:09 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[18-Mar-2026 15:18:14 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[18-Mar-2026 15:20:46 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[18-Mar-2026 15:22:51 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[19-Mar-2026 15:14:15 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[19-Mar-2026 17:15:05 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[19-Mar-2026 17:15:07 UTC] PHP Fatal error:  Uncaught Error: Class "App\Core\Location" not found in /var/www/html/php/src/bootstrap.php:34
+Stack trace:
+#0 /var/www/html/php/src/Agents/worker.php(18): App\Registry::get('App\\Core\\Locati...')
+#1 {main}
+  thrown in /var/www/html/php/src/bootstrap.php on line 34
+[19-Mar-2026 17:43:00 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[19-Mar-2026 17:55:06 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[20-Mar-2026 09:09:30 UTC] CLI-Bootstrap: Database schema verified and synced.
+[20-Mar-2026 09:09:31 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[20-Mar-2026 09:09:34 UTC] CLI-Bootstrap: Database schema verified and synced.
+[20-Mar-2026 09:20:56 UTC] CLI-Bootstrap: Database schema verified and synced.
+[20-Mar-2026 09:20:56 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[20-Mar-2026 09:21:07 UTC] CLI-Bootstrap: Database schema verified and synced.
+[20-Mar-2026 09:31:00 UTC] CLI-Bootstrap: Database schema verified and synced.
+[20-Mar-2026 09:31:01 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /var/www/html/tests/run.php:40) in /var/www/html/php/src/Controllers/BaseController.php on line 26
+[20-Mar-2026 09:31:04 UTC] CLI-Bootstrap: Database schema verified and synced.
