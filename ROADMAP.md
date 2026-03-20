@@ -1,53 +1,27 @@
-# Roadmap – Sharpishly Research & Development
+# 🗺️ Sharpishly R&D Roadmap
 
-This is a rough, evolving roadmap. Priorities may change based on user feedback and actual needs.
+## ✅ Completed (v2.0.0 Architecture)
+- **Containerization:** Multi-container Docker setup (App, PHP, Worker, DB, Dozzle).
+- **Security:** AES-256 Vault system for secret management.
+- **MVC Core:** Standardized Front Controller and Regex-based Smarty templates.
+- **Agent Basics:** Implementation of the first autonomous `mail_agent.php` loop.
 
-## ✅ Completed (Recent Milestones)
-- **Centralized Alert System:** Bootstrap-style programmatic toast notifications.
-- **Auth Persistence:** Implemented `localStorage` for sessions and project data.
-- **Project Validation:** Duplicate title prevention and logic-based entry.
-- **HR Admin Suite:** Dynamic category rendering and data hydration.
-- **Dropdown Logic:** Centralized `roles` and `tax` data arrays feeding dynamic selects.
+## 🟦 In Progress: Milestone #9 (Observability & UI)
+*Focus: Getting the "Nervous System" visible and the HUD interface functional.*
+- **Unified Logging:** Moving all system events into a single, accessible root stream.
+- **Glassmorphism HUD:** Deploying the high-utility dashboard for real-time monitoring.
+- **SSE Bridge:** Live-streaming Agent thoughts directly to the browser.
 
-## Near-term (next 1–3 months)
-- **Work Assignment Tab:** Link specific employees to project IDs via the HR Suite.
-- **Improved Accessibility:** Enhance ARIA attributes and focus management for project forms.
-- **UI Refinement:** Add dark mode toggle and smooth scroll behavior.
-- **Meta Data:** Add favicon and basic SEO meta tags.
-- **Theme Extraction:** Move CSS variables to a separate theme file.
+## 🟦 Next: Milestone #10 (Autonomous Interrogation)
+*Focus: Turning the platform into a proactive job and lead scout.*
+- **Official API Integration:** Transitioning from scraping to stable Adzuna/Recruitment APIs.
+- **Mail Automation:** Fully automated email dispatching for high-priority job leads.
+- **Vault Self-Service:** UI-based management of encrypted credentials.
 
-## Medium-term (3–9 months)
-- **Status Management:** Edit project status (Active, Review, Completed) directly from the dashboard card.
-- **Interactive Workspace:** Build out the "AI R&D Insight" panel to suggest logic based on project titles.
-- **Reporting Tool:** Create a "Download Feasibility Report" button to export summaries as PDFs.
-- **Hero Components:** Add a modular hero section with background image options for the Home page.
-- **Validation:** Implement advanced JS validation for the Quick Start and Dashboard forms.
+## 🟦 Future: Milestone #11 (Vertical Expansion)
+- **Landlord CRM:** Expanding the agentic model to manage real-world property assets.
+- **LLM Reasoning:** Integrating Gemini/GPT to summarize "Scout" findings into actionable reports.
+- **Mobile Alerts:** Telegram/WhatsApp bridge for instant "God Mode" notifications.
 
-## Longer-term / nice-to-have
-- **Dynamic Logs:** Real-time simulation of system logs within the project workspace.
-- **Mock Portals:** Expand the style guide for the "Staff" and "Client" dropdown placeholders.
-- **Automated Testing:** Integrate Playwright smoke tests for the navigation filtering logic.
-- **Static Generation:** Evaluate lightweight SSGs (like Eleventy) if the site structure grows.
-
-## Not planned (at this time)
-- **Framework Migration:** Staying dependency-free (No React, Vue, or Svelte).
-- **Live Backend:** Maintaining a client-side focused "mock-live" experience.
-
-## ✅ Completed (Recent Milestones)
-- **Containerization:** Successfully dockerized the application using Nginx on an Ubuntu VM.
-- **Work Assignment Tab:** Link specific employees to project IDs via the HR Suite.
-...
-
-
-## ✅ Completed
-- **Infrastructure:** Dockerized Nginx environment on Ubuntu VM.
-- **UI/UX:** Settings page with persistent Dark Mode.
-- **Refactor:** Standardized kebab-case naming conventions.
-
-## 🟦 In Progress (Current Milestone)
-- **API Connectivity:** Implementing `requestPost` and `requestGet` wrappers for fetch API.
-- **Service Layer:** Abstracting data calls to move away from pure LocalStorage.
 ---
-Feedback and pull requests welcome — especially regarding the R&D workspace UX!
-
-**Last updated:** 17th February 2026
+**Last Updated:** 5th March 2026

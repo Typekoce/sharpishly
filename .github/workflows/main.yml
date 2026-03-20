@@ -1,0 +1,35 @@
+name: Neural Factory Build
+
+on: [push]
+
+jobs:
+  test-suite:
+    runs-on: ubuntu-latest
+    
+    env:
+      # Silences the deprecation warnings and uses the modern runner
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: phpunit
+          extensions: mbstring, xml, ctype, iconv
+
+      - name: Remote Composer Install
+        # --optimize-autoloader is key for discovering new Models/Controllers
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
+
+      - name: Integrity Check (Syntax)
+        # Corrected path from 'php/src' to 'src'
+        run: find src -name "*.php" -exec php -l {} \;
+
+      - name: Run Tests
+        # Removed the '|| true' so you actually know if a test fails, 
+        # but added --do-not-cache-result for clean runs
+        run: vendor/bin/phpunit --do-not-cache-result

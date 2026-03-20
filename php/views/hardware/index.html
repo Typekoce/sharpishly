@@ -1,0 +1,11 @@
+<h1>🔧 Hardware Scanner</h1>
+<button onclick="scan()">Scan All Hardware</button>
+<pre id="result">Click to scan...</pre>
+
+<script>
+async function scan() {
+    const res = await fetch('/php/hardware/info');
+    const data = await res.json();
+    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+}
+</script>

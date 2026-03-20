@@ -1,89 +1,96 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Smarty;
+use App\Models\HomeModel;
 use Exception;
-use App\Models\HomeModel; // add this if needed
 
-class HomeController
+class HomeController extends BaseController
 {
-    private Smarty $smarty;
     private HomeModel $home;
 
     public function __construct()
     {
-        $this->smarty = new Smarty();
+        parent::__construct();
         $this->home = new HomeModel();
     }
 
-    public function response(){
-        $data = array(
-            "h1"=>"hello",
-            "description"=>"Six Million Dollar Man"
-        );
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data);
-        die();
-    }
-
-    public function render()
-    {
-        $data = [
-            'title'     => 'Sharpishly Dashboard',
-            'dashboard' => 'Your Dashboard',
-            //'jobs'      => $jobs,
-        ];
-
-        $header = $this->getViewContent('layouts/header');
-        $footer = $this->getViewContent('layouts/footer');
-        $main   = $this->getViewContent('home/main');
-
-        $renderedMain = $this->smarty->render($main, $data);
-
-        echo $header . $renderedMain . $footer;
-    }
-
+    /**
+     * Main Dashboard View
+     */
     public function index(): void
     {
-        $this->render();
+        $data = [
+            'title'       => 'Sharpishly Dashboard',
+            'dashboard'   => 'Your Dashboard',
+            'recent_jobs' => $this->home->csv()
+        ];
+
+        // Standardized layout rendering via BaseController
+        $this->render($data, [
+            'header' => 'layouts/header',
+            'main'   => 'home/main',
+            'footer' => 'layouts/footer'
+        ]);
     }
 
-    public function about(string $name = 'Guest'): void
+    /**
+     * RESTORED: API Endpoint for checking active job status
+     */
+    public function status(): void
     {
-        echo "<h1>About page</h1>";
-        echo "<p>Hello, " . htmlspecialchars($name) . "!</p>";
+        $activeJobs = $this->db->find([
+            'tbl'   => 'jobs',
+            'where' => ['status !=' => 'completed', 'status !=' => 'failed']
+        ]);
+
+        $this->json($activeJobs);
     }
 
+    /**
+     * JSON response for data table updates
+     */
     public function csv(): void
     {
-
-        $result = $this->home->csv();
-        var_dump($result);
-        $this->render();
-
+        $this->json($this->home->csv());
     }
 
+    /**
+     * Database Schema Migration Report
+     */
     public function migrate(): void
     {
         try {
-            $model = new HomeModel();
-            echo $model->migrate();
+            echo $this->home->migrate();
         } catch (Exception $e) {
             http_response_code(500);
-            echo "<h1>Migration Error</h1>";
-            echo "<pre style=\"color:red;\">" . htmlspecialchars($e->getMessage()) . "</pre>";
+            echo "<h1>Migration Error</h1><pre>{$e->getMessage()}</pre>";
         }
     }
 
-    private function getViewContent(string $path): string
+    /**
+     * Endpoint: /php/home/signal?type=stop
+     */
+    public function signal(): void
     {
-        $file = dirname(__DIR__, 1) . "/views/$path.html"; // fixed path (up 2 levels)
+        $type = $_GET['type'] ?? '';
+        $allowedSignals = ['stop', 'restart', 'clear_logs'];
 
-        if (file_exists($file)) {
-            return file_get_contents($file);
+        if (!in_array($type, $allowedSignals)) {
+            $this->json(['status' => 'error', 'message' => 'Invalid signal'], 400);
+            return;
         }
 
-        return "<!-- View not found: $path -->";
+        // Create the physical signal file in the queue directory
+        // The Worker loop checks for file_exists($loc->queue('STOP'))
+        $signalFile = $this->loc->queue(strtoupper($type));
+        
+        if (touch($signalFile)) {
+            \App\Services\Logger::info("System Signal Issued: " . strtoupper($type));
+            $this->json(['status' => 'success', 'signal' => $type]);
+        } else {
+            $this->json(['status' => 'error', 'message' => 'Failed to issue signal'], 500);
+        }
     }
 }

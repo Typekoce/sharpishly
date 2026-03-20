@@ -13,22 +13,28 @@
 
     <nav class="navbar">
         <div class="container">
-            <a href="/" class="brand" data-link>Minimal SPA</a>
+            <a href="/" class="brand" data-link>Sharpishly</a>
 
             <button class="menu-toggle" aria-label="Toggle menu">☰</button>
 
             <div class="nav-links">
                 <a href="/" data-link>Home</a>
-                <a href="/about" data-link>About</a>
-                <a href="/work" data-link>Work</a>
-                <a href="/contact" data-link>Contact</a>
+                <a href="/" data-link>Dashboard</a>
+                <a href="/operations" data-link>Operations</a>
+                <a href="/cyberdeck" data-link>Cyberdeck</a>
+                <a href="/intelligence" data-link>Intelligence</a>
+                <a href="/crm" data-link>CRM</a>
             </div>
         </div>
     </nav>
 
+
     <main class="container">
+        <nav id="breadcrumbs" class="breadcrumb-nav"></nav>       
+        <div id="sub-nav"></div>     
         <div id="app"></div>
     </main>
+
 
     <!-- Your app logic -->
     <script src="script.js" type="module"></script>

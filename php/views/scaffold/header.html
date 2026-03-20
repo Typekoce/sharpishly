@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharpishly TARDIS Control</title>
+    <style>
+        /* Internal Bootstrap-lite CSS Reset & Grid */
+        :root {
+            --primary: #0d6efd;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --border: #dee2e6;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            color: var(--dark);
+            background-color: #fff;
+        }
+        
+        /* Navbar */
+        nav {
+            background: var(--dark);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        nav a { color: white; text-decoration: none; font-weight: bold; }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-links a { font-weight: normal; font-size: 0.9rem; opacity: 0.8; }
+        .nav-links a:hover { opacity: 1; }
+
+        /* Container & Grid */
+        .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+        .row { display: flex; flex-wrap: wrap; gap: 20px; }
+        .col { flex: 1; min-width: 250px; }
+
+        /* Card UI */
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: transform 0.2s;
+            height: 100%;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .card h3 { margin-top: 0; color: var(--primary); }
+        
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        /* Responsive Query */
+        @media (max-width: 768px) {
+            .nav-links { display: none; } /* Simplified for self-contained mobile */
+        }
+    </style>
+</head>
+<body>
+    
+<nav>
+    <a href="/">🚀 SHARPISHLY TARDIS</a>
+    <div class="nav-links">
+        <a href="/php/home/index">Home</a>
+        <a href="/php/landlord/index">Landlord</a>
+        <a href="/php/csv/upload">CSV Engine</a>
+        <a href="/php/ollama/chat">Neural Engine</a>
+    </div>
+</nav>
+
+<div class="container">

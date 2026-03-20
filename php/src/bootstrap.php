@@ -1,46 +1,87 @@
-<?php declare(strict_types=1); // ← no newline or space before declare!
+<?php
+declare(strict_types=1);
 
-require_once __DIR__ . '/autoload.php';
+namespace App;
 
-// Load environment variables (if you use .env)
-if (file_exists(__DIR__ . '/../../.env')) {
-    foreach (parse_ini_file(__DIR__ . '/../../.env', false) as $k => $v) {
-        putenv("$k=$v");
+use App\Services\Location;
+use App\Services\Logger;
+use App\Db;
+
+/**
+ * 1. MANUAL SEED LOADING
+ * We must manually load the Location service because the autoloader 
+ * relies on it to find the base directory of the project.
+ */
+$locationFile = __DIR__ . '/Services/Location.php';
+if (file_exists($locationFile)) {
+    require_once $locationFile;
+} else {
+    die("❌ Critical Failure: Location service not found at $locationFile");
+}
+
+/**
+ * 2. REGISTRY SERVICE
+ * Centralized container for shared class instances (Singleton pattern).
+ */
+class Registry {
+    private static array $instances = [];
+    
+    /**
+     * Retrieves or creates a shared instance of a class.
+     */
+    public static function get(string $class, ...$args) {
+        if (!isset(self::$instances[$class])) {
+            self::$instances[$class] = new $class(...$args);
+        }
+        return self::$instances[$class];
+    }
+
+    /**
+     * Injects an existing instance (useful for testing/mocking).
+     */
+    public static function set(string $class, object $instance): void {
+        self::$instances[$class] = $instance;
     }
 }
 
-// Register global exception handler
-set_exception_handler(function (Throwable $e) {
-    \App\Services\Logger::exception($e);
-    http_response_code(500);
-    echo "<h1>500 Internal Server Error</h1>";
-    if (getenv('APP_DEBUG') === 'true') {
-        echo "<pre>" . htmlspecialchars($e->__toString()) . "</pre>";
+/**
+ * 3. INITIALIZE CORE PATHS
+ */
+$loc  = Registry::get(Location::class);
+$base = $loc->baseDir(); // Standardized project root (e.g., /var/www/html/)
+
+/**
+ * 4. DYNAMIC AUTOLOADER
+ * Maps namespaces to physical directories based on the project root.
+ */
+spl_autoload_register(function ($class) use ($base) {
+    // A. Unit Test Mapping (App\Tests\ -> /tests/unit/)
+    if (strpos($class, 'App\Tests\\') === 0) {
+        $relativeClass = str_replace('App\Tests\\', '', $class);
+        $file = $base . 'tests/unit/' . str_replace('\\', '/', $relativeClass) . '.php';
+    } 
+    // B. Application Mapping (App\ -> /php/src/)
+    elseif (strpos($class, 'App\\') === 0) {
+        $relativeClass = str_replace('App\\', '', $class);
+        $file = $base . 'php/src/' . str_replace('\\', '/', $relativeClass) . '.php';
     } else {
-        echo "<p>Something went wrong. Please try again later.</p>";
+        return;
     }
-    exit;
+
+    if (file_exists($file)) {
+        require_once $file;
+    }
 });
 
-// Optional: error handler for non-fatal errors
-set_error_handler(function ($severity, $message, $file, $line) {
-    if (!(error_reporting() & $severity)) {
-        return false; // respect @ operator
-    }
-    \App\Services\Logger::error("PHP Error: $message", [
-        'severity' => $severity,
-        'file'     => $file,
-        'line'     => $line,
-    ]);
-    return true; // don't execute PHP's default handler
-}, E_ALL);
-
-// Make Logger available globally (alias)
-class_alias(\App\Services\Logger::class, 'Logger');
-
-// Optional debug line (remove in production)
-if (getenv('APP_DEBUG') === 'true') {
-    echo "Bootstrap loaded at " . date('c') . "\n";
+/**
+ * 5. CORE SERVICE INITIALIZATION
+ * Pre-warm the shared database connection and logger.
+ */
+try {
+    Registry::get(Db::class);
+    Logger::info("System bootstrap completed successfully.");
+} catch (\Exception $e) {
+    // If DB fails during bootstrap, we still want the system to load, 
+    // but we log the error.
+    error_log("Bootstrap Warning: " . $e->getMessage());
 }
-
-Logger::info("Bootstrap loaded successfully", ['env' => getenv('APP_ENV') ?: 'unknown']);

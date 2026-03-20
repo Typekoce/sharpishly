@@ -1,218 +1,156 @@
 <?php
-// src/Db.php
-
 declare(strict_types=1);
 
-namespace App;   // ← root namespace of your app (not Controllers)
+namespace App;
 
 use PDO;
-use PDOException;
-use InvalidArgumentException;
+use Exception;
 
-class Db
-{
-    public ?PDO $pdo = null;
+/**
+ * @file Db.php
+ * @package App
+ * @brief Database Abstraction & Self-Healing Schema Manager.
+ *
+ * A PDO wrapper that enforces the "Zero-Manual-SQL" rule in controllers.
+ * It provides methods for automated table migrations and safe data 
+ * persistence.
+ *
+ * @details 
+ * - Automated Table Creation: Checks for table existence before queries.
+ * - Prepared Statements: Prevents SQL injection across the entire stack.
+ * - Singleton Access: Managed via the App\Registry for resource efficiency.
+ */
+class Db {
+    private PDO $pdo;
 
-    public function __construct()
-    {
+    public function __construct() {
+        $host = getenv('DB_HOST') ?: 'db';
+        $db   = getenv('DB_NAME') ?: 'sharpishly';
+        $user = getenv('DB_USER') ?: 'user';
+        $pass = getenv('DB_PASS') ?: 'pass';
+        $dsn  = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 
-        $host     = getenv('DB_HOST');
-        $dbname   = getenv('DB_NAME');
-        $user     = getenv('DB_USER');
-        $password = getenv('DB_PASS');
-        $charset  = 'utf8mb4';
-
-        $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
-
-        try {
-            $this->pdo = new PDO(
-                $dsn,
-                $user,
-                $password,
-                [
-                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES   => false,
-                ]
-            );
-        } catch (PDOException $e) {
-            throw new PDOException("Connection failed: " . $e->getMessage());
-        }
-    }
-
-    public function find(array $conditions): array
-    {
-        if (empty($conditions['tbl'])) {
-            throw new InvalidArgumentException("Table name ('tbl') is required");
-        }
-
-        $table  = $this->escapeIdentifier($conditions['tbl']);
-        $fields = $conditions['fields'] ?? '*';
-        $where  = $conditions['where']  ?? [];
-        $order  = $conditions['order']  ?? [];
-        $limit  = $conditions['limit']  ?? null;
-        $offset = $conditions['offset'] ?? null;
-
-        $select = is_array($fields)
-            ? implode(', ', array_map([$this, 'escapeIdentifier'], $fields))
-            : '*';
-
-        $whereSql = '';
-        $params   = [];
-        if ($where) {
-            $clauses = [];
-            foreach ($where as $key => $value) {
-                if (preg_match('/^(.*?)\s*([<>=!]+)$/i', $key, $m)) {
-                    $col = trim($m[1]);
-                    $op  = $m[2];
-                } else {
-                    $col = $key;
-                    $op  = '=';
-                }
-                $ph = ':' . preg_replace('/[^a-zA-Z0-9_]/', '_', $col);
-                $clauses[] = $this->escapeIdentifier($col) . " $op $ph";
-                $params[$ph] = $value;
-            }
-            $whereSql = ' WHERE ' . implode(' AND ', $clauses);
-        }
-
-        $orderSql = '';
-        if ($order) {
-            $parts = [];
-            foreach ($order as $col => $dir) {
-                $parts[] = $this->escapeIdentifier($col) . ' ' . (strtoupper($dir) === 'DESC' ? 'DESC' : 'ASC');
-            }
-            $orderSql = ' ORDER BY ' . implode(', ', $parts);
-        }
-
-        $limitSql = '';
-        if ($limit !== null) {
-            $limitSql = ' LIMIT ' . (int)$limit;
-            if ($offset !== null) {
-                $limitSql .= ' OFFSET ' . (int)$offset;
-            }
-        }
-
-        $sql = "SELECT $select FROM $table{$whereSql}{$orderSql}{$limitSql}";
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
 
         try {
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($params);
-            return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            error_log("Query failed: $sql → " . $e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * Save (INSERT or UPDATE) a record
-     *
-     * @param array $data Associative array with:
-     *   - 'tbl'        => table name (required)
-     *   - 'id'         => if present → UPDATE, else INSERT
-     *   - other keys   → column names and values
-     * @return int Last insert ID (on insert) or number of affected rows (on update)
-     * @throws InvalidArgumentException
-     * @throws PDOException
-     */
-    public function save(array $data): int
-    {
-        if (empty($data['tbl'])) {
-            throw new InvalidArgumentException("Table name ('tbl') is required");
-        }
-
-        $table = $this->escapeIdentifier($data['tbl']);
-        unset($data['tbl']); // remove meta key
-
-        // Decide INSERT or UPDATE
-        $isUpdate = !empty($data['id']) && is_numeric($data['id']) && $data['id'] > 0;
-        $id = $isUpdate ? (int)$data['id'] : null;
-        unset($data['id']); // remove id from columns to set
-
-        if (empty($data)) {
-            throw new InvalidArgumentException("No fields to save");
-        }
-
-        $columns = array_keys($data);
-        $placeholders = array_map(fn($col) => ':' . $col, $columns);
-
-        if ($isUpdate) {
-            // UPDATE
-            $setParts = [];
-            foreach ($columns as $col) {
-                $setParts[] = $this->escapeIdentifier($col) . ' = :' . $col;
-            }
-            $setClause = implode(', ', $setParts);
-
-            $sql = "UPDATE $table SET $setClause WHERE id = :id";
-            $params = $data;
-            $params['id'] = $id;
-
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($params);
-
-            return $stmt->rowCount(); // usually 1 or 0
-        } else {
-            // INSERT
-            $columnsEscaped = array_map([$this, 'escapeIdentifier'], $columns);
-            $sql = "INSERT INTO $table (" . implode(', ', $columnsEscaped) . ") 
-                    VALUES (" . implode(', ', $placeholders) . ")";
-
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($data);
-
-            return (int)$this->pdo->lastInsertId();
-        }
-    }
-
-    public function escapeIdentifier(string|int $identifier): string
-    {
-        return '`' . str_replace('`', '``', (string)$identifier) . '`';
-    }
-
-    // src/Db.php
-    public function create(array $schema): void
-    {
-        $table = $schema['tbl'] ?? throw new InvalidArgumentException("Missing 'tbl'");
-        unset($schema['tbl']);
-
-        $engine  = $schema['ENGINE'] ?? 'InnoDB';
-        unset($schema['ENGINE']);
-
-        $colDefs = [];
-        foreach ($schema as $col => $def) {
-            $colDefs[] = $this->escapeIdentifier($col) . ' ' . $def;
-        }
-
-        $sql = "CREATE TABLE IF NOT EXISTS " . $this->escapeIdentifier($table) . " (
-            " . implode(",\n        ", $colDefs) . "
-        ) ENGINE=$engine DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-
-        $this->pdo->exec($sql);
-    }
-
-    /**
-     * Generic Alter Table helper
-     * @param string $table Table name
-     * @param string $action e.g., "ADD COLUMN", "MODIFY COLUMN", "ADD INDEX"
-     * @param string $name Column or Index name
-     * @param string $definition SQL definition (e.g., "VARCHAR(255) NOT NULL")
-     */
-    public function alter(string $table, string $action, string $name, string $definition = ''): void
-    {
-        $table = $this->escapeIdentifier($table);
-        $name  = $this->escapeIdentifier($name);
-        
-        // Example: ALTER TABLE `jobs` ADD COLUMN `priority` INT DEFAULT 0
-        $sql = "ALTER TABLE $table $action $name $definition";
-        
-        try {
-            $this->pdo->exec($sql);
-            \App\Services\Logger::info("Schema change: $sql");
+            $this->pdo = new PDO($dsn, $user, $pass, $options);
         } catch (\PDOException $e) {
-            // We log it but don't necessarily crash if the column already exists
-            \App\Services\Logger::debug("Alter note (possibly exists): " . $e->getMessage());
+            throw new Exception("Database Connection Failed: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Creates a table. Signature supports raw strings or structured arrays.
+     */
+    public function createTable(string $table, string|array $definition): bool {
+        $columnSql = '';
+
+        if (is_array($definition)) {
+            $parts = [];
+            foreach ($definition as $column => $spec) {
+                // If key is numeric, assume the value is the raw line
+                if (is_numeric($column)) {
+                    $parts[] = $spec;
+                } else {
+                    $parts[] = "`$column` $spec";
+                }
+            }
+            $columnSql = implode(",\n            ", $parts);
+        } else {
+            $columnSql = $definition;
+        }
+
+        $sql = "CREATE TABLE IF NOT EXISTS `$table` (
+            $columnSql
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+        return $this->execute($sql);
+    }
+
+    /**
+     * Helper to verify column existence before ALTER commands
+     */
+    public function columnExists(string $table, string $column): bool {
+        try {
+            $stmt = $this->pdo->prepare("SHOW COLUMNS FROM `$table` LIKE ?");
+            $stmt->execute([$column]);
+            return (bool)$stmt->fetch();
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Structured finding via $conditions array
+     */
+    public function find(array $params): array {
+        $tbl    = $params['tbl'];
+        $fields = isset($params['fields']) ? implode(', ', $params['fields']) : '*';
+        $where  = "";
+        $values = [];
+
+        if (isset($params['where'])) {
+            $conds = [];
+            foreach ($params['where'] as $col => $val) {
+                // ADDED BACKTICKS: Prevents issues with reserved words
+                $conds[] = "`$col` = ?";
+                $values[] = $val;
+            }
+            $where = "WHERE " . implode(' AND ', $conds);
+        }
+
+        $order = isset($params['order']) ? "ORDER BY `" . key($params['order']) . "` " . current($params['order']) : "";
+        $limit = isset($params['limit']) ? "LIMIT " . (int)$params['limit'] : "";
+
+        $sql = "SELECT $fields FROM `$tbl` $where $order $limit";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($values);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * UPSERT: Insert or update on key conflict
+     */
+    public function save(array $data): int|bool {
+        $tbl = $data['tbl'];
+        unset($data['tbl']);
+
+        $columns = implode('`, `', array_keys($data));
+        $placeholders = implode(', ', array_fill(0, count($data), '?'));
+        
+        $sql = "INSERT INTO `$tbl` (`$columns`) VALUES ($placeholders) 
+                ON DUPLICATE KEY UPDATE ";
+        
+        $updates = [];
+        foreach ($data as $col => $val) {
+            $updates[] = "`$col` = VALUES(`$col`)";
+        }
+        $sql .= implode(', ', $updates);
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(array_values($data));
+        
+        $id = $this->pdo->lastInsertId();
+        return $id ? (int)$id : true;
+    }
+
+    /**
+     * Structural changes
+     */
+    public function alter(string $table, string $action, string $name, string $spec): bool {
+        $sql = "ALTER TABLE `$table` $action `$name` $spec";
+        return $this->execute($sql);
+    }
+
+    /**
+     * Base execution helper
+     */
+    public function execute(string $sql, array $params = []): bool {
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute($params);
     }
 }

@@ -1,7 +1,9 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Registry;
 use App\Db;
 use Exception;
 
@@ -11,122 +13,184 @@ class HomeModel
 
     public function __construct()
     {
-        $this->db = new Db();
-    }
-
-    public function csv(){
-
-        $conditions = [
-            'tbl'    => 'jobs',
-            'fields' => ['id', 'status', 'processed_rows', 'total_rows', 'updated_at'],
-            'order'  => ['id' => 'DESC'],
-            'limit'  => 5
-        ];
-
-        $result = $this->db->find($conditions);
-
-        echo "<pre>" . print_r($result) . "</pre>";
-
-        return $result;
+        // Pulling the shared DB instance from the Registry
+        $this->db = Registry::get(Db::class);
     }
 
     /**
-     * Run migrations: create necessary tables if they don't exist + optional seeding
-     *
-     * @return string HTML-formatted report
+     * Fetch recent jobs for the dashboard
+     */
+    public function csv(): array
+    {
+        return $this->db->find([
+            'tbl'    => 'jobs',
+            'fields' => ['id', 'title', 'status', 'processed_rows', 'total_rows', 'updated_at'],
+            'order'  => ['id' => 'DESC'],
+            'limit'  => 5
+        ]);
+    }
+
+    /**
+     * Orchestrates the full system migration
      */
     public function migrate(): string
     {
-        $report = "<h2>Migration Report</h2><pre>\n";
+        $report = "<h2>Sharpishly Migration Report</h2><pre>\n";
 
         try {
 
-            // Table: social (example – add more tables as needed)
-            $this->createTable('social', [
-                'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
-                //'file_path'      => 'VARCHAR(255) NOT NULL',
-                'status'         => "ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending'",
-                //'total_rows'     => 'INT DEFAULT 0',
-                'processed_rows' => 'INT DEFAULT 0',
-                'created_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
-                'updated_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
-            ], [
-                'engine'  => 'InnoDB',
-                'charset' => 'utf8mb4',
-                'collate' => 'utf8mb4_unicode_ci',
-            ]);
-            $report .= "[OK] Table 'social' created or already exists\n";
 
-            // Table: users (example – add more tables as needed)
-            $this->createTable('users', [
-                'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
-                //'file_path'      => 'VARCHAR(255) NOT NULL',
-                'status'         => "ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending'",
-                //'total_rows'     => 'INT DEFAULT 0',
-                'processed_rows' => 'INT DEFAULT 0',
-                'created_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
-                'updated_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
-            ], [
-                'engine'  => 'InnoDB',
-                'charset' => 'utf8mb4',
-                'collate' => 'utf8mb4_unicode_ci',
+            /**
+             * Using the Db abstraction to ensure the table structure exists.
+             * We pass the schema array to the Db service.
+             */
+            $this->db->createTable('properties', [
+                'id'          => 'INT AUTO_INCREMENT PRIMARY KEY',
+                'address'     => 'VARCHAR(255) NOT NULL',
+                'rent'        => 'DECIMAL(10, 2) NOT NULL',
+                'status'      => "ENUM('Paid', 'Overdue', 'Pending') DEFAULT 'Pending'",
+                'tenant_name' => 'VARCHAR(100)',
+                'updated_at'  => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
             ]);
-            $report .= "[OK] Table 'users' created or already exists\n";
+            $report .= "[OK] Table 'properties' ready\n";
 
-            // Table: jobs (example – add more tables as needed)
-            $this->createTable('jobs', [
+
+            // Seed check using abstraction
+            $existing = $this->db->find(['tbl' => 'properties', 'limit' => 1]);
+
+            if (empty($existing)) {
+                $this->db->save([
+                    'tbl'     => 'properties',
+                    'address' => '221B Baker St',
+                    'rent'    => 1200.00,
+                    'status'  => 'Paid'
+                ]);
+
+                $report .= "[OK] Table 'properties seeded' ready\n";
+
+            }
+
+
+            // 1. Merchandise Inventory
+            $this->db->createTable('merchandise_inventory', [
+                'id'           => 'INT AUTO_INCREMENT PRIMARY KEY',
+                'item_name'    => 'VARCHAR(255) NOT NULL',
+                'stock_count'  => 'INT DEFAULT 0',
+                'unit_price'   => 'DECIMAL(10,2)',
+                'updated_at'   => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            ]);
+            $report .= "[OK] Table 'merchandise_inventory' ready\n";
+
+            // 2. Orders System
+            $this->db->createTable('orders', [
+                'id'           => 'INT AUTO_INCREMENT PRIMARY KEY',
+                'order_type'   => "ENUM('B2C', 'B2B') DEFAULT 'B2C'",
+                'club_logo'    => 'VARCHAR(100)',
+                'quantity'     => 'INT DEFAULT 1',
+                'total_price'  => 'DECIMAL(10,2)',
+                'status'       => "ENUM('pending', 'paid', 'shipped') DEFAULT 'pending'",
+                'created_at'   => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+            ]);
+            $report .= "[OK] Table 'orders' ready\n";
+
+            // 3. Hardware Scans
+            $this->db->createTable('hardware_scans', [
+                'id'           => 'BIGINT AUTO_INCREMENT PRIMARY KEY',
+                'scan_type'    => 'VARCHAR(50) DEFAULT "full"',
+                'usb_count'    => 'INT DEFAULT 0',
+                'cpu_info'     => 'VARCHAR(255)',
+                'memory_info'  => 'JSON',
+                'network_info' => 'JSON',
+                'raw_data'     => 'JSON',
+                'created_at'   => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+            ]);
+            $report .= "[OK] Table 'hardware_scans' ready\n";
+
+            // 4. CRM Infrastructure (Tenants)
+            $this->db->createTable('tenants', [
+                'id'         => 'INT AUTO_INCREMENT PRIMARY KEY',
+                'name'       => 'VARCHAR(255) NOT NULL',
+                'status'     => "ENUM('active', 'inactive', 'suspended') DEFAULT 'active'",
+                'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+                'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            ]);
+            $report .= "[OK] Table 'tenants' ready\n";
+
+            // 5. Workflow Infrastructure (Social, Users, Jobs)
+            $standardFields = [
                 'id'             => 'INT AUTO_INCREMENT PRIMARY KEY',
-                'file_path'      => 'VARCHAR(255) NOT NULL',
                 'status'         => "ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending'",
+                'processed_rows' => 'INT DEFAULT 0',
                 'total_rows'     => 'INT DEFAULT 0',
-                'processed_rows' => 'INT DEFAULT 0',
                 'created_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
                 'updated_at'     => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
-            ], [
-                'engine'  => 'InnoDB',
-                'charset' => 'utf8mb4',
-                'collate' => 'utf8mb4_unicode_ci',
-            ]);
-            $report .= "[OK] Table 'jobs' created or already exists\n";
+            ];
 
-            // Table: csv_records (example)
-            $this->createTable('csv_records', [
+            $this->db->createTable('social', $standardFields);
+            $this->db->createTable('users', $standardFields);
+            
+            $jobFields = array_merge([
+                'title'     => 'VARCHAR(255)', 
+                'file_path' => 'VARCHAR(255) NOT NULL'
+            ], $standardFields);
+            
+            $this->db->createTable('jobs', $jobFields);
+            $report .= "[OK] Workflow tables ready\n";
+
+            // PATCH: Add 'note' to jobs (Defensive Check)
+            if (!$this->db->columnExists('jobs', 'note')) {
+                $this->db->alter('jobs', 'ADD COLUMN', 'note', 'TEXT NULL AFTER status');
+                $report .= "[PATCH] Added 'note' column to 'jobs'\n";
+            } else {
+                $report .= "[SKIP] Column 'note' already exists in 'jobs'\n";
+            }
+
+            // 6. Tasks & CSV Records
+            $this->db->createTable('tasks', [
+                'id'          => 'BIGINT AUTO_INCREMENT PRIMARY KEY',
+                'name'        => 'VARCHAR(255) NOT NULL',
+                'type'        => "ENUM('cron', 'webhook', 'manual', 'file_drop') NOT NULL",
+                'payload'     => 'JSON NOT NULL',
+                'status'      => "ENUM('active', 'paused', 'failed') DEFAULT 'active'",
+                'created_at'  => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
+            ]);
+
+            $this->db->createTable('csv_records', [
                 'id'         => 'INT AUTO_INCREMENT PRIMARY KEY',
                 'job_id'     => 'INT',
                 'column_1'   => 'VARCHAR(255)',
                 'column_2'   => 'VARCHAR(255)',
                 'column_3'   => 'TEXT',
                 'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
-            ], [
-                'engine'  => 'InnoDB',
-                'charset' => 'utf8mb4',
-                'collate' => 'utf8mb4_unicode_ci',
             ]);
+            $report .= "[OK] CSV Engine tables ready\n";
 
-            // Add Index for performance
-            $this->db->alter('csv_records', 'ADD INDEX', 'idx_job_id', '(job_id)');
+            // 7. Landlord Infrastructure (NEW)
+            $this->db->createTable('properties', [
+                'id'           => 'INT AUTO_INCREMENT PRIMARY KEY',
+                'name'         => 'VARCHAR(255) NOT NULL',
+                'address'      => 'TEXT NOT NULL',
+                'unit_number'  => 'VARCHAR(50)',
+                'monthly_rent' => 'DECIMAL(10, 2) NOT NULL',
+                'status'       => "ENUM('vacant', 'occupied', 'maintenance') DEFAULT 'vacant'",
+                'created_at'   => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+                'updated_at'   => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            ]);
+            $report .= "[OK] Table 'properties' ready\n";
 
-            // Add Foreign Key for data integrity
-            $this->db->alter('csv_records', 'ADD FOREIGN KEY', 'fk_job_id', '(job_id) REFERENCES jobs(id) ON DELETE CASCADE ON UPDATE CASCADE');
-
-            $report .= "[OK] Indexes & foreign key processed for csv_records\n";
-
-            // Simple seeding example – only if table is empty
-            $count = $this->db->find(['tbl' => 'jobs', 'limit' => 1]);
-            if (empty($count)) {
-                $this->db->save([
-                    'tbl'           => 'jobs',
-                    'file_path'     => 'php/uploads/initial-' . date('YmdHis') . '.csv',
-                    'status'        => 'pending',
-                    'total_rows'    => 50000,
-                    'processed_rows'=> 0,
-                ]);
-                $report .= "[SEED] Added 1 initial job record\n";
-            } else {
-                $report .= "[SKIP] jobs table already has data → no seeding\n";
+            // 8. Relational Constraints
+            try {
+                $this->db->alter('csv_records', 'ADD INDEX', 'idx_job_id', '(job_id)');
+                $this->db->alter('csv_records', 'ADD FOREIGN KEY', 'fk_job_id', '(job_id) REFERENCES jobs(id) ON DELETE CASCADE');
+                $report .= "[PATCH] Constraints applied to 'csv_records'\n";
+            } catch (Exception $e) {
+                $report .= "[SKIP] Constraints already exist\n";
             }
 
-            $report .= "\nMigration completed successfully.\n";
+            // 9. Seeding
+            $this->seedInitialData($report);
+
+            $report .= "\n✅ Migration completed successfully.\n";
         } catch (Exception $e) {
             $report .= "[ERROR] " . htmlspecialchars($e->getMessage()) . "\n";
         }
@@ -135,37 +199,57 @@ class HomeModel
         return $report;
     }
 
-    private function createTable(string $table, array $columns, array $options = []): void
+    /**
+     * Seeds initial data if tables are empty
+     */
+    private function seedInitialData(string &$report): void
     {
-        if (empty($columns)) {
-            throw new Exception("No columns defined for table '$table'");
+        // Seed Tenants
+        if (empty($this->db->find(['tbl' => 'tenants', 'limit' => 1]))) {
+            $this->db->save([
+                'tbl'    => 'tenants',
+                'name'   => 'Sharpishly Global HQ',
+                'status' => 'active'
+            ]);
+            $report .= "[SEED] Initial tenant record added\n";
         }
 
-        $colDefs = [];
-        foreach ($columns as $name => $def) {
-            $colDefs[] = $this->db->escapeIdentifier($name) . ' ' . $def;
+        // Seed Mugs
+        if (empty($this->db->find(['tbl' => 'merchandise_inventory', 'limit' => 1]))) {
+            $this->db->save([
+                'tbl'         => 'merchandise_inventory',
+                'item_name'   => 'Premium White Mug Blank',
+                'stock_count' => 1000,
+                'unit_price'  => 4.50
+            ]);
+            $report .= "[SEED] Initial mug stock added\n";
         }
 
-        $engine  = $options['engine']  ?? 'InnoDB';
-        $charset = $options['charset'] ?? 'utf8mb4';
-        $collate = $options['collate'] ?? 'utf8mb4_unicode_ci';
+        // Seed Jobs
+        if (empty($this->db->find(['tbl' => 'jobs', 'limit' => 1]))) {
+            $this->db->save([
+                'tbl'            => 'jobs',
+                'title'          => 'System Initial Test',
+                'file_path'      => 'storage/uploads/seed.csv',
+                'status'         => 'pending',
+                'total_rows'     => 500,
+                'processed_rows' => 0,
+                'note'           => 'Initial system-generated seed job.'
+            ]);
+            $report .= "[SEED] Initial job record added\n";
+        }
 
-        $sql = "CREATE TABLE IF NOT EXISTS " . $this->db->escapeIdentifier($table) . " (
-            " . implode(",\n            ", $colDefs) . "
-        ) ENGINE=$engine DEFAULT CHARSET=$charset COLLATE=$collate;";
-
-        // FIXED: use public property directly instead of non-existent getPdo()
-        $this->db->pdo->exec($sql);
-    }
-
-    // Placeholder – to be implemented later
-    public function trackEmailOpen(string $emailId, string $recipient): bool
-    {
-        // Future implementation:
-        // 1. Log open event to database (table email_opens)
-        // 2. Update opened_at timestamp
-        // 3. Possibly increment open count
-
-        return true; // stub
+        // Seed Properties
+        if (empty($this->db->find(['tbl' => 'properties', 'limit' => 1]))) {
+            $this->db->save([
+                'tbl'          => 'properties',
+                'name'         => 'TARDIS View Apartments',
+                'address'      => '742 Evergreen Terrace',
+                'unit_number'  => 'A1',
+                'monthly_rent' => 1200.00,
+                'status'       => 'occupied'
+            ]);
+            $report .= "[SEED] Initial property record added\n";
+        }
     }
 }
