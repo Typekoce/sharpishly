@@ -37,7 +37,6 @@ The architecture follows a **"Brain-Body" model**:
 
 ## 📂 Project Structure
 
-```
 .
 ├── website/                # The "Skin": Cyberdeck Dashboard & UI assets
 ├── php/                    # The "Brain": MVC Core, Agents & Neural Services
@@ -50,7 +49,6 @@ The architecture follows a **"Brain-Body" model**:
 ├── storage/                # The "Memory": Vault keys, Uploads, Vectors, and Logs
 ├── nginx.conf              # The "Thalamus": Traffic Orchestration & SSE Rules
 └── docker-compose.yml      # The "Body": Containerized Infrastructure Orchestration
-```
 
 ## 🛠️ Getting Started
 
